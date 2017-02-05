@@ -51,6 +51,20 @@ def json():
 
 	return jsonify(out)
 
+@app.route('/src')
+def src():
+	current = os.path.dirname(os.path.realpath(__file__))
+	version_file = current+"/../etc/version_string"
+	with open(version_file,'r') as f:
+		version_string = f.read().strip()
+
+	source_name="torscraper-%s.tar.gz" % version_string
+	source_link="/static/%s" % source_name
+	return render_template('src.html', source_name=source_name, source_link=source_link)
+
+
+
+
 @app.route('/favicon.ico')
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
