@@ -1,0 +1,3 @@
+export http_proxy=http://localhost:3140
+export https_proxy=https://localhost:3129
+export SOCKS_PROXY=localhost:9050

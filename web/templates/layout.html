@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Fresh Onions</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="/static/favicon-96x96.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+</head>
+<body>
+	<h1>Fresh Onions</h1>
+	<div id="topbar">
+	<ul id="menu">
+
+	<li>
+		<a href="{{ url_for('faq') }}">FAQ</a>
+	</li>
+	<li>
+		<a href="{{ url_for('json') }}">JSON</a>
+	</li>
+	<li>
+		<a href="{{ url_for('index', show='all') }}">SHOW ALL</a>
+	</li>
+	</ul>
+	<div id="stats">
+	-- {{domain_count}} certified fresh onions, {{day_count}} in the last 24 hours.
+	</div>
+
+	</div>
+	{% block body %}{% endblock %}
+   
+</body>
+</html>

@@ -1,0 +1,83 @@
+{% extends "layout.html" %}
+{% block body %}
+	<table>
+		<thead>
+			<tr>
+				<th>FAQ</th>
+				<th>Question</th>
+				<th>Answer</th>
+				<th><a href="/">Back</a></th>
+			</tr>
+		</thead>
+		<tbody>
+		<tr>
+			<td class="heading_column"></td>
+			<td class="question">
+				What do the colours of the onion links mean?
+			</td>
+			<td class="answer">
+				Green means the site is live. Orange means we've been having some trouble connecting to it recently, but it may still be fine. Red means we haven't been able to connect to it for over four hours, and the link is likely to be dead.
+				<br/><br/>
+			</td>
+			<td class="last_column"></td>
+		</tr>
+		<tr>
+			<td class="heading_column"></td>
+			<td class="question">
+				How often are the links checked?
+			</td>
+			<td class="answer">
+				Once an hour-ish.
+				<br/><br/>
+			</td>
+			<td class="last_column"></td>
+		</tr>
+		<tr>
+			<td class="heading_column"></td>
+			<td class="question">
+				Where do you get new onions from?
+			</td>
+			<td class="answer">
+				This site runs a tor web spider that is constantly crawling every link in the database 24/7. New links are added as they are discovered.
+				<br/><br/>
+			</td>
+			<td class="last_column"></td>
+		</tr>
+		<tr>
+			<td class="heading_column"></td>
+			<td class="question">
+				What does "SHOW ALL" do?
+			</td>
+			<td class="answer">
+				Certain onion links (particularly the ones entitled "Site Hosted by Freedom Hosting II") never seem to have any content and were cluttering up the interface. "SHOW ALL" reveals them. They are still listed in the JSON output, because if you can parse JSON then you can filter them out yourself (if that's what you want).
+				<br/><br/>
+			</td>
+			<td class="last_column"></td>
+		</tr>
+		<tr>
+			<td class="heading_column"></td>
+			<td class="question">
+				What do the [FAKE] and [GENUINE] tags mean?
+			</td>
+			<td class="answer">
+				Sites listed in the <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">/r/darknetmarkets superlist</a> are tagged as genuine. Clones of these sites are tagged as fake. Note that clone detection is pretty primitive.
+				<br/><br/>
+			</td>
+			<td class="last_column"></td>
+		</tr>
+		<tr>
+			<td class="heading_column"></td>
+			<td class="question">
+				I think I've found a bug / I have a feature request
+			</td>
+			<td class="answer">
+				Sure thing! I run this site as a public service, so will try to help if I can. Hit me up on reddit, <a href="https://www.reddit.com/user/abruptdismissal/">abruptdismissal</a>.
+				<br/><br/>
+			</td>
+			<td class="last_column"></td>
+		</tr
+
+
+		</tbody>
+	</table>
+{% endblock %}

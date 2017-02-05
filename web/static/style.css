@@ -1,0 +1,155 @@
+body {
+    background-color: #111111;
+    font-family: "Lucida Console", Monaco, monospace;
+    color:#DDDDDD;
+}
+
+table {
+	width:100%;
+	border-collapse:collapse;
+}
+
+tbody tr:nth-child(even) {background: #202020}
+tbody tr:nth-child(odd) {background: #111111}
+
+h1 {
+	margin:2px;
+	padding:2px;
+}
+
+#topbar {
+	margin-bottom: 10px;
+	font-size:1em;
+}
+
+ul#menu {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    float: left;
+}
+
+ul#menu li {
+    float: left;
+    padding-left: 10px;
+    margin: 0px;
+}
+
+ul#menu li.selected {
+    color: #888800
+}
+
+
+ul#menu li a {
+    display: block;
+    text-align: left;
+}
+a:link {
+	color: #CCCC00;
+}
+
+a:visited {
+	color: #AAAA00;
+}
+
+a:hover {
+	color: #FFFF00;
+}
+
+div#stats {
+	float: left;
+	padding-left: 10px;
+    margin: 0px;
+}
+
+.tag {
+	font-weight:bold;
+	letter-spacing: 0.2em;
+}
+
+.genuine {
+	color:#00CC00;
+}
+
+.fake {
+	color:#990000;
+}
+
+
+
+
+tr.alive td a:link {
+	color:#00CC00;
+}
+
+tr.alive td a:visited {
+	color:#00AA00;
+}
+
+tr.alive td a:hover {
+	color:#00FF00;
+}
+
+tr.maybe td a:link {
+	color:#DD8500;
+}
+
+tr.maybe td a:visited {
+	color:#AA5500;
+}
+
+tr.maybe td a:hover {
+	color:#FFA500;w
+}
+
+
+tr.dead td a:link {
+	color:#CC0000;
+}
+
+tr.dead td a:visited {
+	color:#AA0000;
+}
+
+tr.dead td a:hover {
+	color:#FF0000;w
+}
+
+
+thead, thead tr {
+	background-color: #333333;
+}
+
+
+
+th, td {
+	text-align: left;
+	vertical-align: top;
+	margin: 0px;
+	padding: 5px;
+}
+
+td.domain {
+	width: 250px;
+	max-width: 250px;
+	text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+td.ago {
+	width: 100px;
+}
+
+td.heading_column, td.last_column {
+	width: 100px;
+}
+
+td.question {
+	color:#00CC00;
+	font-weight: bold;
+}
+
+td.never {
+	color: #990000;
+}
