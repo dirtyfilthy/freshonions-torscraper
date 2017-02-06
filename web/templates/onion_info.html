@@ -1,0 +1,71 @@
+{% extends "layout.html" %}
+{% from 'domain_table.macro.html' import domain_table %}
+{% block body %}
+<div id="info_panel" class="contents">
+<div id="dates">
+<table>
+<tr>
+<td>Created At</td>
+<td>{{domain.created_at}}</td>
+</tr>
+<tr>
+<td>Visited At</td>
+<td>
+{% if domain.visited_at != NEVER %}
+{{domain.visited_at}}
+{% else %}
+<span class="never">Never</span>
+{% endif %}
+</td>
+</tr>
+<td>Last Seen</td>
+<td>
+{% if domain.last_alive != NEVER %}
+{{domain.last_alive}}
+{% else %}
+<span class="never">Never</span>
+{% endif %}
+</td>
+</tr>
+</table>
+</div>
+<h2>Information for {{domain.host}}</h2>
+<p>
+<div id="title">
+{% if domain.title!='' %}
+{{domain.title}}
+{% else %}
+No title for this domain.
+{% endif %}
+<a href="{{domain.index_url()}}">[SITE]</a>
+<a href="{{url_for('onion_info_json', onion=domain.host)}}">[JSON]</a>
+</div>
+</p>
+<p>
+<div id="tags">
+{% if domain.is_fake %}
+<span class="tag fake">[FAKE]</span> -- this domain is a clone of an onion listed in the /r/darknetmarkets <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">superlist</a> 
+{% endif %}
+{% if domain.is_genuine %}
+<span class="tag genuine">[GENUINE]</span> -- this onion is listed as genuine in the /r/darknetmarkets <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">superlist</a> 
+{% endif %}
+</div>
+</p>
+<div class="links links_to">
+<h3>Links to this domain:</h3>
+{% if links_to.count()!=0 %}
+{{ domain_table(links_to)}}
+{% else %}
+No links to this domain in database.
+{% endif %}
+</div>
+<div class="links links_from">
+<h3>Links from this domain:</h3>
+{% if links_from.count()!=0 %}
+{{ domain_table(links_from)}}
+{% else %}
+No links from this domain in database.
+{% endif %}
+</div>
+</div>
+{% endblock %}

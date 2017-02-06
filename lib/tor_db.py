@@ -91,6 +91,15 @@ class Domain(db.Entity):
         else:
             return "%s://%s/" % (schema, self.host)
 
+    @db_session
+    def links_to(self):
+        return select(d for d in Domain for p in d.pages for link_to in p.links_to if link_to.domain==self)
+
+    @db_session
+    def links_from(self):
+        return select(d for d in Domain for p in d.pages for link_from in p.links_from if link_from.domain==self)
+
+
     @classmethod
     @db_session
     def make_genuine(klass, host):
@@ -116,7 +125,6 @@ class Domain(db.Entity):
         domain = klass.get(host=host, port=port, ssl=ssl)
         if not domain:
             domain = klass(host=host, port=port, ssl=ssl, is_up=False, title='', created_at=datetime.now(), visited_at=NEVER, last_alive=NEVER)
-        commit()
         return domain
 
 
@@ -149,7 +157,7 @@ class Domain(db.Entity):
                 port = 443
             else:
                 port = 80
-        return find_stub_by_url(klass, host, port, ssl)
+        return klass.find_stub(host, port, ssl)
 
     @classmethod
     def is_onion_url(klass, url):
@@ -170,5 +178,24 @@ class Page(db.Entity):
     domain      = Required(Domain)
     created_at  = Required(datetime)
     visited_at  = Required(datetime)
+    links_to    = Set("Page", reverse="links_from", table="page_link", column="link_to");
+    links_from  = Set("Page", reverse="links_to",   table="page_link", column="link_from");
+
+    @classmethod
+    @db_session
+    def find_stub_by_url(klass, url):
+        now = datetime.now()
+        p = klass.get(url=url)
+        if not p:
+            domain = Domain.find_stub_by_url(url)
+            p = klass(url=url, domain=domain, code=666, created_at=now, visited_at=NEVER, title='')
+
+        return p
+
+    def got_server_response(self):
+        responded = [200, 401, 403, 500, 302, 304]
+        return (self.code in responded)
+
+        
 
 db.generate_mapping(create_tables=True)

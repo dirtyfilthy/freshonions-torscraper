@@ -162,22 +162,39 @@ class TorSpider(scrapy.Spider):
                 page.title = title
             page.code = code
             page.visited_at = now
-        commit()
-        return True
+       
+        return page
 
+    @db_session
     def parse(self, response):
         title = response.css('title::text').extract_first()
         parsed_url = urlparse.urlparse(response.url)
         host  = parsed_url.hostname
         if host != "zlal32teyptf4tvi.onion":  
             self.log('Got %s (%s)' % (response.url, title))
-            self.update_page_info(response.url, title, response.status)
+            page = self.update_page_info(response.url, title, response.status)
+            got_server_response = page.got_server_response()
+            commit()
+            link_to_list = []
             if (not hasattr(self, "test") or self.test != "yes") and not host in TorSpider.spider_exclude:
                 for url in response.xpath('//a/@href').extract():
                     try:
                         yield scrapy.Request(url, callback=self.parse)
-	            except:
+                        if got_server_response and Domain.is_onion_url(url):
+                            parsed_link = urlparse.urlparse(url)
+                            link_host   = parsed_link.hostname
+                            if host != link_host:
+                                link_to_list.append(url)
+                    except:
                         continue
+                           
+            if page.got_server_response():
+                page.links_to.clear()
+                for url in link_to_list:
+                    link_to = Page.find_stub_by_url(url)
+                    page.links_to.add(link_to)
+
+                commit()                        
 
 
     def process_exception(self, response, exception, spider):
