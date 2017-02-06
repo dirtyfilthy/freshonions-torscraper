@@ -41,8 +41,8 @@ def domain_urls_recent_no_crap():
     urls = []
     now = datetime.now()
     event_horizon = now - timedelta(days=30)
-    n_items = count(d for d in Domain if d.last_alive > event_horizon and d.is_crap == False)
-    for domain in Domain.select(lambda d: d.last_alive > event_horizon and d.is_crap == False).random(n_items):
+    n_items = count(d for d in Domain if d.is_up == True and d.is_crap == False)
+    for domain in Domain.select(lambda d: d.is_up == True and d.is_crap == False).random(n_items):
         urls.append(domain.index_url())
     return urls
 
@@ -101,8 +101,10 @@ class TorSpider(scrapy.Spider):
             self.start_urls = domain_urls_down()
         elif hasattr(self, "load_links") and self.load_links == "resurrect":
             self.start_urls = domain_urls_resurrect()
-        elif hasattr(self, "test"):
+        elif hasattr(self, "test") and self.test == "yes":
             self.start_urls = domain_urls_recent()
+        else:
+            self.start_urls = domain_urls_recent_no_crap()
 
 
     @db_session
@@ -187,7 +189,7 @@ class TorSpider(scrapy.Spider):
                                 link_to_list.append(url)
                     except:
                         continue
-                           
+
             if page.got_server_response():
                 page.links_to.clear()
                 for url in link_to_list:
