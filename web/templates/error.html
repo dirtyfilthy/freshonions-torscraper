@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% block body %}
+<div id="error_code">
+{{code}}
+</div>
+{% if message %}
+<div id="error_message">
+{{message}}
+</div>
+{% endif %}
+{% endblock %}

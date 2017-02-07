@@ -1,42 +1,5 @@
 {% extends "layout.html" %}
+{% from 'domain_table.macro.html' import domain_table %}
 {% block body %}
-	<table>
-		<thead>
-			<tr>
-				<th>Onion</th>
-				<th>Title</th>
-				<th>Added</th>
-				<th>Visited</th>
-				<th>Last Up</th>
-			</tr>
-		</thead>
-		<tbody>
-{% for domain in domains %}
-			<tr class="{{domain.status()}}">
-				<td class="domain">
-					<a href="{{domain.index_url()}}">{{domain.host}}</a>
-				</td>
-				<td class="title">
-					{{domain.title}} 
-				    {% if domain.is_genuine %}
-				    <span class="tag genuine">[GENUINE]</span>
-				    {% endif %}
-				    {% if domain.is_fake %}
-				    <span class="tag fake">[FAKE]</span>
-				    {% endif %}
-
-				</td>
-				<td class="created_at ago">
-					{{Domain.time_ago(domain.created_at)}}
-				</td>
-				<td class="visited_at ago">
-					{{Domain.time_ago(domain.visited_at)}}
-				</td>
-				<td class="last_seen {{'never ' if Domain.time_ago(domain.last_alive)=='Never' else ''}}ago">
-					{{Domain.time_ago(domain.last_alive)}}
-				</td>
-			</tr>
-{% endfor %}
-		</tbody>
-	</table>
+{{ domain_table(domains)}}
 {% endblock %}
