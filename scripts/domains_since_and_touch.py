@@ -1,7 +1,8 @@
-#1/usr/bin/python
+#!/usr/bin/python
 from pony.orm import *
 from datetime import *
 from tor_db import *
+import os
 import sys 
 
 def touch(fname, times=None):
@@ -20,7 +21,7 @@ def get_domains_since_file_mod(fname):
 	touch(fname)
 	domains = select(d for d in Domain if d.created_at > creation_horizon)
 	for domain in domains:
-		print domain.host
+		print(domain.host)
 
 
 get_domains_since_file_mod(sys.argv[1])

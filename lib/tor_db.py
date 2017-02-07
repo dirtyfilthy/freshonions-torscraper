@@ -7,9 +7,9 @@ db = Database()
 db.bind('mysql', host='groan', user='root', passwd='fuck', db='tor')
 NEVER = datetime.fromtimestamp(0)
 
-class SSHFingerprint(db.entity)
+class SSHFingerprint(db.Entity):
     _table_ = "ssh_fingerprint"
-    fingerprint = Required(str, unique=True)
+    fingerprint = Required(str, 450, unique=True)
     domains = Set('Domain', reverse="ssh_fingerprint") 
 
 
