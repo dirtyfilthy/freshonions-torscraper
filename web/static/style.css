@@ -168,7 +168,13 @@ tr.dead td a:hover {
 	color:#FF0000;w
 }
 
+.small {
+	font-size:0.8em;
+}
 
+#search {
+	margin-bottom: 0.5cm;
+}
 #error_code, #error_message {
 	color: #990000;
 }

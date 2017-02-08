@@ -32,40 +32,42 @@ def page_not_found(e):
 def index():
 	now = datetime.now()
 	query = select(d for d in Domain)
-	
-	if request.args["is_up"]:
-		query = query.filter("d.is_up = 1")
-	rep = request.args["rep"]
+	is_up = request.args.get("is_up")
+	if is_up:
+		query = query.filter("d.is_up == 1")
+	rep = request.args.get("rep")
 	if not rep:
-		rep = "N/A"
-	if rep == "Genuine":
-		query = query.filter("d.is_genuine = 1")
-	if rep == "Fake":
-		query = query.filter("d.is_fake = 1")
+		rep = "n/a"
+	if rep == "genuine":
+		query = query.filter("d.is_genuine == 1")
+	if rep == "fake":
+		query = query.filter("d.is_fake == 1")
 
 	
-	search = request.args["search"]
+	search = request.args.get("search")
 	if not search:
 		search=""
-	search = search.strip
+	search = search.strip()
 	if search != "":
-		if re.match('.*\.onion$', onion):
-			return redirect(url_for("onion_info",onion=onion), code=302)
+		if re.match('.*\.onion$', search):
+			return redirect(url_for("onion_info",onion=search), code=302)
 		else:
 			query = query.filter("search in d.title")
 
-	never_seen = request.args["never_seen"]
+	never_seen = request.args.get("never_seen")
 	if not never_seen:
-		query = query.filter("d.last_seen != NEVER")
+		query = query.filter("d.last_alive != NEVER")
 
 	query = query.order_by(desc(Domain.created_at))
 
-	older = request.args["older"]
+	more = request.args.get("more")
 
-	if not older:
+	if not more:
 		query = query.limit(1000)
 
-	return render_template('index.html', domains=query, is_up=is_up, rep=rep, search=search, never_seen=never_seen, older=older)
+	n_results = len(query)
+
+	return render_template('index.html', domains=query, is_up=is_up, rep=rep, search=search, never_seen=never_seen, more=more, n_results=n_results)
 	
 
 @app.route('/json')

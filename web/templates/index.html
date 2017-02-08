@@ -1,17 +1,21 @@
 {% extends "layout.html" %}
 {% from 'domain_table.macro.html' import domain_table %}
-{% import 'input.html' as input}
+{% import 'input.macro.html' as input %}
 {% block body %}
 <div class="contents">
 <div id="search">
-<form>
-
-{{input.checkbox("older", older, "include old")}} 
-{{input.checkbox("never_seen", never_seen, "include never seen")}}
+<form method="GET">
+<p>
+{{input.checkbox("more", more, "more")}} 
+{{input.checkbox("never_seen", never_seen, "inc. never seen")}}
 {{input.checkbox("is_up", is_up, "alive only")}}
-{{input.radio("rep", ["n/a","genuine", "fake"], rep)}}
-{{input.text("search", search, "Search:")}}
-{{input.submit("Go!")}
+({{input.radio("rep", ["n/a","genuine", "fake"], rep)}})
+{{input.text("search", search, "search:")}}
+{{input.submit("Go >>>")}} <br />
+<span class="small">
+search for title or enter ".onion" domain for onion info. showing {{n_results}} results.
+</span>
+</p>
 </form>
 </div>
 

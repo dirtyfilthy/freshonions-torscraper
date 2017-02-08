@@ -8,7 +8,7 @@
 {% for value in values %}
 <input type="radio" name="{{name}}" id="input_{{name}}_{{value}}" value="{{value}}" {{"checked" if value == selected else ""}}>
 <label for="input_{{name}}_{{value}}">{{value}}</label>
-{% endfor}
+{% endfor %}
 {% endmacro %}
 
 
@@ -19,5 +19,5 @@
 
 
 {% macro submit(text) %}
-<input type="text" name="submit" value="text">
+<input type="submit" name="submit" value="{{text}}">
 {% endmacro %}
