@@ -11,7 +11,7 @@ def touch(fname, times=None):
 
 def read_file_modification_time(fname):
 	try:
-		return datetime.datetime.fromtimestamp(os.path.getmtime(fname))
+		return datetime.fromtimestamp(os.path.getmtime(fname))
 	except:
 		return NEVER
 
