@@ -87,6 +87,12 @@ def json():
 		d['last_seen']  = domain.last_alive
 		d['is_genuine'] = domain.is_genuine
 		d['is_fake']    = domain.is_fake
+
+		if domain.ssh_fingerprint:
+			d['ssh_fingerprint']  = domain.ssh_fingerprint.fingerprint
+		else:
+			d['ssh_fingerprint']  = None
+		
 		out.append(d)
 
 	return jsonify(out)
