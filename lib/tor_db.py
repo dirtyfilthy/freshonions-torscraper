@@ -7,6 +7,11 @@ db = Database()
 db.bind('mysql', host='groan', user='root', passwd='fuck', db='tor')
 NEVER = datetime.fromtimestamp(0)
 
+class SSHFingerprint(db.Entity):
+    _table_ = "ssh_fingerprint"
+    fingerprint = Required(str, 450, unique=True)
+    domains = Set('Domain', reverse="ssh_fingerprint") 
+
 
 class Domain(db.Entity):
     host        = Required(str)
@@ -21,6 +26,7 @@ class Domain(db.Entity):
     created_at  = Required(datetime)
     visited_at  = Required(datetime)
     last_alive  = Required(datetime)
+    ssh_fingerprint = Optional(SSHFingerprint)
 
 
     def status(self):
@@ -196,6 +202,6 @@ class Page(db.Entity):
         responded = [200, 401, 403, 500, 302, 304]
         return (self.code in responded)
 
-        
+    
 
 db.generate_mapping(create_tables=True)

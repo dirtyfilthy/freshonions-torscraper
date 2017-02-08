@@ -71,6 +71,10 @@ class TorSpider(scrapy.Spider):
 
     custom_settings = {
         'DOWNLOAD_MAXSIZE': (1024 * 1024),
+        'BIG_DOWNLOAD_MAXSIZE': (1024 * 1024)*4,
+        'ALLOW_BIG_DOWNLOAD': [
+            'cratedvnn5z57xhl.onion'
+        ],
         'ROBOTSTXT_OBEY': False,
 	    'CONCURRENT_REQUESTS' : 24,
         'DEPTH_PRIORITY' : 8,
@@ -83,7 +87,8 @@ class TorSpider(scrapy.Spider):
         'DOWNLOADER_MIDDLEWARES' : {
             'torscraper.middlewares.FilterDomainByPageLimitMiddleware' : 551,
             'torscraper.middlewares.FilterTooManySubdomainsMiddleware' : 550,
-            'torscraper.middlewares.FilterDeadDomainMiddleware' : 556
+            'torscraper.middlewares.FilterDeadDomainMiddleware' : 556,
+            'torscraper.middlewares.AllowBigDownloadMiddleware' : 557
          },
         'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
     }

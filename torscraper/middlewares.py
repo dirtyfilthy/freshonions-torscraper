@@ -90,6 +90,32 @@ class FilterDomainByPageLimitMiddleware(object):
             return None                   
         else:
             raise IgnoreRequest('MAX_PAGES_PER_DOMAIN reached, filtered %s' % request.url)
+
+class AllowBigDownloadMiddleware(object):
+    def __init__(self, big_download_size, allow_list):
+        logger = logging.getLogger()
+        logger.info("AllowBigDownloadMiddleware loaded with BIG_DOWNLOAD_MAXSIZE = %d", big_download_size)
+        self.big_download_size = big_download_size
+        self.allow_list = allow_list
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        settings = crawler.settings
+        spider_name = crawler.spider.name
+        big_download_size = settings.get('BIG_DOWNLOAD_MAXSIZE')
+        allow_list = settings.get('ALLOW_BIG_DOWNLOAD')
+        o = cls(big_download_size, allow_list)
+        return o
+
+    def process_request(self, request, spider):
+        
+        parsed_url = urlparse.urlparse(request.url)
+        host = parsed_url.hostname
+        if host in self.allow_list:
+            request.meta["download_maxsize"] = self.big_download_size
+            logger = logging.getLogger()
+            logger.info("Big download allowed for %s", host)
+        return None
             
 
 class TorscraperSpiderMiddleware(object):
