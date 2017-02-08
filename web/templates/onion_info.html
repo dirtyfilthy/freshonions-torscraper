@@ -50,6 +50,23 @@ No title for this domain.
 <span class="tag genuine">[GENUINE]</span> -- this onion is listed as genuine in the /r/darknetmarkets <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">superlist</a> 
 {% endif %}
 </div>
+<div id="ssh">
+<h3>SSH fingerprint</h3>
+{% if not domain.ssh_fingerprint %}
+No SSH fingerprint in database.
+{% else %}
+<div class="fingerprint_container"
+<div class="fingerprint">
+{{domain.ssh_fingerprint.fingerprint}}
+</div>
+</div>
+{% if fp_count > 1 %}
+<p>
+{{fp_count-1}} other {{"domain has" if fp_count == 2 else "domains have"}} this fingerprint. <a href="{{url_for('ssh_list', id=domain.ssh_fingerprint.id)}}">[VIEW]</a>
+</p>
+{% endif %}
+{% endif %}
+</div>
 </p>
 <div class="links links_to">
 <h3>Links to this domain:</h3>

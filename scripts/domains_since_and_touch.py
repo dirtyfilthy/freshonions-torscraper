@@ -19,7 +19,7 @@ def read_file_modification_time(fname):
 def get_domains_since_file_mod(fname):
 	creation_horizon = read_file_modification_time(fname)
 	touch(fname)
-	domains = select(d for d in Domain if d.created_at > creation_horizon)
+	domains = select(d for d in Domain if d.created_at > creation_horizon and d.last_alive != NEVER)
 	for domain in domains:
 		print(domain.host)
 

@@ -35,6 +35,18 @@ input[type="text"] {
 	width: 200px; 
 }
 
+.fingerprint_container {
+	width: 100%;
+}
+
+.fingerprint {
+	margin-left: 1cm;
+	margin-right: 1cm;
+	overflow-wrap: break-word;
+}
+
+
+
 #info_panel h2 {
 	margin-bottom: 5px;
 }
