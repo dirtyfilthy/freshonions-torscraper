@@ -1,0 +1,23 @@
+{% macro checkbox(name, checked, desc, value="1") %}
+<input type="checkbox" id="input_{{name}}" name="{{name}}" {{"checked" if checked else ""}}> 
+<label for="input_{{name}}">{{desc}}</label>
+{% endmacro %}
+
+
+{% macro radio(name, values, selected) %}
+{% for value in values %}
+<input type="radio" name="{{name}}" id="input_{{name}}_{{value}}" value="{{value}}" {{"checked" if value == selected else ""}}>
+<label for="input_{{name}}_{{value}}">{{value}}</label>
+{% endfor}
+{% endmacro %}
+
+
+{% macro text(name, value, desc) %}
+<label for="input_{{name}}_{{value}}">{{desc}}</label>
+<input type="text" name="{{name}}" id="input_{{name}}" value="{{value}}">
+{% endmacro %}
+
+
+{% macro submit(text) %}
+<input type="text" name="submit" value="text">
+{% endmacro %}

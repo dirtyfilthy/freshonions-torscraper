@@ -1,5 +1,21 @@
 {% extends "layout.html" %}
 {% from 'domain_table.macro.html' import domain_table %}
+{% import 'input.html' as input}
 {% block body %}
+<div class="contents">
+<div id="search">
+<form>
+
+{{input.checkbox("older", older, "include old")}} 
+{{input.checkbox("never_seen", never_seen, "include never seen")}}
+{{input.checkbox("is_up", is_up, "alive only")}}
+{{input.radio("rep", ["n/a","genuine", "fake"], rep)}}
+{{input.text("search", search, "Search:")}}
+{{input.submit("Go!")}
+</form>
+</div>
+
 {{ domain_table(domains)}}
+
+</div>
 {% endblock %}
