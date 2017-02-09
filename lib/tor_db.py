@@ -14,12 +14,16 @@ class SSHFingerprint(db.Entity):
 
 class Email(db.Entity):
     address = Required(str, 100, unique=True)
-    pages = Set('Page', reverse="email", column="page", table="email_link")
+    pages = Set('Page', reverse="emails", column="page", table="email_link")
 
 class BitcoinAddress(db.Entity):
     _table_ = "bitcoin_address"
     address = Required(str, 100, unique=True)
-    pages = Set('Page', reverse="bitcoin_address", column="page", table="bitcoin_address_link")
+    pages = Set('Page', reverse="bitcoin_addresses", column="page", table="bitcoin_address_link")
+
+  
+
+
 
 
 class Domain(db.Entity):
@@ -195,8 +199,8 @@ class Page(db.Entity):
     visited_at  = Required(datetime)
     links_to    = Set("Page", reverse="links_from", table="page_link", column="link_to");
     links_from  = Set("Page", reverse="links_to",   table="page_link", column="link_from");
-    emails      = Set('Email', reverse="Page", column="email", table="email_link")
-    bitcoin_addresses = Set('BitcoinAddress', reverse="Page", column="bitcoin_address", table="bitcoin_address_link")
+    emails      = Set('Email', reverse="pages", column="email", table="email_link")
+    bitcoin_addresses = Set('BitcoinAddress', reverse="pages", column="bitcoin_address", table="bitcoin_address_link")
 
     @classmethod
     @db_session

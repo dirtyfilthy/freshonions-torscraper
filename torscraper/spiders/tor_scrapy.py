@@ -203,20 +203,21 @@ class TorSpider(scrapy.Spider):
                     page.links_to.add(link_to)
 
                 page.emails.clear()
-                for addr in re.findall(r'[\w\.-]+@[\w\.-]+', response.body):
+                for addr in re.findall(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+[a-zA-Z0-9]', response.body):
+                    addr = addr.lower()
                     email = Email.get(address=addr)
                     if not email:
                         email = Email(address=addr)
                     page.emails.add(email)
 
                 page.bitcoin_addresses.clear()
-                for addr in re.findall(r'\b[13][a-zA-Z1-9]{26,34}\b', response.body)
+                for addr in re.findall(r'\b[13][a-zA-Z1-9]{26,34}\b', response.body):
                     if not bitcoin.is_valid(addr):
                         continue
-                    bitcoin = BitcoinAddress.get(address=addr)
-                    if not bitcoin:
-                        bitcoin = BitcoinAddress(address=addr)
-                        page.bitcoin_addresses.add(bitcoin)
+                    bitcoin_addr = BitcoinAddress.get(address=addr)
+                    if not bitcoin_addr:
+                        bitcoin_addr = BitcoinAddress(address=addr)
+                    page.bitcoin_addresses.add(bitcoin_addr)
 
                 commit()                        
 
