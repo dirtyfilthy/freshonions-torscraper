@@ -48,6 +48,10 @@ def index():
 	if not show_subdomains:
 		query = query.filter("d.is_subdomain == 0")
 
+	show_fh_default = request.args.get("show_fh_default")
+	if not show_fh_default:
+		query = query.filter("d.is_crap == 0")
+
 	search = request.args.get("search")
 	if not search:
 		search=""
@@ -72,7 +76,7 @@ def index():
 	n_results = len(query)
 
 	return render_template('index.html', domains=query, is_up=is_up, rep=rep, search=search, 
-		never_seen=never_seen, more=more, show_subdomains=show_subdomains, n_results=n_results)
+		never_seen=never_seen, more=more, show_subdomains=show_subdomains, show_fh_default=show_fh_default, n_results=n_results)
 	
 
 @app.route('/json')
