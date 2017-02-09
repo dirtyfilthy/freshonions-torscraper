@@ -50,6 +50,42 @@ No title for this domain.
 <span class="tag genuine">[GENUINE]</span> -- this onion is listed as genuine in the /r/darknetmarkets <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">superlist</a> 
 {% endif %}
 </div>
+
+<div id="emails">
+<h3>Emails:</h3>
+{% if len(emails)==0 %}
+No emails in database.
+{% else %}
+<ul>
+{% for email in emails %}
+<li><a href="mailto://{{email.address}}">{{email.address}}</a>
+{% if len(email.domains())>1 %}
+(found {{len(email.domains())-1}} other places <a href="{{url_for('email_list',addr=email.address)}}">[VIEW]</a>)
+{% endif %}
+</li>
+{% endfor %}
+</ul>
+{% endif %}
+</div>
+
+<div id="bitcoin_addresses">
+<h3>Bitcoin Addresses:</h3>
+{% if len(bitcoin_addresses)==0 %}
+No bitcoin addresses in database.
+{% else %}
+<ul>
+{% for addr in bitcoin_addresses %}
+<li><a href="https://blockchainbdgpzk.onion/address/{{addr.address}}">{{addr.address}}</a>
+{% if len(addr.domains())>1 %}
+(found {{len(addr.domains())-1}} other places <a href="{{url_for('bitcoin_list',addr=addr.address)}}">[VIEW]</a>)
+{% endif %}
+</li>
+{% endfor %}
+</ul>
+{% endif %}
+</div>
+
+
 <div id="ssh">
 <h3>SSH fingerprint</h3>
 {% if not domain.ssh_fingerprint %}
@@ -67,6 +103,8 @@ No SSH fingerprint in database.
 {% endif %}
 {% endif %}
 </div>
+
+
 </p>
 <div class="links links_to">
 <h3>Links to this domain:</h3>

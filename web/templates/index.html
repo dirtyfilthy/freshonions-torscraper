@@ -12,6 +12,8 @@
 ({{input.radio("rep", ["n/a","genuine", "fake"], rep)}})
 {{input.text("search", search, "search:")}}
 {{input.submit("Go >>>")}} <br />
+{{input.checkbox("show_subdomains", show_subdomains, "show subdomains")}} 
+<br/>
 <span class="small">
 search for title or enter ".onion" domain for onion info. showing {{n_results}} results.
 </span>

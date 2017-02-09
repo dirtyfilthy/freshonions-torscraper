@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% from 'domain_table.macro.html' import domain_table %}
+{% block body %}
+<div class="contents">
+<h2>Email Address</h2>
+<p>Showing domains for address "{{email}}":</p>
+<p></p>
+{{ domain_table(domains)}}
+
+</div>
+{% endblock %}
