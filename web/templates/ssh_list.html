@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+{% from 'domain_table.macro.html' import domain_table %}
+{% block body %}
+<div class="contents">
+<h2>SSH Fingerprint</h2>
+<p>Showing domains for fingerprint:</p>
+<div class="fingerprint_container">
+<div class="fingerprint">
+{{fingerprint}}
+</div>
+</div>
+<p></p>
+{{ domain_table(domains)}}
+
+</div>
+{% endblock %}

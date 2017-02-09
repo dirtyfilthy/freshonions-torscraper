@@ -4,6 +4,7 @@ from collections import *
 from pony.orm import *
 from datetime import *
 from tor_db import *
+import bitcoin
 
 
 from scrapy.exceptions import IgnoreRequest
@@ -200,6 +201,22 @@ class TorSpider(scrapy.Spider):
                 for url in link_to_list:
                     link_to = Page.find_stub_by_url(url)
                     page.links_to.add(link_to)
+
+                page.emails.clear()
+                for addr in re.findall(r'[\w\.-]+@[\w\.-]+', response.body):
+                    email = Email.get(address=addr)
+                    if not email:
+                        email = Email(address=addr)
+                    page.emails.add(email)
+
+                page.bitcoin_addresses.clear()
+                for addr in re.findall(r'\b[13][a-zA-Z1-9]{26,34}\b', response.body)
+                    if not bitcoin.is_valid(addr):
+                        continue
+                    bitcoin = BitcoinAddress.get(address=addr)
+                    if not bitcoin:
+                        bitcoin = BitcoinAddress(address=addr)
+                        page.bitcoin_addresses.add(bitcoin)
 
                 commit()                        
 
