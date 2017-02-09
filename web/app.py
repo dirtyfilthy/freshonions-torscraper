@@ -14,6 +14,7 @@ import os
 app = Flask(__name__)
 app.jinja_env.globals.update(Domain=Domain)
 app.jinja_env.globals.update(NEVER=NEVER)
+app.jinja_env.globals.update(len=len)
 @app.context_processor
 @db_session
 def inject_counts():
@@ -43,7 +44,10 @@ def index():
 	if rep == "fake":
 		query = query.filter("d.is_fake == 1")
 
-	
+	show_subdomains = request.args.get("show_subdomains")
+	if not show_subdomains:
+		query = query.filter("d.is_subdomain == 0")
+
 	search = request.args.get("search")
 	if not search:
 		search=""
@@ -67,7 +71,8 @@ def index():
 
 	n_results = len(query)
 
-	return render_template('index.html', domains=query, is_up=is_up, rep=rep, search=search, never_seen=never_seen, more=more, n_results=n_results)
+	return render_template('index.html', domains=query, is_up=is_up, rep=rep, search=search, 
+		never_seen=never_seen, more=more, show_subdomains=show_subdomains, n_results=n_results)
 	
 
 @app.route('/json')
@@ -92,7 +97,7 @@ def json():
 			d['ssh_fingerprint']  = domain.ssh_fingerprint.fingerprint
 		else:
 			d['ssh_fingerprint']  = None
-		
+
 		out.append(d)
 
 	return jsonify(out)
@@ -116,12 +121,14 @@ def onion_info(onion):
 	links_from = []
 	domain = select(d for d in Domain if d.host==onion).first()
 	fp_count = 0
+	emails = domain.emails()
+	bitcoin_addresses = domain.bitcoin_addresses()
 	if domain.ssh_fingerprint:
 		fp_count = len(domain.ssh_fingerprint.domains)
 	if domain:
 		links_to   = domain.links_to()
 		links_from = domain.links_from()
-		return render_template('onion_info.html', domain=domain, links_to=links_to, links_from = links_from, fp_count=fp_count)
+		return render_template('onion_info.html', domain=domain, emails=emails, bitcoin_addresses=bitcoin_addresses, links_to=links_to, links_from = links_from, fp_count=fp_count)
 	else:
 		return render_template('error.html', code=404, message="Onion not found."), 404
 
@@ -137,6 +144,8 @@ def onion_info_json(onion):
 
 	links_to   = domain.links_to()
 	links_from = domain.links_from()
+	emails     = domain.emails()
+	btc_addr   = domain.bitcoin_addresses()
 	d = dict()
 	d['url']        = domain.index_url()
 	d['title']      = domain.title
@@ -148,6 +157,8 @@ def onion_info_json(onion):
 	d['is_fake']    = domain.is_fake
 	d['links_to']   = []
 	d['links_from'] = []
+	d['emails']     = []
+	d['bitcoin_addresses'] = []
 	if domain.ssh_fingerprint:
 		d['ssh_fingerprint']  = domain.ssh_fingerprint.fingerprint
 	else:
@@ -157,6 +168,10 @@ def onion_info_json(onion):
 		d['links_to'].append(link_to.index_url())
 	for link_from in links_from:
 		d['links_from'].append(link_from.index_url())
+	for email in emails:
+		d["emails"].append(email.address)
+	for addr in btc_addr:
+		d["bitcoin_addresses"].append(addr.address)
 
 	return jsonify(d)
 
@@ -170,6 +185,26 @@ def ssh_list(id):
 		return render_template('ssh_list.html', domains=domains, fingerprint=fingerprint)
 	else:
 		return render_template('error.html', code=404, message="Fingerprint not found."), 404
+
+@app.route('/email/<addr>')
+@db_session
+def email_list(addr):
+	email = Email.get(address=addr)
+	if email:
+		domains = email.domains()
+		return render_template('email_list.html', domains=domains, email=addr)
+	else:
+		return render_template('error.html', code=404, message="Email not found."), 404
+
+@app.route('/bitcoin/<addr>')
+@db_session
+def bitcoin_list(addr):
+	btc_addr = BitcoinAddress.get(address=addr)
+	if btc_addr:
+		domains = btc_addr.domains()
+		return render_template('bitcoin_list.html', domains=domains, addr=addr)
+	else:
+		return render_template('error.html', code=404, message="Email not found."), 404
 
 @app.route('/favicon.ico')
 def favicon():

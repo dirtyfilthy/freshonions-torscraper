@@ -10,22 +10,44 @@ NEVER = datetime.fromtimestamp(0)
 class SSHFingerprint(db.Entity):
     _table_ = "ssh_fingerprint"
     fingerprint = Required(str, 450, unique=True)
-    domains = Set('Domain', reverse="ssh_fingerprint") 
+    domains = Set('Domain', reverse="ssh_fingerprint")
+
+
+
+class Email(db.Entity):
+    address = Required(str, 100, unique=True)
+    pages = Set('Page', reverse="emails", column="page", table="email_link")
+
+    def domains(self):
+        return select(d for d in Domain for p in d.pages for e in p.emails if e == self)
+
+class BitcoinAddress(db.Entity):
+    _table_ = "bitcoin_address"
+    address = Required(str, 100, unique=True)
+    pages = Set('Page', reverse="bitcoin_addresses", column="page", table="bitcoin_address_link")
+
+    def domains(self):
+        return select(d for d in Domain for p in d.pages for b in p.bitcoin_addresses if b == self)
+
+  
+
+
 
 
 class Domain(db.Entity):
-    host        = Required(str)
-    port        = Required(int)
-    pages       = Set('Page')
-    ssl         = Required(bool)
-    is_up       = Required(bool)
-    title       = Optional(str)
-    is_crap     = Required(bool, default=False)
-    is_fake     = Required(bool, default=False)
-    is_genuine  = Required(bool, default=False)
-    created_at  = Required(datetime)
-    visited_at  = Required(datetime)
-    last_alive  = Required(datetime)
+    host         = Required(str)
+    port         = Required(int)
+    pages        = Set('Page')
+    ssl          = Required(bool)
+    is_up        = Required(bool)
+    title        = Optional(str)
+    is_crap      = Required(bool, default=False)
+    is_fake      = Required(bool, default=False)
+    is_genuine   = Required(bool, default=False)
+    is_subdomain = Required(bool, default=False)
+    created_at   = Required(datetime)
+    visited_at   = Required(datetime)
+    last_alive   = Required(datetime)
     ssh_fingerprint = Optional(SSHFingerprint)
 
 
@@ -53,6 +75,9 @@ class Domain(db.Entity):
             genuine_exists = select(d.is_genuine for d in Domain if d.is_genuine == True and self.title == d.title).first()
             if genuine_exists:
                 self.is_fake = True
+
+        if self.host.count(".") > 1:
+            self.is_subdomain = True
 
 
     def before_update(self):
@@ -104,6 +129,14 @@ class Domain(db.Entity):
     @db_session
     def links_from(self):
         return select(d for d in Domain for p in d.pages for link_from in p.links_from if link_from.domain==self)
+
+    @db_session
+    def emails(self):
+        return select(e for e in Email for p in e.pages if p.domain == self)
+
+    @db_session
+    def bitcoin_addresses(self):
+        return select(b for b in BitcoinAddress for p in b.pages if p.domain == self).limit(100)
 
 
     @classmethod
@@ -186,6 +219,8 @@ class Page(db.Entity):
     visited_at  = Required(datetime)
     links_to    = Set("Page", reverse="links_from", table="page_link", column="link_to");
     links_from  = Set("Page", reverse="links_to",   table="page_link", column="link_from");
+    emails      = Set('Email', reverse="pages", column="email", table="email_link")
+    bitcoin_addresses = Set('BitcoinAddress', reverse="pages", column="bitcoin_address", table="bitcoin_address_link")
 
     @classmethod
     @db_session
