@@ -189,16 +189,21 @@ class TorSpider(scrapy.Spider):
     @timeout_decorator.timeout(5)
     @db_session
     def extract_other(self, page, body):
+        self.log("extract_other")
         page.emails.clear()
-        for addr in re.findall(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+[a-zA-Z0-9]', body):
+        self.log("find_emails")
+        for addr in re.findall(r'\b[a-zA-Z0-9_.+-]{1,50}@[a-zA-Z0-9-]{1,50}\.[a-zA-Z0-9-.]{1,50}[a-zA-Z0-9]\b', body):
             addr = addr.lower()
+            self.log("found email %s" % addr)
             email = Email.get(address=addr)
             if not email:
                 email = Email(address=addr)
             page.emails.add(email)
 
         page.bitcoin_addresses.clear()
+        self.log("find_bitcoin")
         for addr in re.findall(r'\b[13][a-zA-Z1-9]{26,34}\b', body):
+            self.log("testing address %s" % addr)
             if not bitcoin.is_valid(addr):
                 continue
             bitcoin_addr = BitcoinAddress.get(address=addr)
