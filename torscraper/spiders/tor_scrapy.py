@@ -57,6 +57,15 @@ def domain_urls_recent():
         urls.append(domain.index_url())
     return urls
 
+@db_session
+def domain_urls_last_seen():
+    urls = []
+    now = datetime.now()
+    event_horizon = now - timedelta(days=30)
+    for domain in Domain.select(lambda d: d.last_alive > event_horizon).order_by(Domain.last_alive):
+        urls.append(domain.index_url())
+    return urls
+
 class TorSpider(scrapy.Spider):
     name = "tor"
     allowed_domains = ['onion']
@@ -175,6 +184,7 @@ class TorSpider(scrapy.Spider):
 
     @db_session
     def parse(self, response):
+        MAX_PARSE_SIZE_KB = 400
         title = response.css('title::text').extract_first()
         parsed_url = urlparse.urlparse(response.url)
         host  = parsed_url.hostname
@@ -196,30 +206,31 @@ class TorSpider(scrapy.Spider):
                     except:
                         continue
 
-            if page.got_server_response():
-                page.links_to.clear()
-                for url in link_to_list:
-                    link_to = Page.find_stub_by_url(url)
-                    page.links_to.add(link_to)
+                if page.got_server_response():
+                    small_body = response.body[:(1024*MAX_PARSE_SIZE_KB)]
+                    page.links_to.clear()
+                    for url in link_to_list:
+                        link_to = Page.find_stub_by_url(url)
+                        page.links_to.add(link_to)
 
-                page.emails.clear()
-                for addr in re.findall(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+[a-zA-Z0-9]', response.body):
-                    addr = addr.lower()
-                    email = Email.get(address=addr)
-                    if not email:
-                        email = Email(address=addr)
-                    page.emails.add(email)
+                    page.emails.clear()
+                    for addr in re.findall(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+[a-zA-Z0-9]', small_body):
+                        addr = addr.lower()
+                        email = Email.get(address=addr)
+                        if not email:
+                            email = Email(address=addr)
+                        page.emails.add(email)
 
-                page.bitcoin_addresses.clear()
-                for addr in re.findall(r'\b[13][a-zA-Z1-9]{26,34}\b', response.body):
-                    if not bitcoin.is_valid(addr):
-                        continue
-                    bitcoin_addr = BitcoinAddress.get(address=addr)
-                    if not bitcoin_addr:
-                        bitcoin_addr = BitcoinAddress(address=addr)
-                    page.bitcoin_addresses.add(bitcoin_addr)
+                    page.bitcoin_addresses.clear()
+                    for addr in re.findall(r'\b[13][a-zA-Z1-9]{26,34}\b', small_body):
+                        if not bitcoin.is_valid(addr):
+                            continue
+                        bitcoin_addr = BitcoinAddress.get(address=addr)
+                        if not bitcoin_addr:
+                            bitcoin_addr = BitcoinAddress(address=addr)
+                        page.bitcoin_addresses.add(bitcoin_addr)
 
-                commit()                        
+                    commit()                        
 
 
     def process_exception(self, response, exception, spider):
