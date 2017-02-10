@@ -4,6 +4,7 @@ from collections import *
 from pony.orm import *
 from datetime import *
 from tor_db import *
+import timeout_decorator
 import bitcoin
 
 
@@ -122,6 +123,8 @@ class TorSpider(scrapy.Spider):
             self.start_urls = domain_urls_recent_no_crap()
 
 
+
+
     @db_session
     def update_page_info(self, url, title, code):
         if not Domain.is_onion_url(url):
@@ -182,9 +185,30 @@ class TorSpider(scrapy.Spider):
        
         return page
 
+    
+    @timeout_decorator.timeout(5)
+    @db_session
+    def extract_other(self, page, body):
+        page.emails.clear()
+        for addr in re.findall(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+[a-zA-Z0-9]', body):
+            addr = addr.lower()
+            email = Email.get(address=addr)
+            if not email:
+                email = Email(address=addr)
+            page.emails.add(email)
+
+        page.bitcoin_addresses.clear()
+        for addr in re.findall(r'\b[13][a-zA-Z1-9]{26,34}\b', body):
+            if not bitcoin.is_valid(addr):
+                continue
+            bitcoin_addr = BitcoinAddress.get(address=addr)
+            if not bitcoin_addr:
+                bitcoin_addr = BitcoinAddress(address=addr)
+            page.bitcoin_addresses.add(bitcoin_addr)
+
     @db_session
     def parse(self, response):
-        MAX_PARSE_SIZE_KB = 400
+        MAX_PARSE_SIZE_KB = 1000
         title = response.css('title::text').extract_first()
         parsed_url = urlparse.urlparse(response.url)
         host  = parsed_url.hostname
@@ -213,22 +237,10 @@ class TorSpider(scrapy.Spider):
                         link_to = Page.find_stub_by_url(url)
                         page.links_to.add(link_to)
 
-                    page.emails.clear()
-                    for addr in re.findall(r'[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+[a-zA-Z0-9]', small_body):
-                        addr = addr.lower()
-                        email = Email.get(address=addr)
-                        if not email:
-                            email = Email(address=addr)
-                        page.emails.add(email)
-
-                    page.bitcoin_addresses.clear()
-                    for addr in re.findall(r'\b[13][a-zA-Z1-9]{26,34}\b', small_body):
-                        if not bitcoin.is_valid(addr):
-                            continue
-                        bitcoin_addr = BitcoinAddress.get(address=addr)
-                        if not bitcoin_addr:
-                            bitcoin_addr = BitcoinAddress(address=addr)
-                        page.bitcoin_addresses.add(bitcoin_addr)
+                    try:
+                        self.extract_other(page, small_body)
+                    except timeout_decorator.TimeoutError:
+                        pass
 
                     commit()                        
 
