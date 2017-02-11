@@ -71,7 +71,7 @@ def domain_urls_visited_at():
 class TorSpider(scrapy.Spider):
     name = "tor"
     allowed_domains = ['onion']
-    handle_httpstatus_list = [404, 403, 401, 503, 500, 504]
+    handle_httpstatus_list = [404, 403, 401, 503, 500, 504, 502]
     start_urls = domain_urls_recent_no_crap()
     if len(start_urls) == 0:
         start_urls = [
@@ -131,7 +131,7 @@ class TorSpider(scrapy.Spider):
         if not Domain.is_onion_url(url):
             return False
 
-        failed_codes = [666, 503, 504]
+        failed_codes = [666, 503, 504, 502]
         if not title:
             title = ''
         parsed_url = urlparse.urlparse(url)
