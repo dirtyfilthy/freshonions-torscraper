@@ -21,8 +21,8 @@ app.jinja_env.globals.update(len=len)
 @db_session
 def inject_counts():
 	event_horizon = datetime.now() - timedelta(days=1)
-	domain_count = count(d for d in Domain if d.is_up == True and d.is_crap == False)
-	day_count    = count(d for d in Domain if d.is_up == True and d.is_crap == False and d.created_at > event_horizon)
+	domain_count = count(d for d in Domain if d.is_up == True and d.is_crap == False and d.is_subdomain = False)
+	day_count    = count(d for d in Domain if d.is_up == True and d.is_crap == False and d.is_subdomain = False and d.created_at > event_horizon)
 	return dict(day_count=day_count, domain_count=domain_count)
 
 @app.errorhandler(404)
