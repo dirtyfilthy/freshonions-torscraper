@@ -102,6 +102,8 @@ def json():
 		d['last_seen']  = domain.last_alive
 		d['is_genuine'] = domain.is_genuine
 		d['is_fake']    = domain.is_fake
+		d['server']     = domain.server
+		d['powered_by'] = domain.powered_by
 
 		if domain.ssh_fingerprint:
 			d['ssh_fingerprint']  = domain.ssh_fingerprint.fingerprint
@@ -165,6 +167,8 @@ def onion_info_json(onion):
 	d['last_seen']  = domain.last_alive
 	d['is_genuine'] = domain.is_genuine
 	d['is_fake']    = domain.is_fake
+	d['server']     = domain.server
+	d['powered_by'] = domain.powered_by
 	d['links_to']   = []
 	d['links_from'] = []
 	d['emails']     = []
