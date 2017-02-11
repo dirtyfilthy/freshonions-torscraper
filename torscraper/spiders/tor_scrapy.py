@@ -88,7 +88,7 @@ class TorSpider(scrapy.Spider):
         ]
 
     custom_settings = {
-        'DOWNLOAD_MAXSIZE': (1024 * 1024),
+        'DOWNLOAD_MAXSIZE': (1024 * 1024)*2,
         'BIG_DOWNLOAD_MAXSIZE': (1024 * 1024)*4,
         'ALLOW_BIG_DOWNLOAD': [
             'cratedvnn5z57xhl.onion'
