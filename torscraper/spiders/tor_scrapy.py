@@ -60,11 +60,11 @@ def domain_urls_recent():
     return urls
 
 @db_session
-def domain_urls_last_seen():
+def domain_urls_visited_at():
     urls = []
     now = datetime.now()
     event_horizon = now - timedelta(days=30)
-    for domain in Domain.select(lambda d: d.last_alive > event_horizon).order_by(Domain.last_alive):
+    for domain in Domain.select(lambda d: d.last_alive > event_horizon).order_by(Domain.visited_at):
         urls.append(domain.index_url())
     return urls
 
@@ -119,7 +119,7 @@ class TorSpider(scrapy.Spider):
         elif hasattr(self, "load_links") and self.load_links == "resurrect":
             self.start_urls = domain_urls_resurrect()
         elif hasattr(self, "test") and self.test == "yes":
-            self.start_urls = domain_urls_recent()
+            self.start_urls = domain_urls_visited_at()
         else:
             self.start_urls = domain_urls_recent_no_crap()
 
