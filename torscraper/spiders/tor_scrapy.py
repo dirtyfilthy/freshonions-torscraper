@@ -221,7 +221,14 @@ class TorSpider(scrapy.Spider):
         if host != "zlal32teyptf4tvi.onion":  
             self.log('Got %s (%s)' % (response.url, title))
             page = self.update_page_info(response.url, title, response.status)
+
             got_server_response = page.got_server_response()
+            if got_server_response and response.headers.get("Server"):
+                page.domain.server = response.headers.get("Server")
+            if got_server_response and response.headers.get("X-Powered-By"):
+                page.domain.powered_by = response.headers.get("X-Powered-By")
+            if got_server_response and response.headers.get("Powered-By"):
+                page.domain.powered_by = response.headers.get("Powered-By")
             commit()
             link_to_list = []
             if (not hasattr(self, "test") or self.test != "yes") and not host in TorSpider.spider_exclude:

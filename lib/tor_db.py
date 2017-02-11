@@ -41,6 +41,8 @@ class Domain(db.Entity):
     ssl          = Required(bool)
     is_up        = Required(bool)
     title        = Optional(str)
+    server       = Optional(str)
+    powered_by   = Optional(str)
     is_crap      = Required(bool, default=False)
     is_fake      = Required(bool, default=False)
     is_genuine   = Required(bool, default=False)

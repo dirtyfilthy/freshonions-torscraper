@@ -18,6 +18,7 @@
 {% endif %}
 </td>
 </tr>
+<tr>
 <td>Last Seen</td>
 <td>
 {% if domain.last_alive != NEVER %}
@@ -27,6 +28,25 @@
 {% endif %}
 </td>
 </tr>
+
+{% if domain.server != '' %}
+<tr>
+<td>Server</td>
+<td>
+{{domain.server}}
+</td>
+</tr>
+{% endif %}
+
+{% if domain.powered_by != '' %}
+<tr>
+<td>X-Powered-By</td>
+<td>
+{{domain.powered_by}}
+</td>
+</tr>
+{% endif %}
+
 </table>
 </div>
 <h2>Information for {{domain.host}}</h2>
