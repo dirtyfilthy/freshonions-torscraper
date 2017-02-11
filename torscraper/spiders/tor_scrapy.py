@@ -66,11 +66,12 @@ def domain_urls_recent():
     return urls
 
 @db_session
-def domain_urls_visited_at():
+def domain_urls_next_scheduled():
     urls = []
     now = datetime.now()
     event_horizon = now - timedelta(days=30)
-    for domain in Domain.select(lambda d: d.last_alive > event_horizon).order_by(Domain.visited_at):
+
+    for domain in Domain.select(lambda d: d.last_alive > event_horizon and now > d.next_scheduled_check).order_by(Domain.visited_at):
         urls.append(domain.index_url())
     return urls
 
@@ -127,7 +128,7 @@ class TorSpider(scrapy.Spider):
         elif hasattr(self, "load_links"):
             self.start_urls = [maybe_add_scheme(line) for line in open(self.load_links)]
         elif hasattr(self, "test") and self.test == "yes":
-            self.start_urls = domain_urls_visited_at()
+            self.start_urls = domain_urls_next_scheduled()
         else:
             self.start_urls = domain_urls_recent_no_crap()
 
@@ -167,7 +168,8 @@ class TorSpider(scrapy.Spider):
             else:
                 last_alive = NEVER
                 title=''
-            domain=Domain(host=host, port=port, ssl=ssl, is_up=is_up, last_alive=last_alive, created_at=now, visited_at=now, title=title)
+            domain=Domain(host=host, port=port, ssl=ssl, is_up=is_up, last_alive=last_alive, 
+                created_at=now, next_scheduled_check=(now + timedelta(hours=1)), visited_at=now, title=title)
             self.log("created domain %s" % host)
         else:
             domain.is_up      = is_up
@@ -237,8 +239,22 @@ class TorSpider(scrapy.Spider):
                 page.domain.powered_by = response.headers.get("X-Powered-By")
             if got_server_response and response.headers.get("Powered-By"):
                 page.domain.powered_by = response.headers.get("Powered-By")
+            
+            if hasattr(self, "test") and self.test == "yes":
+                domain = page.domain
+                if domain.is_up:
+                    domain.dead_in_a_row = 0
+                    domain.next_scheduled_check = datetime.now() + timedelta(hours=1)
+                else:
+                    domain.dead_in_a_row += 1
+                    domain.next_scheduled_check = (datetime.now() + timedelta(hours=1) 
+                        + timedelta(minutes = 10 * (2 ^ domain.dead_in_a_row)))
+
             commit()
             link_to_list = []
+
+
+
             if (not hasattr(self, "test") or self.test != "yes") and not host in TorSpider.spider_exclude:
                 for url in response.xpath('//a/@href').extract():
                     try:

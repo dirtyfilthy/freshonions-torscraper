@@ -50,6 +50,8 @@ class Domain(db.Entity):
     created_at   = Required(datetime)
     visited_at   = Required(datetime)
     last_alive   = Required(datetime)
+    next_scheduled_check = Required(datetime)
+    dead_in_a_row = Required(int, default=0)
     ssh_fingerprint = Optional(SSHFingerprint)
 
 
@@ -93,6 +95,11 @@ class Domain(db.Entity):
             genuine_exists = select(d.is_genuine for d in Domain if d.is_genuine == True and self.title == d.title).first()
             if genuine_exists:
                 self.is_fake = True
+
+        if self.is_up:
+            self.dead_in_a_row = 0
+            self.next_scheduled_check = datetime.now() + timedelta(hours=1)
+
 
     @classmethod
     def time_ago(klass, time):
