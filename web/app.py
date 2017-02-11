@@ -62,9 +62,9 @@ def index():
 		if re.match('.*\.onion$', search):
 			return redirect(url_for("onion_info",onion=search), code=302)
 		elif re.match(email_util.REGEX_ALL, search):
-			return redirect(url_for("email",addr=search), code=302)
+			return redirect(url_for("email_list",addr=search), code=302)
 		elif bitcoin.is_valid(search):
-			return redirect(url_for("bitcoin",addr=search), code=302)
+			return redirect(url_for("bitcoin_list",addr=search), code=302)
 		else:
 			query = query.filter("search in d.title")
 
