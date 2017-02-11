@@ -6,6 +6,7 @@ from datetime import *
 from tor_db import *
 import timeout_decorator
 import bitcoin
+import email_util
 
 
 from scrapy.exceptions import IgnoreRequest
@@ -192,7 +193,7 @@ class TorSpider(scrapy.Spider):
         self.log("extract_other")
         page.emails.clear()
         self.log("find_emails")
-        for addr in re.findall(r'\b[a-zA-Z0-9_.+-]{1,50}@[a-zA-Z0-9-]{1,50}\.[a-zA-Z0-9-.]{1,50}[a-zA-Z0-9]\b', body):
+        for addr in re.findall(email_util.REGEX, body):
             addr = addr.lower()
             self.log("found email %s" % addr)
             email = Email.get(address=addr)
@@ -202,7 +203,7 @@ class TorSpider(scrapy.Spider):
 
         page.bitcoin_addresses.clear()
         self.log("find_bitcoin")
-        for addr in re.findall(r'\b[13][a-zA-Z1-9]{26,34}\b', body):
+        for addr in re.findall(bitcoin.REGEX, body):
             self.log("testing address %s" % addr)
             if not bitcoin.is_valid(addr):
                 continue

@@ -2,6 +2,9 @@ from Crypto.Hash import SHA256
 import re
 import math
 
+REGEX     = re.compile('\b[13][a-zA-Z1-9]{26,34}\b')
+REGEX_ALL = re.compile('^[13][a-zA-Z1-9]{26,34}$')
+
 __b58chars = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 __b58base = len(__b58chars)
 
@@ -36,7 +39,7 @@ def b58decode(v, length):
 
 def is_valid(addr):
 	addr=addr.strip()
-	if not re.match(r"^[13][a-zA-Z1-9]{26,34}$", addr):
+	if not re.match(REGEX_ALL, addr):
 		return False
 	bin_addr = b58decode(addr,25)
 	if bin_addr is None:
