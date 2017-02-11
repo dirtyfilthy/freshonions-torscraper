@@ -1,4 +1,7 @@
 #!/bin/sh
 DIR=$( cd "$(dirname "$0")" ; pwd -P )
 . $DIR/env.sh
-cat $1 | xargs -n 1 $SCRIPTDIR/push.sh
+(
+cd $BASEDIR
+scrapy crawl tor -a load_links=$1 -a test=yes
+)

@@ -1,5 +1,6 @@
 import scrapy
 import urlparse 
+import re
 from collections import *
 from pony.orm import *
 from datetime import *
@@ -11,6 +12,11 @@ import email_util
 
 from scrapy.exceptions import IgnoreRequest
 
+def maybe_add_scheme(onion):
+    o = onion.strip()
+    if not re.match(r"^(http|https)://", o):
+        o = ("http://%s/" % o)
+    return o
 
 @db_session
 def domain_urls_down():
@@ -118,6 +124,8 @@ class TorSpider(scrapy.Spider):
             self.start_urls = domain_urls_down()
         elif hasattr(self, "load_links") and self.load_links == "resurrect":
             self.start_urls = domain_urls_resurrect()
+        elif hasattr(self, "load_links"):
+            self.start_urls = [maybe_add_scheme(line) for line in open(self.load_links)]
         elif hasattr(self, "test") and self.test == "yes":
             self.start_urls = domain_urls_visited_at()
         else:
