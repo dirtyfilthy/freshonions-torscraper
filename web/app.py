@@ -87,11 +87,12 @@ def index():
 		query = query.order_by(desc(Domain.created_at))
 
 	more = request.args.get("more")
-	orig_count = len(query)
+	orig_count = count(query)
+	n_results  = orig_count
 	if not more:
 		query = query.limit(1000)
-
-	n_results = len(query)
+		if n_results > 1000:
+			n_results = 1000
 
 	is_more = (orig_count > 1000) and not more
 
