@@ -6,23 +6,26 @@
 <div id="search">
 <form method="GET">
 <p>
-{{input.checkbox("more", more, "more")}} 
-{{input.checkbox("never_seen", never_seen, "inc. never seen")}}
-{{input.checkbox("is_up", is_up, "alive only")}}
-({{input.radio("rep", ["n/a","genuine", "fake"], rep)}})
-{{input.text("search", search, "search:")}}
+{{input.checkbox("more", context["more"], "more")}} 
+{{input.checkbox("never_seen", context["never_seen"], "inc. never seen")}}
+{{input.checkbox("is_up", context["is_up"], "alive only")}}
+({{input.radio("rep", ["n/a","genuine", "fake"], context["rep"])}})
+{{input.text("search", context["search"], "search:")}}
 {{input.submit("Go >>>")}} <br />
-{{input.checkbox("show_subdomains", show_subdomains, "show subdomains")}} 
-{{input.checkbox("show_fh_default", show_fh_default, "show fh default")}} 
+{{input.checkbox("show_subdomains", context["show_subdomains"], "show subdomains")}} 
+{{input.checkbox("show_fh_default", context["show_fh_default"], "show fh default")}} 
 <br/>
 <span class="small">
-search for title, email, bitcoin addr or enter ".onion" domain for onion info. showing {{n_results}} results.
+search for title, email, bitcoin addr or enter ".onion" domain for onion info. showing {{n_results}} results of {{orig_count}}.
+{% if is_more %}
+<a href="{{ url_for('index', more='yes', search=context['search'], is_up=context['is_up'], never_seen=context['never_seen'], show_subdomains=context['show_subdomains'], rep=context['rep'], show_fh_default=context['show_fh_default'], sort=sort) }}">[MORE]</a>
+{% endif %}
 </span>
 </p>
 </form>
 </div>
 
-{{ domain_table(domains)}}
+{{ domain_table(domains, sortable=True, context=context)}}
 
 </div>
 {% endblock %}

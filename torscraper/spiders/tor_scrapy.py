@@ -5,6 +5,7 @@ from collections import *
 from pony.orm import *
 from datetime import *
 from tor_db import *
+import random
 import timeout_decorator
 import bitcoin
 import email_util
@@ -244,11 +245,11 @@ class TorSpider(scrapy.Spider):
                 domain = page.domain
                 if domain.is_up:
                     domain.dead_in_a_row = 0
-                    domain.next_scheduled_check = datetime.now() + timedelta(hours=1)
+                    domain.next_scheduled_check = datetime.now() + timedelta(minutes = random.randint(60, 180)) 
                 else:
                     domain.dead_in_a_row += 1
-                    domain.next_scheduled_check = (datetime.now() + timedelta(hours=1) 
-                        + timedelta(minutes = 10 * (2 ^ domain.dead_in_a_row)))
+                    domain.next_scheduled_check = (datetime.now() + 
+                        timedelta(minutes = random.randint(60, 180) * (1.5 ** domain.dead_in_a_row)))
 
             commit()
             link_to_list = []

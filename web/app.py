@@ -68,21 +68,43 @@ def index():
 		else:
 			query = query.filter("search in d.title")
 
+
+
 	never_seen = request.args.get("never_seen")
 	if not never_seen:
 		query = query.filter("d.last_alive != NEVER")
 
-	query = query.order_by(desc(Domain.created_at))
+	sort = request.args.get("sort")
+	if   sort=="onion":
+		query = query.order_by(Domain.host)
+	elif sort=="title":
+		query = query.order_by(Domain.title)
+	elif sort=="last_seen":
+		query = query.order_by(desc(Domain.last_alive))
+	elif sort=="visited_at":
+		query = query.order_by(desc(Domain.visited_at))
+	else:
+		query = query.order_by(desc(Domain.created_at))
 
 	more = request.args.get("more")
-
+	orig_count = len(query)
 	if not more:
 		query = query.limit(1000)
 
 	n_results = len(query)
 
-	return render_template('index.html', domains=query, is_up=is_up, rep=rep, search=search, 
-		never_seen=never_seen, more=more, show_subdomains=show_subdomains, show_fh_default=show_fh_default, n_results=n_results)
+	is_more = (orig_count > 1000) and not more
+
+	context = dict()
+	context["more"] = more
+	context["never_seen"] = never_seen
+	context["show_subdomains"] = show_subdomains
+	context["rep"] = rep
+	context["is_up"] = is_up
+	context["show_fh_default"] = show_fh_default
+	context["search"] = search
+
+	return render_template('index.html', domains=query, context=context, orig_count=orig_count, n_results=n_results, sort=sort, is_more = is_more)
 	
 
 @app.route('/json')
