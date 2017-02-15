@@ -1,10 +1,11 @@
 import urlparse 
 import re
+import os
 from pony.orm import *
 from datetime import *
 import pretty
 db = Database()
-db.bind('mysql', host='groan', user='root', passwd='fuck', db='tor')
+db.bind('mysql', host=os.environ['DB_HOST'], user=os.environ['DB_USER'], passwd=os.environ['DB_PASS'], db=os.environ['DB_BASE'])
 NEVER = datetime.fromtimestamp(0)
 
 class SSHFingerprint(db.Entity):
