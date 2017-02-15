@@ -1,0 +1,6 @@
+scrapy
+pony
+PyMySQL
+py-pretty
+pycrypto
+
