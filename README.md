@@ -1,6 +1,6 @@
 # Fresh Onions TOR Hidden Service Crawler
 
-This is a copy of the source for the http://zlal32teyptf4tvi.onion hidden service, which implements a tor crawler and web site.
+This is a copy of the source for the http://zlal32teyptf4tvi.onion hidden service, which implements a tor hidden service crawler / spider and web site.
 
 ## Features
 
