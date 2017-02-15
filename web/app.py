@@ -116,24 +116,7 @@ def json():
 	domains = Domain.select(lambda p: p.last_alive > event_horizon).order_by(desc(Domain.created_at))
 	out = []
 	for domain in domains:
-		d = dict()
-		d['url']        = domain.index_url()
-		d['title']      = domain.title
-		d['is_up']      = domain.is_up
-		d['created_at'] = domain.created_at
-		d['visited_at'] = domain.visited_at
-		d['last_seen']  = domain.last_alive
-		d['is_genuine'] = domain.is_genuine
-		d['is_fake']    = domain.is_fake
-		d['server']     = domain.server
-		d['powered_by'] = domain.powered_by
-
-		if domain.ssh_fingerprint:
-			d['ssh_fingerprint']  = domain.ssh_fingerprint.fingerprint
-		else:
-			d['ssh_fingerprint']  = None
-
-		out.append(d)
+		out.append(domain.to_dict(full=False))
 
 	return jsonify(out)
 
@@ -174,43 +157,7 @@ def onion_info_json(onion):
 	links_to = []
 	links_from = []
 	domain = select(d for d in Domain if d.host==onion).first()
-	if not domain:
-		return render_template('error.html', code=404, message="Onion not found."), 404
-
-	links_to   = domain.links_to()
-	links_from = domain.links_from()
-	emails     = domain.emails()
-	btc_addr   = domain.bitcoin_addresses()
-	d = dict()
-	d['url']        = domain.index_url()
-	d['title']      = domain.title
-	d['is_up']      = domain.is_up
-	d['created_at'] = domain.created_at
-	d['visited_at'] = domain.visited_at
-	d['last_seen']  = domain.last_alive
-	d['is_genuine'] = domain.is_genuine
-	d['is_fake']    = domain.is_fake
-	d['server']     = domain.server
-	d['powered_by'] = domain.powered_by
-	d['links_to']   = []
-	d['links_from'] = []
-	d['emails']     = []
-	d['bitcoin_addresses'] = []
-	if domain.ssh_fingerprint:
-		d['ssh_fingerprint']  = domain.ssh_fingerprint.fingerprint
-	else:
-		d['ssh_fingerprint']  = None
-
-	for link_to in links_to:
-		d['links_to'].append(link_to.index_url())
-	for link_from in links_from:
-		d['links_from'].append(link_from.index_url())
-	for email in emails:
-		d["emails"].append(email.address)
-	for addr in btc_addr:
-		d["bitcoin_addresses"].append(addr.address)
-
-	return jsonify(d)
+	return jsonify(domain.to_dict(full=True))
 
 @app.route('/ssh/<id>')
 @db_session

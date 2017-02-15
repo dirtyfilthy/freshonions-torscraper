@@ -101,6 +101,46 @@ class Domain(db.Entity):
             self.next_scheduled_check = datetime.now() + timedelta(hours=1)
 
 
+  
+    def to_dict(self, full=False):
+        d = dict()
+        d['url']        = self.index_url()
+        d['title']      = self.title
+        d['is_up']      = self.is_up
+        d['created_at'] = self.created_at
+        d['visited_at'] = self.visited_at
+        d['last_seen']  = self.last_alive
+        d['is_genuine'] = self.is_genuine
+        d['is_fake']    = self.is_fake
+        d['server']     = self.server
+        d['powered_by'] = self.powered_by
+
+        if self.ssh_fingerprint:
+            d['ssh_fingerprint']  = self.ssh_fingerprint.fingerprint
+        else:
+            d['ssh_fingerprint']  = None
+
+        if full:
+            links_to   = self.links_to()
+            links_from = self.links_from()
+            emails     = self.emails()
+            btc_addr   = self.bitcoin_addresses()
+            d['links_to']   = []
+            d['links_from'] = [] 
+            d['emails']     = []
+            d['bitcoin_addresses'] = []
+            for link_to in links_to:
+                d['links_to'].append(link_to.index_url())
+            for link_from in links_from:
+                d['links_from'].append(link_from.index_url())
+            for email in emails:
+                d["emails"].append(email.address)
+            for addr in btc_addr:
+                d["bitcoin_addresses"].append(addr.address)
+
+        return d
+
+
     @classmethod
     def time_ago(klass, time):
         if time==NEVER:
