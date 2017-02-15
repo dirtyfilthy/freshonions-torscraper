@@ -3,4 +3,6 @@ pony
 PyMySQL
 py-pretty
 pycrypto
+elasticsearch>=5.0.0,<6.0.0
+elasticsearch-dsl>=2.0.0,<3.0.0
 

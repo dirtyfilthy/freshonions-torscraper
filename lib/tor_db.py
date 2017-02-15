@@ -173,6 +173,10 @@ class Domain(db.Entity):
             return "%s://%s/" % (schema, self.host)
 
     @db_session
+    def fingerprint(self):
+        return self.ssh_fingerprint.fingerprint if self.ssh_fingerprint else None
+
+    @db_session
     def links_to(self):
         return select(d for d in Domain for p in d.pages for link_to in p.links_to if link_to.domain==self)
 
