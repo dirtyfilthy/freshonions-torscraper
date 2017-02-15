@@ -24,8 +24,8 @@ From the GNU site:
 
 ## Dependencies
 
-python
-tor
+* python
+* tor
 
 ### pip install:
 
@@ -35,16 +35,15 @@ pip install -r requirements.txt
 
 Create mysql db from schema.sql
 
-Edit lib/tor_db.py for your database setup
+Edit etc/database for your database setup
 
 Edit etc/proxy for your TOR setup
 
-script/push.sh someoniondirectory.onion 
-script/push.sh anotheroniondirectory.onion
+    script/push.sh someoniondirectory.onion 
+    script/push.sh anotheroniondirectory.onion
 
-init/scraper_service.sh
-
-Run init/isup_service.sh to keep site status up to date
+    init/scraper_service.sh # to start crawling
+    init/isup_service.sh # to keep site status up to date
 
 
 ## Infrastructure
