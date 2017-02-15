@@ -29,11 +29,7 @@ tor
 
 ### pip install:
 
-scrapy
-pony
-py-crypto
-py-pretty
-possibly some others you will discover when shit errors out
+pip install -r requirements.txt
 
 ## Install
 
