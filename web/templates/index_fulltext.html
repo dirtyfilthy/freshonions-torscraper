@@ -1,0 +1,11 @@
+{% extends "layout.html" %}
+{% from 'domain_table.macro.html' import domain_fulltext_table %}
+{% from 'search_panel.macro.html' import search_panel %}
+
+{% block body %}
+<div class="contents">
+{{ search_panel(context, n_results, orig_count, is_more, elasticsearch_enabled) }}
+{{ domain_fulltext_table(results, sortable=False, context=context) }}
+
+</div>
+{% endblock %}

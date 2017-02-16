@@ -13,5 +13,12 @@ def add_domains():
 		dom.save()
 		print(domain.host)
 
+
+if is_elasticsearch_enabled():
+	print("[+] Elastic search enabled")
+else:
+	print("[!] Elastic search disabled")
+	sys.exit(1)
+
 add_domains()
 sys.exit(0)

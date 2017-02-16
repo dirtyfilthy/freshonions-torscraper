@@ -1,8 +1,5 @@
-{% extends "layout.html" %}
-{% from 'domain_table.macro.html' import domain_table %}
 {% import 'input.macro.html' as input %}
-{% block body %}
-<div class="contents">
+{% macro search_panel(context, n_results, orig_count, is_more, elasticsearch_enabled) %}
 <div id="search">
 <form method="GET">
 <p>
@@ -13,19 +10,18 @@
 {{input.text("search", context["search"], "search:")}}
 {{input.submit("Go >>>")}} <br />
 {{input.checkbox("show_subdomains", context["show_subdomains"], "show subdomains")}} 
-{{input.checkbox("show_fh_default", context["show_fh_default"], "show fh default")}} 
+{{input.checkbox("show_fh_default", context["show_fh_default"], "show fh default")}}
+{% if elasticsearch_enabled %}
+{{input.checkbox("search title only", context["search_title_only"], "search_title_only")}}
+{% endif %}
 <br/>
 <span class="small">
 search for title, email, bitcoin addr or enter ".onion" domain for onion info. showing {{n_results}} results of {{orig_count}}.
 {% if is_more %}
-<a href="{{ url_for('index', more='yes', search=context['search'], is_up=context['is_up'], never_seen=context['never_seen'], show_subdomains=context['show_subdomains'], rep=context['rep'], show_fh_default=context['show_fh_default'], sort=sort) }}">[MORE]</a>
+<a href="{{ url_for('index', more='yes', search=context['search'], is_up=context['is_up'], never_seen=context['never_seen'], show_subdomains=context['show_subdomains'], rep=context['rep'], show_fh_default=context['show_fh_default'], search_title_only=context['search_title_only'], sort=sort) }}">[MORE]</a>
 {% endif %}
 </span>
 </p>
 </form>
 </div>
-
-{{ domain_table(domains, sortable=True, context=context)}}
-
-</div>
-{% endblock %}
+{% endmacro %}

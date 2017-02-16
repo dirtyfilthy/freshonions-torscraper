@@ -1,5 +1,5 @@
 {% macro sort_url(title, sort, context) %}
-<a href="{{ url_for('index', more=context['more'], search=context['search'], is_up=context['is_up'], never_seen=context['never_seen'], show_subdomains=context['show_subdomains'], rep=context['rep'], show_fh_default=context['show_fh_default'], sort=sort) }}">{{title}}</a>
+<a href="{{ url_for('index', more=context['more'], search=context['search'], is_up=context['is_up'], never_seen=context['never_seen'], show_subdomains=context['show_subdomains'], rep=context['rep'], show_fh_default=context['show_fh_default'], search_title_only=context['search_title_only'], sort=sort) }}">{{title}}</a>
 {% endmacro %}
 
 {% macro domain_table(domains, sortable=False, context=None) %}
@@ -49,6 +49,65 @@
 				</td>
 				<td class="visited_at ago">
 					{{Domain.time_ago(domain.visited_at)}}
+				</td>
+				<td class="last_seen {{'never ' if Domain.time_ago(domain.last_alive)=='Never' else ''}}ago">
+					{{Domain.time_ago(domain.last_alive)}}
+				</td>
+			</tr>
+{% endfor %}
+		</tbody>
+	</table>
+{% endmacro %}
+
+{% macro domain_fulltext_table(results, sortable=False, context=None) %}
+	<table>
+		<thead>
+		{% if not sortable %}
+			<tr>
+			    <th></th>
+				<th>Onion</th>
+				<th>Title</th>
+				<th>Added</th>
+				<th>Visited</th>
+				<th>Last Up</th>
+			</tr>
+		{% else %}
+		<tr>
+			    <th></th>
+				<th>{{sort_url("Onion", "onion", context) }}</th>
+				<th>{{sort_url("Title", "title", context) }}</th>
+				<th>{{sort_url("Added", "created_at", context) }}</th>
+				<th>{{sort_url("Visited At", "visited_at", context) }}</th>
+				<th>{{sort_url("Last Up", "last_seen", context) }}</th>
+			</tr>
+		{% endif %}
+		</thead>
+		<tbody>
+{% for hit in results.hits %}
+{% set domain = (Domain.select(lambda d: d.host==hit.meta.routing).first()) %}
+			<tr class="{{domain.status()}}">
+			    <td class="info_link">
+			    	<a class="info_link" href="{{url_for('onion_info',onion=domain.host)}}">(i)</a>
+			    </td>
+				<td class="domain">
+					<a href="{{domain.index_url()}}">{{domain.host}}</a>
+				</td>
+				<td class="title">
+					<a href="{{hit.meta.id}}">{{hit.title}}</a> 
+				    {% if domain.is_genuine %}
+				    <span class="tag genuine">[GENUINE]</span>
+				    {% endif %}
+				    {% if domain.is_fake %}
+				    <span class="tag fake">[FAKE]</span>
+				    {% endif %}<br/>
+				    {{hit.meta.highlight.body[0]|safe}}
+
+				</td>
+				<td class="created_at ago">
+					{{Domain.time_ago(hit.created_at)}}
+				</td>
+				<td class="visited_at ago">
+					{{Domain.time_ago(hit.visited_at)}}
 				</td>
 				<td class="last_seen {{'never ' if Domain.time_ago(domain.last_alive)=='Never' else ''}}ago">
 					{{Domain.time_ago(domain.last_alive)}}

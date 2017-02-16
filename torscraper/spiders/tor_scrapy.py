@@ -138,7 +138,7 @@ class TorSpider(scrapy.Spider):
 
 
     @db_session
-    def update_page_info(self, url, title, code):
+    def update_page_info(self, url, title, code, is_frontpage):
         if not Domain.is_onion_url(url):
             return False
 
@@ -183,18 +183,20 @@ class TorSpider(scrapy.Spider):
 
                 domain.last_alive = now
 
-                if not domain.title or domain.title=='' or path=='/':
+                if is_frontpage:
                     if not (domain.title != '' and title == ''):
                         domain.title = title
 
         page = Page.get(url=url)
         if not page:
-            page = Page(url=url, title=title, code=code, created_at=now, visited_at=now, domain=domain)
+            page = Page(url=url, title=title, code=code, created_at=now, visited_at=now, domain=domain, is_frontpage=is_frontpage)
         else:
             if is_up:
                 page.title = title
             page.code = code
             page.visited_at = now
+            if not page.is_frontpage and is_frontpage:
+                page.is_frontpage = is_frontpage
        
         return page
 
@@ -232,7 +234,8 @@ class TorSpider(scrapy.Spider):
         host  = parsed_url.hostname
         if host != "zlal32teyptf4tvi.onion":  
             self.log('Got %s (%s)' % (response.url, title))
-            page = self.update_page_info(response.url, title, response.status)
+            is_frontpage = Page.is_frontpage_request(response.request)
+            page = self.update_page_info(response.url, title, response.status, is_frontpage)
 
             got_server_response = page.got_server_response()
             if got_server_response and response.headers.get("Server"):
@@ -252,7 +255,13 @@ class TorSpider(scrapy.Spider):
                     domain.next_scheduled_check = (datetime.now() + 
                         timedelta(minutes = random.randint(60, 180) * (1.5 ** domain.dead_in_a_row)))
 
-            if is_elasticsearch_enabled() and got_server_response:
+            is_text = False
+            content_type = response.headers.get("Content-Type") 
+            if got_server_response and content_type and re.match('^text/', content_type.strip()):
+                is_text = True
+
+            if is_elasticsearch_enabled() and is_text:
+                self.log('Inserting %s page into elasticsearch' % response.url)
                 pg = PageDocType.from_obj(page, response.body)
                 pg.save()
 

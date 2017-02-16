@@ -236,6 +236,11 @@ td.domain {
     overflow: hidden;
 }
 
+td.title {
+	word-wrap:break-word;
+	overflow-wrap: break-word;
+}
+
 td.ago {
 	width: 100px;
 }
