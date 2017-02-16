@@ -4,6 +4,7 @@ import os
 from pony.orm import *
 from datetime import *
 import pretty
+from tor_elasticsearch import *
 db = Database()
 db.bind('mysql', host=os.environ['DB_HOST'], user=os.environ['DB_USER'], passwd=os.environ['DB_PASS'], db=os.environ['DB_BASE'])
 NEVER = datetime.fromtimestamp(0)
@@ -84,6 +85,10 @@ class Domain(db.Entity):
         if self.host.count(".") > 1:
             self.is_subdomain = True
 
+        if is_elasticsearch_enabled():
+            dom = DomainDocType.from_obj(self)
+            dom.save()
+
 
     def before_update(self):
         if (self.title.find("Site Hosted by Freedom Hosting II") != -1 or
@@ -100,6 +105,10 @@ class Domain(db.Entity):
         if self.is_up:
             self.dead_in_a_row = 0
             self.next_scheduled_check = datetime.now() + timedelta(hours=1)
+
+        if is_elasticsearch_enabled():
+            dom = DomainDocType.from_obj(self)
+            dom.save()
 
 
   

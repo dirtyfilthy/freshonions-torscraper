@@ -63,8 +63,8 @@ class PageDocType(DocType):
     	char_filter=["html_strip"]
 	)
 
-    title = Text()
-    created_at = Date(analyzer="snowball")
+    title = Text(analyzer="snowball")
+    created_at = Date()
     visited_at = Date()
     code       = Integer()
     body       = Text(analyzer=html_strip)

@@ -5,6 +5,7 @@ from collections import *
 from pony.orm import *
 from datetime import *
 from tor_db import *
+from tor_elasticsearch import *
 import random
 import timeout_decorator
 import bitcoin
@@ -250,6 +251,11 @@ class TorSpider(scrapy.Spider):
                     domain.dead_in_a_row += 1
                     domain.next_scheduled_check = (datetime.now() + 
                         timedelta(minutes = random.randint(60, 180) * (1.5 ** domain.dead_in_a_row)))
+
+            if is_elasticsearch_enabled() and got_server_response:
+                pg = PageDocType.from_obj(page, response.body)
+                pg.save()
+
 
             commit()
             link_to_list = []
