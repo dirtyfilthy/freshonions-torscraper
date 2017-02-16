@@ -2,9 +2,9 @@ import os
 from elasticsearch_dsl.connections import connections
 from elasticsearch_dsl import DocType, Date, Nested, Boolean
 from elasticsearch_dsl import analyzer, InnerObjectWrapper, Completion, Keyword, Text
-connections.create_connection(hosts=[os.environ['ELASTICSEARCH_HOST']], timeout=20)
 
-
+def is_elasticsearch_enabled():
+    return (os.environ['ELASTICSEARCH_ENABLED'] and os.environ['ELASTICSEARCH_ENABLED'].lower()=='true')
 
 class DomainDocType(DocType):
     title = Text()
@@ -89,3 +89,6 @@ class PageDocType(DocType):
             code=obj.code,
             body=body
         )
+
+if is_elasticsearch_enabled():
+    connections.create_connection(hosts=[os.environ['ELASTICSEARCH_HOST']], timeout=20)
