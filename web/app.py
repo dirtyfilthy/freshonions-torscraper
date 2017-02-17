@@ -9,6 +9,7 @@ import urlparse
 from pony.orm import *
 from datetime import *
 from tor_db import *
+from tor_elasticsearch import *
 import re
 import os
 import bitcoin
@@ -17,6 +18,13 @@ app = Flask(__name__)
 app.jinja_env.globals.update(Domain=Domain)
 app.jinja_env.globals.update(NEVER=NEVER)
 app.jinja_env.globals.update(len=len)
+app.jinja_env.globals.update(select=select)
+
+@app.context_processor
+def inject_elasticsearch():
+	return dict(elasticsearch_enabled=is_elasticsearch_enabled())
+
+
 @app.context_processor
 @db_session
 def inject_counts():
@@ -30,51 +38,29 @@ def page_not_found(e):
     return render_template('error.html',code=404,message="Page not found."), 404
 
 
-@app.route("/")
-@db_session
-def index():
-	now = datetime.now()
+def build_domain_query(context, sort):
 	query = select(d for d in Domain)
-	is_up = request.args.get("is_up")
-	if is_up:
+	search = context["search"]
+	if search !='':
+		query = query.filter("search in d.title")
+
+	if context["is_up"]:
 		query = query.filter("d.is_up == 1")
-	rep = request.args.get("rep")
-	if not rep:
-		rep = "n/a"
-	if rep == "genuine":
+	
+	if context["rep"] == "genuine":
 		query = query.filter("d.is_genuine == 1")
-	if rep == "fake":
+	if context["rep"] == "fake":
 		query = query.filter("d.is_fake == 1")
-
-	show_subdomains = request.args.get("show_subdomains")
-	if not show_subdomains:
+	
+	if not context["show_subdomains"]:
 		query = query.filter("d.is_subdomain == 0")
-
-	show_fh_default = request.args.get("show_fh_default")
-	if not show_fh_default:
+	
+	if not context["show_fh_default"]:
 		query = query.filter("d.is_crap == 0")
-
-	search = request.args.get("search")
-	if not search:
-		search=""
-	search = search.strip()
-	if search != "":
-		if re.match('.*\.onion$', search):
-			return redirect(url_for("onion_info",onion=search), code=302)
-		elif re.match(email_util.REGEX_ALL, search):
-			return redirect(url_for("email_list",addr=search), code=302)
-		elif bitcoin.is_valid(search):
-			return redirect(url_for("bitcoin_list",addr=search), code=302)
-		else:
-			query = query.filter("search in d.title")
-
-
-
-	never_seen = request.args.get("never_seen")
-	if not never_seen:
+	
+	if not context["never_seen"]:
 		query = query.filter("d.last_alive != NEVER")
-
-	sort = request.args.get("sort")
+	
 	if   sort=="onion":
 		query = query.order_by(Domain.host)
 	elif sort=="title":
@@ -86,27 +72,62 @@ def index():
 	else:
 		query = query.order_by(desc(Domain.created_at))
 
-	more = request.args.get("more")
-	orig_count = count(query)
-	n_results  = orig_count
-	if not more:
-		query = query.limit(1000)
-		if n_results > 1000:
-			n_results = 1000
+	return query
 
-	is_more = (orig_count > 1000) and not more
+@app.route("/")
+@db_session
+def index():
+	now = datetime.now()
 
 	context = dict()
-	context["more"] = more
-	context["never_seen"] = never_seen
-	context["show_subdomains"] = show_subdomains
-	context["rep"] = rep
-	context["is_up"] = is_up
-	context["show_fh_default"] = show_fh_default
-	context["search"] = search
+	context["is_up"] = request.args.get("is_up")
+	context["rep"] = request.args.get("rep")
+	context["show_subdomains"] = request.args.get("show_subdomains")
+	context["show_fh_default"] = request.args.get("show_fh_default")
+	context["search"] = request.args.get("search")
+	context["never_seen"] = request.args.get("never_seen")
+	context["more"] = request.args.get("more")
+	context["search_title_only"] = "on" if (not is_elasticsearch_enabled() or request.args.get("search_title_only")) else None
 
-	return render_template('index.html', domains=query, context=context, orig_count=orig_count, n_results=n_results, sort=sort, is_more = is_more)
+	if not context["search"]:
+		context["search"]=""
+	context["search"] = context["search"].strip()
+
+	if not context["rep"]:
+		context["rep"] = "n/a"
+
+	sort = request.args.get("sort")
+
+	search = context["search"]
+	if search != "":
+		if re.match('.*\.onion$', search):
+			return redirect(url_for("onion_info",onion=search), code=302)
+		elif re.match(email_util.REGEX_ALL, search):
+			return redirect(url_for("email_list",addr=search), code=302)
+		elif bitcoin.is_valid(search):
+			return redirect(url_for("bitcoin_list",addr=search), code=302)
+			
+	if context["search_title_only"] or search == "":
+		query = build_domain_query(context, sort)
+		orig_count = count(query)
+		n_results  = orig_count
+		if not context["more"]:
+			query = query.limit(1000)
+			if n_results > 1000:
+				n_results = 1000
+
+		is_more = (orig_count > 1000) and not context["more"]
+
+		return render_template('index_domains_only.html', domains=query, context=context, orig_count=orig_count, n_results=n_results, sort=sort, is_more = is_more)
 	
+	results = elasticsearch_pages(context, sort)
+	orig_count = results.hits.total
+	n_results  = orig_count
+	n_results  = 1000 if n_results > 1000 and not context["more"] else n_results
+	is_more = (orig_count > 1000) and not context["more"]
+	return render_template('index_fulltext.html', results=results, context=context, orig_count=orig_count, n_results=n_results, sort=sort, is_more = is_more)
+
+
 
 @app.route('/json')
 @db_session

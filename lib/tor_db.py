@@ -3,7 +3,9 @@ import re
 import os
 from pony.orm import *
 from datetime import *
+import dateutil.parser
 import pretty
+from tor_elasticsearch import *
 db = Database()
 db.bind('mysql', host=os.environ['DB_HOST'], user=os.environ['DB_USER'], passwd=os.environ['DB_PASS'], db=os.environ['DB_BASE'])
 NEVER = datetime.fromtimestamp(0)
@@ -84,6 +86,10 @@ class Domain(db.Entity):
         if self.host.count(".") > 1:
             self.is_subdomain = True
 
+        if is_elasticsearch_enabled():
+            dom = DomainDocType.from_obj(self)
+            dom.save()
+
 
     def before_update(self):
         if (self.title.find("Site Hosted by Freedom Hosting II") != -1 or
@@ -100,6 +106,10 @@ class Domain(db.Entity):
         if self.is_up:
             self.dead_in_a_row = 0
             self.next_scheduled_check = datetime.now() + timedelta(hours=1)
+
+        if is_elasticsearch_enabled():
+            dom = DomainDocType.from_obj(self)
+            dom.save()
 
 
   
@@ -144,6 +154,8 @@ class Domain(db.Entity):
 
     @classmethod
     def time_ago(klass, time):
+        if isinstance(time, basestring):
+            time = dateutil.parser.parse(time)
         if time==NEVER:
             return "Never"
         else:
@@ -171,6 +183,10 @@ class Domain(db.Entity):
             return "%s://%s:%d/" % (schema, self.host, self.port)
         else:
             return "%s://%s/" % (schema, self.host)
+
+    @db_session
+    def fingerprint(self):
+        return self.ssh_fingerprint.fingerprint if self.ssh_fingerprint else None
 
     @db_session
     def links_to(self):
@@ -261,15 +277,16 @@ class Domain(db.Entity):
             return False
             
 class Page(db.Entity):
-    url         = Required(str, unique=True)
-    title       = Optional(str)
-    code        = Required(int)
-    domain      = Required(Domain)
-    created_at  = Required(datetime)
-    visited_at  = Required(datetime)
-    links_to    = Set("Page", reverse="links_from", table="page_link", column="link_to");
-    links_from  = Set("Page", reverse="links_to",   table="page_link", column="link_from");
-    emails      = Set('Email', reverse="pages", column="email", table="email_link")
+    url          = Required(str, unique=True)
+    title        = Optional(str)
+    code         = Required(int)
+    is_frontpage = Required(bool, default=False)
+    domain       = Required(Domain)
+    created_at   = Required(datetime)
+    visited_at   = Required(datetime)
+    links_to     = Set("Page", reverse="links_from", table="page_link", column="link_to");
+    links_from   = Set("Page", reverse="links_to",   table="page_link", column="link_from");
+    emails       = Set('Email', reverse="pages", column="email", table="email_link")
     bitcoin_addresses = Set('BitcoinAddress', reverse="pages", column="bitcoin_address", table="bitcoin_address_link")
 
     @classmethod
@@ -283,9 +300,31 @@ class Page(db.Entity):
 
         return p
 
+    @classmethod
+    def is_frontpage_url(klass, url):
+        parsed_url = urlparse.urlparse(url)
+        path  = '/' if parsed_url.path=='' else parsed_url.path
+        if path == '/':
+            return True
+
+        return False
+
+
     def got_server_response(self):
         responded = [200, 401, 403, 500, 302, 304]
         return (self.code in responded)
+
+    @classmethod
+    def is_frontpage_request(klass, request):
+        if klass.is_frontpage_url(request.url):
+            return True
+        if request.meta.get('redirect_urls'):
+            for url in request.meta.get('redirect_urls'):
+                if klass.is_frontpage_url(url):
+                    return True
+
+        return False
+
 
     
 
