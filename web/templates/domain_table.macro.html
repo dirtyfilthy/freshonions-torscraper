@@ -84,7 +84,7 @@
 		</thead>
 		<tbody>
 {% for hit in results.hits %}
-{% set domain = (Domain.select(lambda d: d.host==hit.meta.routing).first()) %}
+{% set domain = Domain.find_by_url(hit.meta.id) %}
 			<tr class="{{domain.status()}}">
 			    <td class="info_link">
 			    	<a class="info_link" href="{{url_for('onion_info',onion=domain.host)}}">(i)</a>
@@ -100,7 +100,7 @@
 				    {% if domain.is_fake %}
 				    <span class="tag fake">[FAKE]</span>
 				    {% endif %}<br/>
-				    {{hit.meta.highlight.body[0]|safe}}
+				    {{hit.meta.highlight.body_stripped[0]|safe}}
 
 				</td>
 				<td class="created_at ago">

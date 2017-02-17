@@ -7,6 +7,7 @@ from elasticsearch import serializer, compat, exceptions
 from elasticsearch_dsl import Search
 from elasticsearch_dsl import Q
 from elasticsearch_dsl import Index
+import re
 try:
     import simplejson as json
 except ImportError:
@@ -44,7 +45,7 @@ def elasticsearch_pages(context, sort):
     limit = 20000 if context["more"] else 1000
 
     has_parent_query = Q("has_parent", type="domain", query=domain_query)
-    query = Search().query(has_parent_query & Q("match", body=context['search'])).highlight_options(order='score', encoder='html').highlight('body')[:limit]
+    query = Search().query(has_parent_query & Q("match", body_stripped=context['search'])).highlight_options(order='score', encoder='html').highlight('body_stripped')[:limit]
     return query.execute()
 
 
@@ -104,12 +105,13 @@ class PageDocType(DocType):
     )
 
     title = Text(analyzer="snowball")
-    created_at   = Date()
-    visited_at   = Date()
-    code         = Integer()
-    body         = Text(analyzer=html_strip)
-    is_frontpage = Boolean()
-    nid          = Integer()
+    created_at   =  Date()
+    visited_at    = Date()
+    code          = Integer()
+    body          = Text()
+    body_stripped = Text(analyzer=html_strip)
+    is_frontpage  = Boolean()
+    nid           = Integer()
 
     class Meta:
         name = 'page'
@@ -130,6 +132,7 @@ class PageDocType(DocType):
             is_frontpage=obj.is_frontpage,
             code=obj.code,
             body=body,
+            body_stripped=re.sub('<[^<]+?>', '', body),
             nid=obj.id
         )
 
