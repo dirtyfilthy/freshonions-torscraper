@@ -27,7 +27,7 @@
 				How often are the links checked?
 			</td>
 			<td class="answer">
-				Once an hour-ish.
+				Sites that are up get checked every 1-4 hours. Sites that are dead get checked (60+rand(180))*(1.5^dead_in_a_row) where "dead_in_a_row" is the number of times this site has been checked and been found dead in a row. If a site is found to be up this is reset to zero.
 				<br/><br/>
 			</td>
 			<td class="last_column"></td>
@@ -46,21 +46,10 @@
 		<tr>
 			<td class="heading_column"></td>
 			<td class="question">
-				What does "SHOW ALL" do?
+				What do the [F] and [G] tags mean?
 			</td>
 			<td class="answer">
-				Certain onion links (particularly the ones entitled "Site Hosted by Freedom Hosting II") never seem to have any content and were cluttering up the interface. "SHOW ALL" reveals them. They are still listed in the JSON output, because if you can parse JSON then you can filter them out yourself (if that's what you want).
-				<br/><br/>
-			</td>
-			<td class="last_column"></td>
-		</tr>
-		<tr>
-			<td class="heading_column"></td>
-			<td class="question">
-				What do the [FAKE] and [GENUINE] tags mean?
-			</td>
-			<td class="answer">
-				Sites listed in the <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">/r/darknetmarkets superlist</a> are tagged as genuine. Clones of these sites are tagged as fake. Note that clone detection is pretty primitive.
+				Sites listed in the <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">/r/darknetmarkets superlist</a> are tagged as [G]enuine. Clones of these sites are tagged as [F]ake. Note that clone detection is pretty primitive.
 				<br/><br/>
 			</td>
 			<td class="last_column"></td>

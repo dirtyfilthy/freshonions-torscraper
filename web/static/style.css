@@ -80,15 +80,15 @@ ul#menu li a {
     display: block;
     text-align: left;
 }
-a:link {
+a:link, .contents tr td.title a.title_link:link {
 	color: #CCCC00;
 }
 
-a:visited {
+a:visited, .contents tr td.title a.title_link:visited {
 	color: #AAAA00;
 }
 
-a:hover {
+a:hover, .contents tr td.title a.title_link:hover {
 	color: #FFFF00;
 }
 
@@ -239,6 +239,11 @@ td.domain {
 td.title {
 	word-wrap:break-word;
 	overflow-wrap: break-word;
+}
+
+td.title em {
+	font-weight: bold;
+	background-color: #666600;
 }
 
 td.ago {

@@ -40,8 +40,8 @@ def page_not_found(e):
 
 def build_domain_query(context, sort):
 	query = select(d for d in Domain)
-
-	if context["search"]!='':
+	search = context["search"]
+	if search !='':
 		query = query.filter("search in d.title")
 
 	if context["is_up"]:
@@ -87,7 +87,7 @@ def index():
 	context["search"] = request.args.get("search")
 	context["never_seen"] = request.args.get("never_seen")
 	context["more"] = request.args.get("more")
-	context["search_titles_only"] = "on" if (not is_elasticsearch_enabled() or request.args.get("search_titles_only")) else None
+	context["search_title_only"] = "on" if (not is_elasticsearch_enabled() or request.args.get("search_title_only")) else None
 
 	if not context["search"]:
 		context["search"]=""
@@ -107,7 +107,7 @@ def index():
 		elif bitcoin.is_valid(search):
 			return redirect(url_for("bitcoin_list",addr=search), code=302)
 			
-	if context["search_titles_only"] or search == "":
+	if context["search_title_only"] or search == "":
 		query = build_domain_query(context, sort)
 		orig_count = count(query)
 		n_results  = orig_count

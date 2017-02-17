@@ -93,12 +93,12 @@
 					<a href="{{domain.index_url()}}">{{domain.host}}</a>
 				</td>
 				<td class="title">
-					<a href="{{hit.meta.id}}">{{hit.title}}</a> 
+					<a href="{{hit.meta.id}}" class="title_link">{{hit.title}}</a> 
 				    {% if domain.is_genuine %}
-				    <span class="tag genuine">[GENUINE]</span>
+				    <span class="tag genuine">[G]</span>
 				    {% endif %}
 				    {% if domain.is_fake %}
-				    <span class="tag fake">[FAKE]</span>
+				    <span class="tag fake">[F]</span>
 				    {% endif %}<br/>
 				    {{hit.meta.highlight.body_stripped[0]|safe}}
 
