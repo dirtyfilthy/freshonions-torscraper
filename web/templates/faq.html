@@ -1,72 +1,104 @@
 {% extends "layout.html" %}
 {% block body %}
-	<table>
-		<thead>
-			<tr>
-				<th>FAQ</th>
-				<th>Question</th>
-				<th>Answer</th>
-				<th><a href="/">Back</a></th>
-			</tr>
-		</thead>
-		<tbody>
-		<tr>
-			<td class="heading_column"></td>
-			<td class="question">
-				What do the colours of the onion links mean?
-			</td>
-			<td class="answer">
-				Green means the site is live. Orange means we've been having some trouble connecting to it recently, but it may still be fine. Red means we haven't been able to connect to it for over four hours, and the link is likely to be dead.
-				<br/><br/>
-			</td>
-			<td class="last_column"></td>
-		</tr>
-		<tr>
-			<td class="heading_column"></td>
-			<td class="question">
-				How often are the links checked?
-			</td>
-			<td class="answer">
-				Sites that are up get checked every 1-4 hours. Sites that are dead get checked (60+rand(180))*(1.5^dead_in_a_row) where "dead_in_a_row" is the number of times this site has been checked and been found dead in a row. If a site is found to be up this is reset to zero.
-				<br/><br/>
-			</td>
-			<td class="last_column"></td>
-		</tr>
-		<tr>
-			<td class="heading_column"></td>
-			<td class="question">
-				Where do you get new onions from?
-			</td>
-			<td class="answer">
-				This site runs a tor web spider that is constantly crawling every link in the database 24/7. New links are added as they are discovered.
-				<br/><br/>
-			</td>
-			<td class="last_column"></td>
-		</tr>
-		<tr>
-			<td class="heading_column"></td>
-			<td class="question">
-				What do the [F] and [G] tags mean?
-			</td>
-			<td class="answer">
-				Sites listed in the <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">/r/darknetmarkets superlist</a> are tagged as [G]enuine. Clones of these sites are tagged as [F]ake. Note that clone detection is pretty primitive.
-				<br/><br/>
-			</td>
-			<td class="last_column"></td>
-		</tr>
-		<tr>
-			<td class="heading_column"></td>
-			<td class="question">
-				I think I've found a bug / I have a feature request
-			</td>
-			<td class="answer">
-				Sure thing! I run this site as a public service, so will try to help if I can. Hit me up on reddit, <a href="https://www.reddit.com/user/abruptdismissal/">abruptdismissal</a>.
-				<br/><br/>
-			</td>
-			<td class="last_column"></td>
-		</tr
+<div class="contents">
 
+<div class="FAQ">
+<div class="question">
+<h2>What do the colours of the onion links mean?</h2>
+</div>
+<div class="answer">
+<p>
+Green means the site is live. Orange means we've been having some trouble connecting to it recently, but it may still be fine. Red means we haven't been able to connect to it for over four hours, and the link is likely to be dead.
+</p>
+</div>
+</div>
 
-		</tbody>
-	</table>
+<div class="FAQ">
+<div class="question">
+<h2>How often are the links checked?</h2>
+</div>
+<div class="answer">
+<p>
+Sites that are up get checked every 1-4 hours. Sites that are dead get checked (60+rand(180))*(1.5^dead_in_a_row) where "dead_in_a_row" is the number of times this site has been checked and been found dead in a row. If a site is found to be up this is reset to zero.
+</p>
+</div>
+</div>
+
+<div class="FAQ">
+<div class="question">
+<h2>Where do you get new onions from?</h2>
+</div>
+<div class="answer">
+<p>
+This site runs a tor web spider that is constantly crawling every link in the database 24/7. New links are added as they are discovered. I also scrape a number of clearnet sites such as:
+</p>
+<p>
+<ul>
+<li><a href="https://eqt5g4fuenphqinx.tor2web.org/antanistaticmap/stats/yesterday"</a>https://eqt5g4fuenphqinx.tor2web.org/antanistaticmap/stats/yesterday</a></li>
+<li><a href="https://onion.cab/list.php?a=list">https://onion.cab/list.php?a=list</a></li>
+<li><a href="https://www.reddit.com/r/onions/search?q=url%3A.onion&sort=new&restrict_sr=on">https://www.reddit.com/r/onions/search?q=url%3A.onion&amp;sort=new&amp;restrict_sr=on</a></li>
+<li><a href="https://ahmia.fi/address/">https://ahmia.fi/address/</a></li>
+<li><a href="https://www.deepdotweb.com/2013/10/28/updated-llist-of-hidden-marketplaces-tor-i2p">https://www.deepdotweb.com/2013/10/28/updated-llist-of-hidden-marketplaces-tor-i2p</a></li>
+<li><a href="https://darkwebnews.com/deep-web-links/">https://darkwebnews.com/deep-web-links/</a></li>
+<li><a href="https://raw.githubusercontent.com/alecmuffett/onion-sites-that-dont-suck/master/README.md">https://raw.githubusercontent.com/alecmuffett/onion-sites-that-dont-suck/master/README.md</a></li>
+<li><a href="https://en.wikipedia.org/wiki/List_of_Tor_hidden_services">https://en.wikipedia.org/wiki/List_of_Tor_hidden_services</a></li>
+<li><a href="https://www.reddit.com/r/HiddenService/">https://www.reddit.com/r/HiddenService/</a></li>
+</ul>
+</p>
+<p>I also have a pastebin scraper running 24/7 harvesting any .onion links</p>
+</div>
+</div>
+
+<div class="FAQ">
+<div class="question">
+<h2>What do the [F] and [G] tags mean?</h2>
+</div>
+<div class="answer">
+<p>
+Sites listed in the /r/darknetmarkets <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">superlist</a> are tagged as [G]enuine. Clones of these sites are tagged as [F]ake. Note that clone detection is pretty primitive.
+</p>
+</div>
+</div>
+
+<div class="FAQ">
+<div class="question">
+<h2>I searched for X, but it didn't show up, what gives?</h2>
+</div>
+<div class="answer">
+<p>
+Certain content relating to child pornography has been removed from this search engine. While I am very much anti-CP, I also doubt that removing links will actually stop any pedos in reality. That being said, while this is a hidden service, it is not being run as an illegal one, and my RL identiy is not very hard to find. Under Australian law, providing links to CP could be considered as "facilitating" its viewing and distribution. I'd rather not take that risk.
+</p>
+<p>
+Access to the full database is available to LE  and legitimate researchers (see below)
+</p>
+</div>
+</div>
+
+<div class="FAQ">
+<div class="question">
+<h2>I'm LE / a legitimate researcher and would like a copy of your database</h2>
+</div>
+<div class="answer">
+<p>
+If you're LE and after child pornographers, then sure. If you're LE and are trying to shut down a drug market, then I am very much anti-drug prohibition, so come back with a warrant.
+</p>
+<p>
+I'm also more than happy to share any data I have with legitimate researchers. By "legitimate researchers" I mean you will either be an academic, have presented at a infosec security conference, or be employed by a infosec company
+</p>
+<p>
+Contact me at <a href="mailto://dirtyfilthee@gmail.com">dirtyfilthee@gmail.com</a> to request access.
+</p>
+</div>
+</div>
+
+<div class="FAQ">
+<div class="question">
+<h2>I think I've found a bug / I have a feature request / I have a question</h2>
+</div>
+<div class="answer">
+Sure thing! I run this site as a public service, and am reasonibly friendly, so will try to help if I can. Hit me up on reddit, <a href="https://www.reddit.com/user/abruptdismissal/">abruptdismissal</a>.
+</div>
+</div>
+
+</div>
 {% endblock %}
