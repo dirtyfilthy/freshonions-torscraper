@@ -1,6 +1,29 @@
-{% macro sort_url(title, sort, context) %}
-<a href="{{ url_for('index', more=context['more'], search=context['search'], is_up=context['is_up'], never_seen=context['never_seen'], show_subdomains=context['show_subdomains'], rep=context['rep'], show_fh_default=context['show_fh_default'], search_title_only=context['search_title_only'], sort=sort) }}">{{title}}</a>
+{% from 'ruler.macro.html' import ruler %}
+{% macro sort_url(title, sort, context, page) %}
+<a href="{{ url_for('index', more=context['more'], search=context['search'], is_up=context['is_up'], never_seen=context['never_seen'], show_subdomains=context['show_subdomains'], rep=context['rep'], show_fh_default=context['show_fh_default'], search_title_only=context['search_title_only'], sort=sort, page=page) }}">{{title}}</a>
 {% endmacro %}
+
+{% macro paginate(context, num_results, per_page, current_page) %}
+{% if num_results > per_page %}
+<div class="pagination">
+<p>
+¯`·.¸¸.·´¯`·
+{% set last = int((((num_results-1)/per_page)+1)+1) %}
+{% for page in range(1,last) %}
+{% if page == current_page %}
+<em>{{ page }}</em>
+{% else %}
+{{ sort_url(page, context['sort'], context, page) }}
+{% endif %}
+{% endfor %}
+ ><(((º>
+</p>
+</div>
+{% else %}
+{{ ruler() }}
+{% endif %}
+{% endmacro %}
+
 
 {% macro domain_table(domains, sortable=False, context=None) %}
 	<table>
@@ -17,11 +40,11 @@
 		{% else %}
 		<tr>
 			    <th></th>
-				<th>{{sort_url("Onion", "onion", context) }}</th>
-				<th>{{sort_url("Title", "title", context) }}</th>
-				<th>{{sort_url("Added", "created_at", context) }}</th>
-				<th>{{sort_url("Visited At", "visited_at", context) }}</th>
-				<th>{{sort_url("Last Up", "last_seen", context) }}</th>
+				<th>{{sort_url("Onion", "onion", context, 1) }}</th>
+				<th>{{sort_url("Title", "title", context, 1) }}</th>
+				<th>{{sort_url("Added", "created_at", context, 1) }}</th>
+				<th>{{sort_url("Visited At", "visited_at", context, 1) }}</th>
+				<th>{{sort_url("Last Up", "last_seen", context, 1) }}</th>
 			</tr>
 		{% endif %}
 		</thead>

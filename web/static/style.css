@@ -23,8 +23,16 @@ h1 {
 
 .contents {
 	clear: both;
-	margin-top:1cm;
+	margin-top:0.25cm;
 	width:100%;
+}
+
+.ruler {
+	margin-top:0px;
+	padding-top: 0.25cm;
+	clear: both;
+	padding-bottom: 0.25cm;
+	margin-bottom:0px;
 }
 
 input {
@@ -103,13 +111,23 @@ div#stats {
     margin: 0px;
 }
 
+
 .tag{
 	font-weight:bold;
 	letter-spacing: 0.2em;
 }
 
-.genuine {
+.genuine, #logo pre, .pagination em {
 	color:#00CC00;
+}
+
+#logo pre {
+	font-size: 1.0em;
+}
+
+.pagination em {
+	font-weight: bold;
+	font-style: normal;
 }
 
 .fake {

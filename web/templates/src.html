@@ -1,14 +1,10 @@
 {% extends "layout.html" %}
+{% from 'ruler.macro.html' import ruler %}
 {% block body %}
-	<table>
-		<thead>
-			<tr>
-				<th>SRC</th>
-			</tr>
-		</thead>
-	</table>
-	<div class="article">
-	<h2>[LICENSE]</h2>
+
+{{ ruler() }}
+<div class="contents">
+	<h2>License</h2>
 	<p>This software is made available under the <a href="https://www.gnu.org/licenses/agpl-3.0.en.html">GNU Affero GPL 3 License.</a>. What this means is that is you deploy this software as part of networked software that is available to the public, you must make the source code available (and any modifications).
 	</p>
 	<p> From the GNU site:
@@ -16,14 +12,14 @@
 	The GNU Affero General Public License is a modified version of the ordinary GNU GPL version 3. It has one added requirement: if you run a modified program on a server and let other users communicate with it there, your server must also allow them to download the source code corresponding to the modified version running there.
 	</blockquote>
 	</p>
-	<h2>[DOWNLOAD]</h2>
+	<h2>Download</h2>
 	<p>
 	The source code for this site, and the associated onion crawler, can be downloaded from here: <a href="{{source_link}}">{{source_name}}</a>. The source code is also available on github at <a href="https://github.com/dirtyfilthy/freshonions-torscraper">https://github.com/dirtyfilthy/freshonions-torscraper</a>
 	</p>
 	<p>
 	Please note that this source code is made available "as-is where-is", as they used to say in my local buy/sell/trade broadsheet. It has not been created with the intention of being easy to install for another person, and is mainly provided as a reference and in the hope that some components, such as the onion crawler, may be useful for your project. Python is not my native language, so be warned, you may see some very ugly constructions.
 	</p>
-	<h2>[INFRASTRUCTURE]</h2>
+	<h2>Infrastructure</h2>
 	<p>
 	Fresh Onions runs on two servers, a frontend host running the database and hidden service web site, and a backend host running the crawler. Probably most interesting to the reader is the setup for the backend. TOR as a client is COMPLETELY SINGLETHREADED. I know! It's 2017, and along with a complete lack of flying cars, TOR runs in a single thread. What this means is that if you try to run a crawler on a single TOR instance you will quickly find you are maxing out your CPU at 100%. 
 	</p>
@@ -36,7 +32,5 @@
 	<p>
 	Additionally, this resource <a href="https://www.howtoforge.com/ultimate-security-proxy-with-tor"</a>https://www.howtoforge.com/ultimate-security-proxy-with-tor</a> might be useful in setting up squid. If all you are doing is crawling and don't care about anonymity, I also recommend running TOR in tor2web mode (required recompilation) for increased speed.
 	</p>
-	<a href="/">Back</a>
-	</div>
-
+</div>
 {% endblock %}

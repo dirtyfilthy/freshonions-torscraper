@@ -28,9 +28,11 @@ class JSONSerializerPython2(serializer.JSONSerializer):
         except (ValueError, TypeError) as e:
             raise exceptions.SerializationError(data, e)
 
-def elasticsearch_pages(context, sort):
+def elasticsearch_pages(context, sort, page):
     result_limit = int(os.environ['RESULT_LIMIT'])
     max_result_limit = int(os.environ['MAX_RESULT_LIMIT'])
+    start = (page - 1) * result_limit
+    end   = start + result_limit
     domain_query = Q("term", is_banned=False)
     if context["is_up"]:
         domain_query = domain_query & Q("term", is_up=True)
@@ -47,7 +49,7 @@ def elasticsearch_pages(context, sort):
 
     has_parent_query = Q("has_parent", type="domain", query=domain_query)
     query = Search().filter(has_parent_query).query(Q("match", body_stripped=context['search']))
-    query = query.highlight_options(order='score', encoder='html').highlight('body_stripped')[:limit]
+    query = query.highlight_options(order='score', encoder='html').highlight('body_stripped')[start:end]
     query = query.source(['title','domain_id','created_at', 'visited_at']).params(request_cache=True)
     return query.execute()
 

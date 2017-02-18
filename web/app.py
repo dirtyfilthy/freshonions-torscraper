@@ -21,6 +21,7 @@ app.jinja_env.globals.update(Domain=Domain)
 app.jinja_env.globals.update(NEVER=NEVER)
 app.jinja_env.globals.update(len=len)
 app.jinja_env.globals.update(select=select)
+app.jinja_env.globals.update(int=int)
 app.jinja_env.globals.update(break_long_words=tor_text.break_long_words)
 
 @app.context_processor
@@ -93,7 +94,11 @@ def index():
 	context["search"] = request.args.get("search")
 	context["never_seen"] = request.args.get("never_seen")
 	context["more"] = request.args.get("more")
+
 	context["search_title_only"] = "on" if (not is_elasticsearch_enabled() or request.args.get("search_title_only")) else None
+	page = int(request.args.get("page", 1))
+	if page < 1:
+		page = 1
 
 	if not context["search"]:
 		context["search"]=""
@@ -104,6 +109,7 @@ def index():
 		context["rep"] = "n/a"
 
 	sort = request.args.get("sort")
+	context["sort"] = sort
 
 	search = context["search"]
 	if search != "":
@@ -117,21 +123,16 @@ def index():
 	if context["search_title_only"] or search == "":
 		query = build_domain_query(context, sort)
 		orig_count = count(query)
-		n_results  = orig_count
-		if not context["more"]:
-			query = query.limit(result_limit)
-			if n_results > result_limit:
-				n_results = result_limit
+		n_results  = result_limit if orig_count > result_limit else orig_count
+		query = query.page(page, result_limit)
+		is_more = (orig_count > result_limit)
 
-		is_more = (orig_count > result_limit) and not context["more"]
-
-		return render_template('index_domains_only.html', domains=query, context=context, orig_count=orig_count, n_results=n_results, sort=sort, is_more = is_more)
+		return render_template('index_domains_only.html', domains=query, context=context, orig_count=orig_count, n_results=n_results, per_page=result_limit, page=page, sort=sort, is_more = is_more)
 	
-	results = elasticsearch_pages(context, sort)
+	results = elasticsearch_pages(context, sort, page)
 	orig_count = results.hits.total
-	n_results  = orig_count
-	n_results  = result_limit if n_results > result_limit and not context["more"] else n_results
-	is_more = (orig_count > result_limit) and not context["more"]
+	n_results  = result_limit if orig_count > result_limit else orig_count
+	is_more = (orig_count > result_limit)
 
 	domain_set_dict = dict()
 	for hit in results.hits:
@@ -139,7 +140,7 @@ def index():
 	domain_set = domain_set_dict.keys()
 	domain_precache = select(d for d in Domain if d.id in domain_set)
 
-	return render_template('index_fulltext.html', results=results, context=context, orig_count=orig_count, n_results=n_results, sort=sort, is_more = is_more)
+	return render_template('index_fulltext.html', results=results, context=context, orig_count=orig_count, n_results=n_results, page=page, per_page=result_limit, sort=sort, is_more = is_more)
 
 
 

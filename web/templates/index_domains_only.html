@@ -1,11 +1,17 @@
 {% extends "layout.html" %}
 {% from 'domain_table.macro.html' import domain_table %}
+{% from 'domain_table.macro.html' import paginate %}
 {% from 'search_panel.macro.html' import search_panel %}
 
 {% block body %}
 <div class="contents">
 {{ search_panel(context, n_results, orig_count, is_more, elasticsearch_enabled) }}
+
+{{ paginate(context, orig_count, n_results, page) }}
+
 {{ domain_table(domains, sortable=True, context=context) }}
+
+{{ paginate(context, orig_count, n_results, page) }}
 
 </div>
 {% endblock %}

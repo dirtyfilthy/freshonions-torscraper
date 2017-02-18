@@ -16,10 +16,7 @@
 {% endif %}
 <br/>
 <span class="small">
-search for title, email, bitcoin addr or enter ".onion" domain for onion info. showing {{n_results}} results of {{orig_count}}.
-{% if is_more %}
-<a href="{{ url_for('index', more='yes', search=context['search'], is_up=context['is_up'], never_seen=context['never_seen'], show_subdomains=context['show_subdomains'], rep=context['rep'], show_fh_default=context['show_fh_default'], search_title_only=context['search_title_only'], sort=sort) }}">[MORE]</a>
-{% endif %}
+search for title, email, bitcoin addr or enter ".onion" domain for onion info. showing {{n_results}} results of {{orig_count}}
 </span>
 </p>
 </form>
