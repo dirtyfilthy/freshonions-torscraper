@@ -15,6 +15,7 @@ export DB_BASE
 . $ETCDIR/elasticsearch
 export ELASTICSEARCH_ENABLED
 export ELASTICSEARCH_HOST
+export ELASTICSEARCH_TIMEOUT
 
 . $ETCDIR/limits
 export RESULT_LIMIT

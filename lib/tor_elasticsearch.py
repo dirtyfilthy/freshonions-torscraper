@@ -105,7 +105,7 @@ class DomainDocType(DocType):
 class PageDocType(DocType):
     html_strip = analyzer('html_strip', 
         tokenizer="standard",
-        filter=["standard", "lowercase", "stop", "snowball"],
+        filter=["standard", "lowercase", "stop", "snowball", "asciifolding"],
         char_filter=["html_strip"]
     )
 
@@ -115,7 +115,7 @@ class PageDocType(DocType):
     code          = Integer()
     body          = Text()
     domain_id     = Integer()
-    body_stripped = Text(analyzer=html_strip)
+    body_stripped = Text(analyzer=html_strip, term_vector="with_positions_offsets")
     is_frontpage  = Boolean()
     nid           = Integer()
 

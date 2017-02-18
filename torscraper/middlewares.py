@@ -26,6 +26,7 @@ class FilterTooManySubdomainsMiddleware(object):
 
     @db_session
     def process_request(self, request, spider):
+
         if not Domain.is_onion_url(request.url):
             return None
         parsed_url = urlparse.urlparse(request.url)
@@ -39,28 +40,32 @@ class FilterTooManySubdomainsMiddleware(object):
        
 
 class FilterDeadDomainMiddleware(object):
-    def __init__(self, dead_timeout):
+    def __init__(self):
         logger = logging.getLogger()
-        self.dead_timeout = dead_timeout
         self.counter = defaultdict(int)
 
     @classmethod
     def from_crawler(cls, crawler):
         settings = crawler.settings
         spider_name = crawler.spider.name
-        dead_timeout = settings.get('DOMAIN_IS_DEAD_TIMEOUT_MINUTES')
-        o = cls(dead_timeout)
+        o = cls()
         return o
 
 
     @db_session
     def process_request(self, request, spider):
+
+          # don't use this middleware while testing is site is up
+        if hasattr(spider, "test") and spider.test=="yes":
+            #logger = logging.getLogger()
+            #logger.info("Testing mode, dead domains disabled")
+            return None
+
         if not Domain.is_onion_url(request.url):
             return None
 
         domain = Domain.find_by_url(request.url)
-        event_horizon = datetime.now() - timedelta(minutes=self.dead_timeout)
-        if not domain or (domain.visited_at < event_horizon) or domain.is_up:
+        if not domain or domain.is_up:
             return None
 
         raise IgnoreRequest('Domain %s is dead, skipping' % domain.host)

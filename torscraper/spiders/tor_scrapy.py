@@ -104,7 +104,6 @@ class TorSpider(scrapy.Spider):
         'MAX_PAGES_PER_DOMAIN' : 1000,
         'HTTPERROR_ALLOWED_CODES': handle_httpstatus_list,
         'RETRY_HTTP_CODES': [],
-        'DOMAIN_IS_DEAD_TIMEOUT_MINUTES' : 5,
         'DOWNLOADER_MIDDLEWARES' : {
             'torscraper.middlewares.FilterDomainByPageLimitMiddleware' : 551,
             'torscraper.middlewares.FilterTooManySubdomainsMiddleware' : 550,
