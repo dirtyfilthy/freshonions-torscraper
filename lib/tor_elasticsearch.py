@@ -31,17 +31,17 @@ class JSONSerializerPython2(serializer.JSONSerializer):
 def elasticsearch_pages(context, sort):
     result_limit = int(os.environ['RESULT_LIMIT'])
     max_result_limit = int(os.environ['MAX_RESULT_LIMIT'])
-    domain_query = Q("match", is_banned=False)
+    domain_query = Q("term", is_banned=False)
     if context["is_up"]:
-        domain_query = domain_query & Q("match", is_up=True)
+        domain_query = domain_query & Q("term", is_up=True)
     if not context["show_fh_default"]:
-        domain_query = domain_query & Q("match", is_crap=False)
+        domain_query = domain_query & Q("term", is_crap=False)
     if not context["show_subdomains"]:
-        domain_query = domain_query & Q("match", is_subdomain=False)
+        domain_query = domain_query & Q("term", is_subdomain=False)
     if context["rep"] == "genuine":
-        domain_query = domain_query & Q("match", is_genuine=True)
+        domain_query = domain_query & Q("term", is_genuine=True)
     if context["rep"] == "fake":
-        domain_query = domain_query & Q("match", is_fake=True)
+        domain_query = domain_query & Q("term", is_fake=True)
 
     limit = max_result_limit if context["more"] else result_limit
 
