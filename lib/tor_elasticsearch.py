@@ -29,8 +29,7 @@ class JSONSerializerPython2(serializer.JSONSerializer):
             raise exceptions.SerializationError(data, e)
 
 def elasticsearch_pages(context, sort):
-    NEVER = datetime.fromtimestamp(0)
-    domain_query = Q("range",created_at={'gt':NEVER})
+    domain_query = Q("match", is_banned=False)
     if context["is_up"]:
         domain_query = domain_query & Q("match", is_up=True)
     if not context["show_fh_default"]:
@@ -61,6 +60,7 @@ class DomainDocType(DocType):
     is_fake    = Boolean()
     is_genuine = Boolean()
     is_crap    = Boolean()
+    is_banned  = Boolean()
     url        = Text()
     is_subdomain = Boolean()
     ssl        = Boolean()
@@ -85,6 +85,7 @@ class DomainDocType(DocType):
             is_fake=obj.is_fake,
             is_genuine=obj.is_fake,
             is_crap=obj.is_crap,
+            is_banned=obj.is_banned,
             url=obj.index_url(),
             is_subdomain=obj.is_subdomain,
             ssl=obj.ssl,
@@ -112,6 +113,7 @@ class PageDocType(DocType):
     body_stripped = Text(analyzer=html_strip)
     is_frontpage  = Boolean()
     nid           = Integer()
+
 
     class Meta:
         name = 'page'
@@ -150,5 +152,6 @@ def migrate():
     hidden_services = Index('hiddenservices')
     hidden_services.doc_type(DomainDocType)
     hidden_services.doc_type(PageDocType)
+    hidden_services.settings(number_of_shards=8, number_of_replicas=1)
     hidden_services.create()
 

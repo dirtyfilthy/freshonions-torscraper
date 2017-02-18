@@ -14,6 +14,7 @@ import re
 import os
 import bitcoin
 import email_util
+import banned
 app = Flask(__name__)
 app.jinja_env.globals.update(Domain=Domain)
 app.jinja_env.globals.update(NEVER=NEVER)
@@ -41,6 +42,7 @@ def page_not_found(e):
 def build_domain_query(context, sort):
 	query = select(d for d in Domain)
 	search = context["search"]
+	query = query.filter("d.is_banned = 0")
 	if search !='':
 		query = query.filter("search in d.title")
 
@@ -92,6 +94,7 @@ def index():
 	if not context["search"]:
 		context["search"]=""
 	context["search"] = context["search"].strip()
+	context["search"] = banned.deleted_banned(context["search"])
 
 	if not context["rep"]:
 		context["rep"] = "n/a"

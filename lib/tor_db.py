@@ -5,6 +5,7 @@ from pony.orm import *
 from datetime import *
 import dateutil.parser
 import pretty
+import banned
 from tor_elasticsearch import *
 db = Database()
 db.bind('mysql', host=os.environ['DB_HOST'], user=os.environ['DB_USER'], passwd=os.environ['DB_PASS'], db=os.environ['DB_BASE'])
@@ -50,6 +51,7 @@ class Domain(db.Entity):
     is_fake      = Required(bool, default=False)
     is_genuine   = Required(bool, default=False)
     is_subdomain = Required(bool, default=False)
+    is_banned    = Required(bool, default=False)
     created_at   = Required(datetime)
     visited_at   = Required(datetime)
     last_alive   = Required(datetime)
@@ -86,9 +88,14 @@ class Domain(db.Entity):
         if self.host.count(".") > 1:
             self.is_subdomain = True
 
+        if banned.contains_banned(self.title):
+            self.is_banned = True
+
         if is_elasticsearch_enabled():
             dom = DomainDocType.from_obj(self)
             dom.save()
+
+        
 
 
     def before_update(self):
@@ -107,9 +114,14 @@ class Domain(db.Entity):
             self.dead_in_a_row = 0
             self.next_scheduled_check = datetime.now() + timedelta(hours=1)
 
+        if banned.contains_banned(self.title):
+            self.is_banned = True
+
         if is_elasticsearch_enabled():
             dom = DomainDocType.from_obj(self)
             dom.save()
+
+
 
 
   
