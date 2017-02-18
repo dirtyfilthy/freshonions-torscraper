@@ -48,7 +48,7 @@ def elasticsearch_pages(context, sort):
     has_parent_query = Q("has_parent", type="domain", query=domain_query)
     query = Search().filter(has_parent_query).query(Q("match", body_stripped=context['search']))
     query = query.highlight_options(order='score', encoder='html').highlight('body_stripped')[:limit]
-    query = query.source(['title','domain_id','created_at', 'visited_at'])
+    query = query.source(['title','domain_id','created_at', 'visited_at']).params(request_cache=True)
     return query.execute()
 
 
@@ -147,7 +147,7 @@ class PageDocType(DocType):
 hidden_services = None
 
 if is_elasticsearch_enabled():
-    connections.create_connection(hosts=[os.environ['ELASTICSEARCH_HOST']], serializer=JSONSerializerPython2(), timeout=30)
+    connections.create_connection(hosts=[os.environ['ELASTICSEARCH_HOST']], serializer=JSONSerializerPython2(), timeout=int(os.environ['ELASTICSEARCH_TIMEOUT']))
     hidden_services = Index('hiddenservices')
     hidden_services.doc_type(DomainDocType)
     hidden_services.doc_type(PageDocType)
