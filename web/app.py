@@ -79,6 +79,8 @@ def build_domain_query(context, sort):
 @app.route("/")
 @db_session
 def index():
+	result_limit = int(os.environ['RESULT_LIMIT'])
+	max_result_limit = int(os.environ['MAX_RESULT_LIMIT'])
 	now = datetime.now()
 
 	context = dict()
@@ -115,19 +117,19 @@ def index():
 		orig_count = count(query)
 		n_results  = orig_count
 		if not context["more"]:
-			query = query.limit(1000)
-			if n_results > 1000:
-				n_results = 1000
+			query = query.limit(result_limit)
+			if n_results > result_limit:
+				n_results = result_limit
 
-		is_more = (orig_count > 1000) and not context["more"]
+		is_more = (orig_count > result_limit) and not context["more"]
 
 		return render_template('index_domains_only.html', domains=query, context=context, orig_count=orig_count, n_results=n_results, sort=sort, is_more = is_more)
 	
 	results = elasticsearch_pages(context, sort)
 	orig_count = results.hits.total
 	n_results  = orig_count
-	n_results  = 1000 if n_results > 1000 and not context["more"] else n_results
-	is_more = (orig_count > 1000) and not context["more"]
+	n_results  = result_limit if n_results > result_limit and not context["more"] else n_results
+	is_more = (orig_count > result_limit) and not context["more"]
 
 	domain_set_dict = dict()
 	for hit in results.hits:

@@ -29,6 +29,8 @@ class JSONSerializerPython2(serializer.JSONSerializer):
             raise exceptions.SerializationError(data, e)
 
 def elasticsearch_pages(context, sort):
+    result_limit = int(os.environ['RESULT_LIMIT'])
+    max_result_limit = int(os.environ['MAX_RESULT_LIMIT'])
     domain_query = Q("match", is_banned=False)
     if context["is_up"]:
         domain_query = domain_query & Q("match", is_up=True)
@@ -41,7 +43,7 @@ def elasticsearch_pages(context, sort):
     if context["rep"] == "fake":
         domain_query = domain_query & Q("match", is_fake=True)
 
-    limit = 20000 if context["more"] else 1000
+    limit = max_result_limit if context["more"] else result_limit
 
     has_parent_query = Q("has_parent", type="domain", query=domain_query)
     query = Search().query(has_parent_query & Q("match", body_stripped=context['search'])).highlight_options(order='score', encoder='html').highlight('body_stripped')[:limit]
