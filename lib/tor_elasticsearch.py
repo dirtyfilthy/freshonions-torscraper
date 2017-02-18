@@ -110,6 +110,7 @@ class PageDocType(DocType):
     visited_at    = Date()
     code          = Integer()
     body          = Text()
+    domain_id     = Integer()
     body_stripped = Text(analyzer=html_strip)
     is_frontpage  = Boolean()
     nid           = Integer()
@@ -133,6 +134,7 @@ class PageDocType(DocType):
             visited_at=obj.visited_at,
             is_frontpage=obj.is_frontpage,
             code=obj.code,
+            domain_id=obj.domain.id,
             body=body,
             body_stripped=re.sub('<[^<]+?>', '', body),
             nid=obj.id

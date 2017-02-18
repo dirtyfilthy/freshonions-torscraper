@@ -128,6 +128,13 @@ def index():
 	n_results  = orig_count
 	n_results  = 1000 if n_results > 1000 and not context["more"] else n_results
 	is_more = (orig_count > 1000) and not context["more"]
+
+	domain_set_dict = dict()
+	for hit in results.hits:
+		domain_set_dict[hit.domain_id] = True
+	domain_set = domain_set_dict.keys()
+	domain_precache = select(d for d in Domain if d.id in domain_set)
+
 	return render_template('index_fulltext.html', results=results, context=context, orig_count=orig_count, n_results=n_results, sort=sort, is_more = is_more)
 
 

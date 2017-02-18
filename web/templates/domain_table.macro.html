@@ -84,7 +84,7 @@
 		</thead>
 		<tbody>
 {% for hit in results.hits %}
-{% set domain = Domain.find_by_url(hit.meta.id) %}
+{% set domain = Domain.get(id=hit.domain_id) %}
 			<tr class="{{domain.status()}}">
 			    <td class="info_link">
 			    	<a class="info_link" href="{{url_for('onion_info',onion=domain.host)}}">(i)</a>
