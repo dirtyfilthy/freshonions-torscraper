@@ -2,8 +2,7 @@
 {% macro search_panel(context, n_results, orig_count, is_more, elasticsearch_enabled) %}
 <div id="search">
 <form method="GET">
-<p>
-{{input.checkbox("more", context["more"], "more")}} 
+<p> 
 {{input.checkbox("never_seen", context["never_seen"], "inc. never seen")}}
 {{input.checkbox("is_up", context["is_up"], "alive only")}}
 ({{input.radio("rep", ["n/a","genuine", "fake"], context["rep"])}})
