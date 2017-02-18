@@ -15,11 +15,13 @@ import os
 import bitcoin
 import email_util
 import banned
+import tor_text
 app = Flask(__name__)
 app.jinja_env.globals.update(Domain=Domain)
 app.jinja_env.globals.update(NEVER=NEVER)
 app.jinja_env.globals.update(len=len)
 app.jinja_env.globals.update(select=select)
+app.jinja_env.globals.update(break_long_words=tor_text.break_long_words)
 
 @app.context_processor
 def inject_elasticsearch():

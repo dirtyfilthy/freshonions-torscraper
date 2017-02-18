@@ -7,6 +7,10 @@ body {
 table {
 	width:100%;
 	border-collapse:collapse;
+	word-wrap:break-all;
+	overflow-wrap: break-all;
+	display: inline-block;
+	white-space:normal;
 }
 
 tbody tr:nth-child(even) {background: #202020}
@@ -20,6 +24,7 @@ h1 {
 .contents {
 	clear: both;
 	margin-top:1cm;
+	width:100%;
 }
 
 input {
@@ -237,8 +242,10 @@ td.domain {
 }
 
 td.title {
-	word-wrap:break-word;
-	overflow-wrap: break-word;
+	word-wrap:break-all;
+	overflow-wrap: break-all;
+	display: inline-block;
+	white-space:normal;
 }
 
 td.title em {

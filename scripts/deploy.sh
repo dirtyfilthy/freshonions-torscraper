@@ -22,21 +22,27 @@ echo $VERSION_STRING > $ETCDIR/version_string
 
 
 echo "Deploying $VERSION_STRING:"
+echo "Removing old source files.."
+(
+	cd $BASEDIR/web/static
+	rm torscraper*.tar.gz
+)
+
 echo "Creating source file..."
 # make src file
 
 DIST_TAR="$BASEDIR/web/static/torscraper-$VERSION_STRING.tar.gz"
 (
 	cd $BASEDIR/..
-	tar czvf $DIST_TAR --exclude='*.tar.gz' --exclude=./$TOP_DIR/.git ./$TOP_DIR
+	tar czvf $DIST_TAR --exclude='*.tar.gz' --exclude=private --exclude=etc/private --exclude=./$TOP_DIR/.git ./$TOP_DIR
 )
 
 # rsync upstream
 echo "rsyncing to upstream hosts..."
 (
 	cd $BASEDIR/..
-	rsync -a -i --exclude=.git $TOP_DIR/ $BACKEND_USER@$BACKEND_HOST:$TOP_DIR
-	rsync -a -i --exclude=.git $TOP_DIR/ $FRONTEND_USER@$FRONTEND_HOST:$TOP_DIR
+	rsync -a -i --exclude=.git --delete-after $TOP_DIR/ $BACKEND_USER@$BACKEND_HOST:$TOP_DIR
+	rsync -a -i --exclude=.git --delete-after $TOP_DIR/ $FRONTEND_USER@$FRONTEND_HOST:$TOP_DIR
 )
 # kick the service
 echo "Restarting $SERVICE_NAME frontend service..."

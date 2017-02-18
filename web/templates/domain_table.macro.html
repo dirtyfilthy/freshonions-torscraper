@@ -100,7 +100,7 @@
 				    {% if domain.is_fake %}
 				    <span class="tag fake">[F]</span>
 				    {% endif %}<br/>
-				    {{hit.meta.highlight.body_stripped[0]|safe}}
+				    {{break_long_words(hit.meta.highlight.body_stripped[0])|safe}}
 
 				</td>
 				<td class="created_at ago">
