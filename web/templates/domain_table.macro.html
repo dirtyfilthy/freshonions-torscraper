@@ -93,7 +93,7 @@
 					<a href="{{domain.index_url()}}">{{domain.host}}</a>
 				</td>
 				<td class="title">
-					<a href="{{hit.meta.id}}" class="title_link">{{hit.title}}</a> 
+					<a href="{{hit.meta.id}}" class="title_link">{{hit.title if hit.title.strip()!="" else "No Title"}}</a> 
 				    {% if domain.is_genuine %}
 				    <span class="tag genuine">[G]</span>
 				    {% endif %}
