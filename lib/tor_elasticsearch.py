@@ -46,7 +46,9 @@ def elasticsearch_pages(context, sort):
     limit = max_result_limit if context["more"] else result_limit
 
     has_parent_query = Q("has_parent", type="domain", query=domain_query)
-    query = Search().query(has_parent_query & Q("match", body_stripped=context['search'])).highlight_options(order='score', encoder='html').highlight('body_stripped')[:limit]
+    query = Search().filter(has_parent_query).query(Q("match", body_stripped=context['search']))
+    query = query.highlight_options(order='score', encoder='html').highlight('body_stripped')[:limit]
+    query = query.source(['title','domain_id','created_at', 'visited_at'])
     return query.execute()
 
 
