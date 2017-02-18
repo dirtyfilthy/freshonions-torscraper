@@ -30,8 +30,8 @@ def inject_elasticsearch():
 @db_session
 def inject_counts():
 	event_horizon = datetime.now() - timedelta(days=1)
-	domain_count = count(d for d in Domain if d.is_up == True and d.is_crap == False and d.is_subdomain == False)
-	day_count    = count(d for d in Domain if d.is_up == True and d.is_crap == False and d.is_subdomain == False and d.created_at > event_horizon)
+	domain_count = count(d for d in Domain if d.is_up == True and d.is_crap == False and d.is_subdomain == False  and d.is_banned == False)
+	day_count    = count(d for d in Domain if d.is_up == True and d.is_crap == False and d.is_subdomain == False  and d.is_banned == False and d.created_at > event_horizon)
 	return dict(day_count=day_count, domain_count=domain_count)
 
 @app.errorhandler(404)
@@ -137,7 +137,7 @@ def index():
 def json():
 	now = datetime.now()
 	event_horizon = now - timedelta(days=30)
-	domains = Domain.select(lambda p: p.last_alive > event_horizon).order_by(desc(Domain.created_at))
+	domains = Domain.select(lambda p: p.last_alive > event_horizon and p.is_banned==False).order_by(desc(Domain.created_at))
 	out = []
 	for domain in domains:
 		out.append(domain.to_dict(full=False))
