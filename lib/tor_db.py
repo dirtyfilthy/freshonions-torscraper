@@ -33,7 +33,10 @@ class BitcoinAddress(db.Entity):
     def domains(self):
         return select(d for d in Domain for p in d.pages for b in p.bitcoin_addresses if b == self)
 
-  
+class OpenPort(db.Entity):
+    _table_   = "open_port"
+    port      = Required(int)
+    domain    = Required('Domain') 
 
 
 
@@ -55,9 +58,11 @@ class Domain(db.Entity):
     created_at   = Required(datetime)
     visited_at   = Required(datetime)
     last_alive   = Required(datetime)
+    open_ports   = Set('OpenPort')
     next_scheduled_check = Required(datetime)
-    dead_in_a_row = Required(int, default=0)
+    dead_in_a_row   = Required(int, default=0)
     ssh_fingerprint = Optional(SSHFingerprint)
+    portscanned_at  = Required(datetime, default=NEVER)
 
 
     def status(self):
@@ -246,6 +251,10 @@ class Domain(db.Entity):
 
 
     @classmethod
+    def find_by_host(klass, host):
+        return klass.find_stub(host, 80, False)
+
+    @classmethod
     @db_session
     def find_by_url(klass, url):
         try:
@@ -287,6 +296,7 @@ class Domain(db.Entity):
                 return False
         except:
             return False
+
             
 class Page(db.Entity):
     url          = Required(str, unique=True)
