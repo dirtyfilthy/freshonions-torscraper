@@ -10,6 +10,7 @@ from pony.orm import *
 from datetime import *
 from tor_db import *
 from tor_elasticsearch import *
+import helpers
 import re
 import os
 import bitcoin
@@ -17,6 +18,7 @@ import email_util
 import banned
 import tor_text
 import portscanner
+import urllib
 app = Flask(__name__)
 app.jinja_env.globals.update(Domain=Domain)
 app.jinja_env.globals.update(NEVER=NEVER)
@@ -42,121 +44,43 @@ def inject_counts():
 def page_not_found(e):
     return render_template('error.html',code=404,message="Page not found."), 404
 
-
-def build_domain_query(context, sort):
-	query = select(d for d in Domain)
-	search = context["search"]
-	query = query.filter("d.is_banned == 0")
-	if search !='':
-		query = query.filter("search in d.title")
-
-	if context["is_up"]:
-		query = query.filter("d.is_up == 1")
-	
-	if context["rep"] == "genuine":
-		query = query.filter("d.is_genuine == 1")
-	if context["rep"] == "fake":
-		query = query.filter("d.is_fake == 1")
-	
-	if not context["show_subdomains"]:
-		query = query.filter("d.is_subdomain == 0")
-	
-	if not context["show_fh_default"]:
-		query = query.filter("d.is_crap == 0")
-	
-	if not context["never_seen"]:
-		query = query.filter("d.last_alive != NEVER")
-	
-	if   sort=="onion":
-		query = query.order_by(Domain.host)
-	elif sort=="title":
-		query = query.order_by(Domain.title)
-	elif sort=="last_seen":
-		query = query.order_by(desc(Domain.last_alive))
-	elif sort=="visited_at":
-		query = query.order_by(desc(Domain.visited_at))
-	else:
-		query = query.order_by(desc(Domain.created_at))
-
-	return query
-
-@app.route("/")
-@db_session
-def index():
-	result_limit = int(os.environ['RESULT_LIMIT'])
-	max_result_limit = int(os.environ['MAX_RESULT_LIMIT'])
-	now = datetime.now()
-
-	context = dict()
-	context["is_up"] = request.args.get("is_up")
-	context["rep"] = request.args.get("rep")
-	context["show_subdomains"] = request.args.get("show_subdomains")
-	context["show_fh_default"] = request.args.get("show_fh_default")
-	context["search"] = request.args.get("search")
-	context["never_seen"] = request.args.get("never_seen")
-	context["more"] = request.args.get("more")
-
-	context["search_title_only"] = "on" if (not is_elasticsearch_enabled() or request.args.get("search_title_only")) else None
-	page = int(request.args.get("page", 1))
-	if page < 1:
-		page = 1
-
-	if not context["search"]:
-		context["search"]=""
-	context["search"] = context["search"].strip()
-	context["search"] = banned.delete_banned(context["search"])
-
-	if not context["rep"]:
-		context["rep"] = "n/a"
-
-	sort = request.args.get("sort")
-	context["sort"] = sort
-
-	search = context["search"]
-	if search != "":
-		if re.match('.*\.onion$', search):
-			return redirect(url_for("onion_info",onion=search), code=302)
-		elif re.match(email_util.REGEX_ALL, search):
-			return redirect(url_for("email_list",addr=search), code=302)
-		elif bitcoin.is_valid(search):
-			return redirect(url_for("bitcoin_list",addr=search), code=302)
-			
-	if context["search_title_only"] or search == "":
-		query = build_domain_query(context, sort)
-		orig_count = count(query)
-		n_results  = result_limit if orig_count > result_limit else orig_count
-		query = query.page(page, result_limit)
-		is_more = (orig_count > result_limit)
-
-		return render_template('index_domains_only.html', domains=query, context=context, orig_count=orig_count, n_results=n_results, per_page=result_limit, page=page, sort=sort, is_more = is_more)
-	
-	results = elasticsearch_pages(context, sort, page)
-	orig_count = results.hits.total
-	n_results  = result_limit if orig_count > result_limit else orig_count
-	is_more = (orig_count > result_limit)
-
-	domain_set_dict = dict()
-	for hit in results.hits:
-		domain_set_dict[hit.domain_id] = True
-	domain_set = domain_set_dict.keys()
-	domain_precache = select(d for d in Domain if d.id in domain_set)
-
-	return render_template('index_fulltext.html', results=results, context=context, orig_count=orig_count, n_results=n_results, page=page, per_page=result_limit, sort=sort, is_more = is_more)
-
-
-
-@app.route('/json')
+@app.route('/json/all')
 @db_session
 def json():
 	now = datetime.now()
 	event_horizon = now - timedelta(days=30)
 	domains = Domain.select(lambda p: p.last_alive > event_horizon and p.is_banned==False).order_by(desc(Domain.created_at))
-	out = []
-	for domain in domains:
-		out.append(domain.to_dict(full=False))
+	return jsonify(Domain.to_dict_list(domains))
 
-	return jsonify(out)
+@app.route("/")
+@db_session
+def index():
 
+	context = helpers.build_search_context()
+
+	r = helpers.maybe_search_redirect(context["search"])
+	if r:
+		return r
+
+	r = helpers.maybe_domain_search(context)
+	if r:
+		return r
+
+	return helpers.render_elasticsearch(context)
+
+@app.route("/json")
+@db_session
+def index_json():
+	
+	context = helpers.build_search_context()
+
+	r = helpers.maybe_domain_search(context, json=True)
+	if r:
+		return r
+
+	return helpers.render_elasticsearch(context, json=True)
+
+	
 @app.route('/src')
 def src():
 	current = os.path.dirname(os.path.realpath(__file__))
@@ -203,7 +127,17 @@ def ssh_list(id):
 	if fp:
 		domains = fp.domains
 		fingerprint = fp.fingerprint
-		return render_template('ssh_list.html', domains=domains, fingerprint=fingerprint)
+		return render_template('ssh_list.html', id=id, domains=domains, fingerprint=fingerprint)
+	else:
+		return render_template('error.html', code=404, message="Fingerprint not found."), 404
+
+@app.route('/ssh/<id>/json')
+@db_session
+def ssh_list_json(id):
+	fp = SSHFingerprint.get(id=id)
+	if fp:
+		domains = fp.domains
+		return jsonify(Domain.to_dict_list(domains))
 	else:
 		return render_template('error.html', code=404, message="Fingerprint not found."), 404
 
@@ -214,6 +148,16 @@ def email_list(addr):
 	if email:
 		domains = email.domains()
 		return render_template('email_list.html', domains=domains, email=addr)
+	else:
+		return render_template('error.html', code=404, message="Email not found."), 404
+
+@app.route('/email/<addr>/json')
+@db_session
+def email_list_json(addr):
+	email = Email.get(address=addr)
+	if email:
+		domains = email.domains()
+		return jsonify(Domain.to_dict_list(domains))
 	else:
 		return render_template('error.html', code=404, message="Email not found."), 404
 
@@ -230,7 +174,23 @@ def port_list(ports):
 	port_list_str = ", ".join(map(lambda p: "%s:%s" % (str(p), portscanner.get_service_name(p)), port_list))
 	domains = select(d for d in Domain for op in OpenPort if op.domain==d and op.port in port_list)
 	if len(domains) > 0:
-		return render_template('port_list.html', domains=domains, port_list_str = port_list_str)
+		return render_template('port_list.html', domains=domains, ports=ports, port_list_str = port_list_str)
+	else:
+		return render_template('error.html', code=404, message="Email not found."), 404
+
+@app.route('/port/<ports>/json')
+@db_session
+def port_list_json(ports):
+	port_list_s = ports.split(",")
+	port_list = []
+	for p in port_list_s:
+		try:
+			port_list.append(int(p.strip()))
+		except ValueError:
+			pass
+	domains = select(d for d in Domain for op in OpenPort if op.domain==d and op.port in port_list)
+	if len(domains) > 0:
+		return jsonify(Domain.to_dict_list(domains))
 	else:
 		return render_template('error.html', code=404, message="Email not found."), 404
 
@@ -241,6 +201,17 @@ def bitcoin_list(addr):
 	if btc_addr:
 		domains = btc_addr.domains()
 		return render_template('bitcoin_list.html', domains=domains, addr=addr)
+	else:
+		return render_template('error.html', code=404, message="Email not found."), 404
+
+
+@app.route('/bitcoin/<addr>/json')
+@db_session
+def bitcoin_list_json(addr):
+	btc_addr = BitcoinAddress.get(address=addr)
+	if btc_addr:
+		domains = btc_addr.domains()
+		return jsonify(Domain.to_dict_list(domains))
 	else:
 		return render_template('error.html', code=404, message="Email not found."), 404
 

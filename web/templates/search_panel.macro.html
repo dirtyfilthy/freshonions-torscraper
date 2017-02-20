@@ -15,7 +15,8 @@
 {% endif %}
 <br/>
 <span class="small">
-search for title, email, bitcoin addr or enter ".onion" domain for onion info. showing {{n_results}} results of {{orig_count}}
+search for title, email, bitcoin addr or enter ".onion" domain for onion info. showing {{n_results}} results of {{orig_count}} 
+<a href="{{url_for('index_json',search=context['search'], is_up=context['is_up'], show_subdomains=context['show_subdomains'], rep=context['rep'], never_seen=context['never_seen'], show_fh_default=context['show_fh_default'], search_title_only=context['search_title_only'], page=context['page'], sort=context['sort'])}}">[JSON]</a>
 </span>
 </p>
 </form>

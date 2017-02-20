@@ -20,3 +20,7 @@ export ELASTICSEARCH_TIMEOUT
 . $ETCDIR/limits
 export RESULT_LIMIT
 export MAX_RESULT_LIMIT
+
+. $ETCDIR/site
+export SITE_PATH
+export SITE_DOMAIN
