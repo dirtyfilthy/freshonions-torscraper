@@ -26,7 +26,7 @@
 
 
 {% macro domain_table(domains, sortable=False, context=None) %}
-	<table>
+	<table class="domain_list">
 		<thead>
 		{% if not sortable %}
 			<tr>
@@ -83,7 +83,7 @@
 {% endmacro %}
 
 {% macro domain_fulltext_table(results, sortable=False, context=None) %}
-	<table>
+	<table class="domain_list">
 		<thead>
 		{% if not sortable %}
 			<tr>

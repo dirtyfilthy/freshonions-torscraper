@@ -13,6 +13,7 @@ table {
 	white-space:normal;
 }
 
+
 tbody tr:nth-child(even) {background: #202020}
 tbody tr:nth-child(odd) {background: #111111}
 
@@ -23,16 +24,16 @@ h1 {
 
 .contents {
 	clear: both;
-	margin-top:0.25cm;
-	width:100%;
+	margin-top: 0.25cm;
+	width: 100%;
 }
 
 .ruler {
-	margin-top:0px;
+	margin-top: 0px;
 	padding-top: 0.25cm;
 	clear: both;
 	padding-bottom: 0.25cm;
-	margin-bottom:0px;
+	margin-bottom: 0px;
 }
 
 input {
@@ -295,4 +296,8 @@ td.question {
 
 td.never {
 	color: #990000;
+}
+
+table.domain_list {
+	width: 100%;
 }
