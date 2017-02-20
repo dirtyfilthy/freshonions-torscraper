@@ -20,8 +20,12 @@ VERSION_STRING="${VERSION}r${REVISION}-${DATE}"
 
 echo $VERSION_STRING > $ETCDIR/version_string
 
+echo "### Deploying $VERSION_STRING: ###"
 
-echo "Deploying $VERSION_STRING:"
+echo "Updating schema.sql..."
+ssh $FRONTEND_USER@$FRONTEND_HOST "cd $TOP_DIR/scripts/ && ./update_schema.sh"
+scp $FRONTEND_USER@$FRONTEND_HOST:$TOP_DIR/schema.sql $BASEDIR/schema.sql
+
 echo "Removing old source files.."
 (
 	cd $BASEDIR/web/static
@@ -34,7 +38,7 @@ echo "Creating source file..."
 DIST_TAR="$BASEDIR/web/static/torscraper-$VERSION_STRING.tar.gz"
 (
 	cd $BASEDIR/..
-	tar czvf $DIST_TAR --exclude='*.tar.gz' --exclude=private --exclude=etc/private --exclude=./$TOP_DIR/.git ./$TOP_DIR
+	tar czf $DIST_TAR --exclude='*.tar.gz' --exclude=private --exclude=etc/private --exclude=./$TOP_DIR/.git ./$TOP_DIR
 )
 
 # rsync upstream

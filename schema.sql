@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.5.54, for debian-linux-gnu (x86_64)
 --
--- Host: localhost    Database: tor
+-- Host: groan    Database: tor
 -- ------------------------------------------------------
 -- Server version	5.6.33-0ubuntu0.14.04.1
 
@@ -75,13 +75,14 @@ CREATE TABLE `domain` (
   `dead_in_a_row` int(11) DEFAULT '0',
   `next_scheduled_check` datetime DEFAULT CURRENT_TIMESTAMP,
   `is_banned` tinyint(1) DEFAULT '0',
+  `portscanned_at` datetime DEFAULT '1969-12-31 19:00:00',
   PRIMARY KEY (`id`),
   KEY `created_at_idx` (`created_at`),
   KEY `last_alive_idx` (`last_alive`),
   KEY `host_idx` (`host`),
   KEY `idx_domain__ssh_fingerprint` (`ssh_fingerprint`),
   CONSTRAINT `fk_domain__ssh_fingerprint` FOREIGN KEY (`ssh_fingerprint`) REFERENCES `ssh_fingerprint` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=44991 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=45100 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -118,6 +119,23 @@ CREATE TABLE `email_link` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `open_port`
+--
+
+DROP TABLE IF EXISTS `open_port`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `open_port` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `port` int(11) NOT NULL,
+  `domain` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_open_port__domain` (`domain`),
+  CONSTRAINT `fk_open_port__domain` FOREIGN KEY (`domain`) REFERENCES `domain` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1346 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `page`
 --
 
@@ -137,7 +155,7 @@ CREATE TABLE `page` (
   UNIQUE KEY `url` (`url`),
   KEY `idx_page__domain` (`domain`),
   CONSTRAINT `fk_page__domain` FOREIGN KEY (`domain`) REFERENCES `domain` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=771422 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=865983 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -169,7 +187,7 @@ CREATE TABLE `ssh_fingerprint` (
   `fingerprint` varchar(450) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `fingerprint` (`fingerprint`)
-) ENGINE=InnoDB AUTO_INCREMENT=106 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=108 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -181,4 +199,4 @@ CREATE TABLE `ssh_fingerprint` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-02-17 22:14:48
+-- Dump completed on 2017-02-19 20:39:48
