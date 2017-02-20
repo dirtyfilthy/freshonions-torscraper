@@ -11,8 +11,8 @@ from tor_db import *
 from twisted.internet import reactor
 TOR_HOST = '127.0.0.1'
 TOR_PORT = 9050
-MAX_TOTAL_CONNECTIONS = 16
-MAX_CONNECTIONS_PER_HOST = 4
+MAX_TOTAL_CONNECTIONS = 4
+MAX_CONNECTIONS_PER_HOST = 1
 
 PORTS = { 8333  : "bitcoin", 
           9051  : "bitcoin-control",
