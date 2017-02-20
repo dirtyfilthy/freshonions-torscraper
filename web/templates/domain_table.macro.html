@@ -1,6 +1,6 @@
 {% from 'ruler.macro.html' import ruler %}
 {% macro sort_url(title, sort, context, page=1) %}
-<a href="{{ url_for('index', more=context['more'], search=context['search'], is_up=context['is_up'], never_seen=context['never_seen'], show_subdomains=context['show_subdomains'], rep=context['rep'], show_fh_default=context['show_fh_default'], search_title_only=context['search_title_only'], sort=sort, page=page) }}">{{title}}</a>
+<a href="{{ url_for('index', more=context['more'], search=context['search'], is_up=context['is_up'], never_seen=context['never_seen'], show_subdomains=context['show_subdomains'], rep=context['rep'], show_fh_default=context['show_fh_default'], search_title_only=context['search_title_only'], phrase=context['phrase'], sort=sort, page=page) }}">{{title}}</a>
 {% endmacro %}
 
 {% macro paginate(context, num_results, per_page, current_page) %}

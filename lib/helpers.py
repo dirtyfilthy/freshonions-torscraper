@@ -79,6 +79,7 @@ def build_search_context():
 	context["search"] = request.args.get("search")
 	context["never_seen"] = request.args.get("never_seen")
 	context["more"] = request.args.get("more")
+	context["phrase"] = request.args.get("phrase")
 
 	context["search_title_only"] = "on" if (not is_elasticsearch_enabled() or request.args.get("search_title_only")) else None
 	page = int(request.args.get("page", 1))
