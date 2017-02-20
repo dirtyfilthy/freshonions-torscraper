@@ -89,7 +89,7 @@ class DomainDocType(DocType):
             visited_at=obj.visited_at,
             is_up=obj.is_up,
             is_fake=obj.is_fake,
-            is_genuine=obj.is_fake,
+            is_genuine=obj.is_genuine,
             is_crap=obj.is_crap,
             is_banned=obj.is_banned,
             url=obj.index_url(),
