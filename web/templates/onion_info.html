@@ -1,6 +1,10 @@
 {% extends "layout.html" %}
-{% from 'domain_table.macro.html' import domain_table %}
+{% from 'domain_table.macro.html' import domain_table %}}
+{% from 'ruler.macro.html' import ruler %}
 {% block body %}
+
+{{ ruler() }}
+
 <div id="info_panel" class="contents">
 <div id="dates">
 <table>
@@ -23,6 +27,16 @@
 <td>
 {% if domain.last_alive != NEVER %}
 {{domain.last_alive}}
+{% else %}
+<span class="never">Never</span>
+{% endif %}
+</td>
+</tr>
+<tr>
+<td>Portscanned</td>
+<td>
+{% if domain.portscanned_at != NEVER %}
+{{domain.portscanned_at}}
 {% else %}
 <span class="never">Never</span>
 {% endif %}
@@ -68,6 +82,28 @@ No title for this domain.
 {% endif %}
 {% if domain.is_genuine %}
 <span class="tag genuine">[GENUINE]</span> -- this onion is listed as genuine in the /r/darknetmarkets <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">superlist</a> 
+{% endif %}
+</div>
+
+
+<div id="ports">
+<h3>Open Ports:</h3>
+{% set open_ports = domain.get_open_ports() %}
+{% if len(open_ports)==0 %}
+No open ports found.
+{% else %}
+<ul>
+{% for port in open_ports %}
+<li>{{port}}:{{scanner.get_service_name(port)}}
+{% if port!=80 %}
+{% set port_count = OpenPort.count_open(port) %}
+{% if port_count>1 %}
+(found {{port_count}} other places <a href="{{url_for('port_list',ports=port)}}">[VIEW]</a>)
+{% endif %}
+{% endif %}
+</li>
+{% endfor %}
+</ul>
 {% endif %}
 </div>
 

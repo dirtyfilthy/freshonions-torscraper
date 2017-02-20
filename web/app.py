@@ -16,6 +16,7 @@ import bitcoin
 import email_util
 import banned
 import tor_text
+import portscanner
 app = Flask(__name__)
 app.jinja_env.globals.update(Domain=Domain)
 app.jinja_env.globals.update(NEVER=NEVER)
@@ -182,7 +183,7 @@ def onion_info(onion):
 	if domain:
 		links_to   = domain.links_to()
 		links_from = domain.links_from()
-		return render_template('onion_info.html', domain=domain, emails=emails, bitcoin_addresses=bitcoin_addresses, links_to=links_to, links_from = links_from, fp_count=fp_count)
+		return render_template('onion_info.html', domain=domain, scanner=portscanner, OpenPort=OpenPort, emails=emails, bitcoin_addresses=bitcoin_addresses, links_to=links_to, links_from = links_from, fp_count=fp_count)
 	else:
 		return render_template('error.html', code=404, message="Onion not found."), 404
 
@@ -213,6 +214,23 @@ def email_list(addr):
 	if email:
 		domains = email.domains()
 		return render_template('email_list.html', domains=domains, email=addr)
+	else:
+		return render_template('error.html', code=404, message="Email not found."), 404
+
+@app.route('/port/<ports>')
+@db_session
+def port_list(ports):
+	port_list_s = ports.split(",")
+	port_list = []
+	for p in port_list_s:
+		try:
+			port_list.append(int(p.strip()))
+		except ValueError:
+			pass
+	port_list_str = ", ".join(map(lambda p: "%s:%s" % (str(p), portscanner.get_service_name(p)), port_list))
+	domains = select(d for d in Domain for op in OpenPort if op.domain==d and op.port in port_list)
+	if len(domains) > 0:
+		return render_template('port_list.html', domains=domains, port_list_str = port_list_str)
 	else:
 		return render_template('error.html', code=404, message="Email not found."), 404
 

@@ -1,6 +1,10 @@
 {% extends "layout.html" %}
 {% from 'domain_table.macro.html' import domain_table %}
+{% from 'ruler.macro.html' import ruler %}
 {% block body %}
+
+{{ ruler() }}
+
 <div class="contents">
 <h2>SSH Fingerprint</h2>
 <p>Showing domains for fingerprint:</p>

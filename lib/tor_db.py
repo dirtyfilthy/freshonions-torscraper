@@ -38,6 +38,13 @@ class OpenPort(db.Entity):
     port      = Required(int)
     domain    = Required('Domain') 
 
+    @classmethod
+    @db_session
+    def count_open(klass, port):
+        return count(p for p in OpenPort if p.port==port)
+
+
+
 
 
 
@@ -75,6 +82,12 @@ class Domain(db.Entity):
             return 'maybe'
         else:
             return 'dead'
+
+    @db_session
+    def get_open_ports(self):
+        op = map(lambda p: p.port, list(self.open_ports))
+        web_ports = select(d.port for d in Domain if d.host == self.host and d.is_up == True)
+        return list(set(op + list(web_ports)))
 
 
     def before_insert(self):
@@ -142,6 +155,7 @@ class Domain(db.Entity):
         d['is_fake']    = self.is_fake
         d['server']     = self.server
         d['powered_by'] = self.powered_by
+        d['portscanned_at'] = self.portscanned_at
 
         if self.ssh_fingerprint:
             d['ssh_fingerprint']  = self.ssh_fingerprint.fingerprint
@@ -157,6 +171,7 @@ class Domain(db.Entity):
             d['links_from'] = [] 
             d['emails']     = []
             d['bitcoin_addresses'] = []
+            d['open_ports'] = self.get_open_ports()
             for link_to in links_to:
                 d['links_to'].append(link_to.index_url())
             for link_from in links_from:
