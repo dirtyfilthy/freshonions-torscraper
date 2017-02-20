@@ -6,6 +6,7 @@ from flask import url_for
 from flask import redirect
 from flask import send_from_directory
 import urlparse
+import dateutil.parser
 from pony.orm import *
 from datetime import *
 from tor_db import *
@@ -159,7 +160,7 @@ def json_domain_search_results(results, context, n_results):
 	json_obj["total_results"] = n_results
 	json_obj["next_page"] = next_index_page_url(context, n_results)
 	json_obj["query"] = context
-	json_obj["results"] = map(lambda d: {"domain":d.to_dict(), "url":d.index_url(), "title":d.title, "fragment":None}, list(results))
+	json_obj["results"] = map(lambda d: {"domain":d.to_dict(), "url":d.index_url(), "title":d.title, "fragment":None, "created_at":d.created_at, "visited_at":d.visited_at}, list(results))
 	return jsonify(json_obj)
 
 @db_session
@@ -175,7 +176,9 @@ def json_elastic_search_results(results, context, n_results):
 		url = hit.meta.id
 		title = hit.title
 		fragment = hit.meta.highlight.body_stripped[0]
-		ary.append({"domain":domain, "url":url, "title":title, "fragment":fragment})
+		created_at = dateutil.parser.parse(hit.visited_at)
+		visited_at = dateutil.parser.parse(hit.created_at)
+		ary.append({"domain":domain, "url":url, "title":title, "fragment":fragment, "created_at":created_at, "visited_at":visited_at})
 	json_obj["results"] = ary
 	return jsonify(json_obj)
 
