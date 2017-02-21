@@ -140,9 +140,9 @@ class Domain(db.Entity):
             dom.save()
 
 
+ 
 
-
-  
+    @db_session
     def to_dict(self, full=False):
         d = dict()
         d['url']        = self.index_url()
@@ -182,6 +182,14 @@ class Domain(db.Entity):
                 d["bitcoin_addresses"].append(addr.address)
 
         return d
+
+    @classmethod
+    def to_dict_list(klass, ary, full=False):
+        ret = []
+        for d in ary:
+            ret.append(d.to_dict(full))
+
+        return ret
 
 
     @classmethod

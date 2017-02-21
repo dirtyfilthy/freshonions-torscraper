@@ -45,12 +45,28 @@ def elasticsearch_pages(context, sort, page):
     if context["rep"] == "fake":
         domain_query = domain_query & Q("term", is_fake=True)
 
+
+
     limit = max_result_limit if context["more"] else result_limit
 
     has_parent_query = Q("has_parent", type="domain", query=domain_query)
-    query = Search().filter(has_parent_query).query(Q("match", body_stripped=context['search']))
+    if context['phrase']:
+        query = Search().filter(has_parent_query).query(Q("match_phrase", body_stripped=context['search']))
+    else:
+        query = Search().filter(has_parent_query).query(Q("match", body_stripped=context['search']))
+
     query = query.highlight_options(order='score', encoder='html').highlight('body_stripped')[start:end]
     query = query.source(['title','domain_id','created_at', 'visited_at']).params(request_cache=True)
+
+    if   context["sort"] == "onion":
+        query = query.sort("_parent")
+    elif context["sort"] == "visited_at":
+        query = query.sort("-visited_at")
+    elif context["sort"] == "created_at":
+        query = query.sort("-created_at")
+    elif context["sort"] == "last_seen":
+        query = query.sort("-visited_at")
+
     return query.execute()
 
 

@@ -13,7 +13,7 @@
 No Results
 </div>
 {% else %}
-{{ domain_fulltext_table(results, sortable=False, context=context) }}
+{{ domain_fulltext_table(results, sortable=True, context=context) }}
 
 {{ paginate(context, orig_count, n_results, page) }}
 {% endif %}

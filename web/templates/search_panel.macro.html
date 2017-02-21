@@ -3,21 +3,26 @@
 <div id="search">
 <form method="GET">
 <p> 
+<div id="search_options">
 {{input.checkbox("never_seen", context["never_seen"], "inc. never seen")}}
 {{input.checkbox("is_up", context["is_up"], "alive only")}}
 ({{input.radio("rep", ["n/a","genuine", "fake"], context["rep"])}})
-{{input.text("search", context["search"], "search:")}}
-{{input.submit("Go >>>")}} <br />
 {{input.checkbox("show_subdomains", context["show_subdomains"], "show subdomains")}} 
 {{input.checkbox("show_fh_default", context["show_fh_default"], "show fh default")}}
 {% if elasticsearch_enabled %}
 {{input.checkbox("search_title_only", context["search_title_only"], "search title only")}}
+{{input.checkbox("phrase", context["phrase"], "match phrase")}}
 {% endif %}
-<br/>
+</div>
+<div id="search_box">
+{{input.text("search", context["search"], "search:")}} {{input.submit("Go >>>")}} 
+</div>
+<div id="search_info">
 <span class="small">
-search for title, email, bitcoin addr or enter ".onion" domain for onion info. showing {{n_results}} results of {{orig_count}}
+search for title, email, bitcoin addr or enter ".onion" domain for onion info. showing {{n_results}} results of {{orig_count}} 
+<a href="{{url_for('index_json',search=context['search'], is_up=context['is_up'], show_subdomains=context['show_subdomains'], rep=context['rep'], never_seen=context['never_seen'], show_fh_default=context['show_fh_default'], search_title_only=context['search_title_only'], page=context['page'], sort=context['sort'], phrase=context['phrase'])}}">[JSON]</a>
 </span>
-</p>
+</div>
 </form>
 </div>
 {% endmacro %}

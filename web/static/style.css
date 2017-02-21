@@ -14,6 +14,8 @@ table {
 }
 
 
+
+
 tbody tr:nth-child(even) {background: #202020}
 tbody tr:nth-child(odd) {background: #111111}
 
@@ -46,7 +48,11 @@ input {
 }
 
 input[type="text"] { 
-	width: 200px; 
+	width: 250px; 
+}
+
+input[type="submit"] { 
+	color: #00CC00
 }
 
 .fingerprint_container {
@@ -300,4 +306,22 @@ td.never {
 
 table.domain_list {
 	width: 100%;
+}
+
+
+#search_options {
+	padding:5px;
+	width: 50em;
+	height: 3em;
+	float: left;
+}
+
+#search_box {
+	padding:5px;
+	clear: both;
+}
+
+#search_info {
+	clear: both;
+	padding:5px;
 }

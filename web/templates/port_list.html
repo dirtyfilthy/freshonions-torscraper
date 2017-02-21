@@ -7,7 +7,7 @@
 
 <div class="contents">
 <h2>Open Port</h2>
-<p>Showing domains which have {{port_list_str}} open:</p>
+<p>Showing domains which have {{port_list_str}} open <a href="{{url_for('port_list_json', ports=ports)}}">[JSON]</a></p>
 <p></p>
 {{ domain_table(domains)}}
 
