@@ -9,6 +9,7 @@ import random
 import string
 import socket
 import ssl
+from pony.orm.core import OptimisticCheckError
 
 @db_session
 def get_domains():
@@ -42,12 +43,15 @@ def scan_404():
 			print("#%d failed (%s)" % (i, url))
 			continue
 		print("#%d tested %s and got %d" % (i, url, code))
-		if code == 404:
-			d.useful_404 = True
-		else:
-			d.useful_404 = False	
-		d.useful_404_scanned_at = datetime.now()
-		commit()
+		try:
+			if code == 404:
+				d.useful_404 = True
+			else:
+				d.useful_404 = False	
+			d.useful_404_scanned_at = datetime.now()
+			commit()
+		except OptimisticCheckError:
+			continue
 
 scan_404()
 sys.exit(0)
