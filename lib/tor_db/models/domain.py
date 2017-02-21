@@ -3,11 +3,13 @@ from tor_db.db import db
 from tor_db.constants import *
 import tor_db.models.email
 import tor_db.models.bitcoin_address
+import tor_db.models.page
 from datetime import *
 import bitcoin
 from tor_elasticsearch import *
 import pretty
 import banned
+import interesting_paths
 import os
 import re
 import dateutil.parser
@@ -38,6 +40,25 @@ class Domain(db.Entity):
     portscanned_at  = Required(datetime, default=NEVER)
     path_scanned_at = Required(datetime, default=NEVER)
     useful_404_scanned_at = Required(datetime, default=NEVER)
+
+
+    @classmethod
+    @db_session
+    def domains_for_path(klass, path):
+        d = select(d for d in klass for p in d.pages if d.useful_404 == True and p.code in [200, 206] and p.path == path)
+        return d
+
+    @db_session
+    def interesting_paths(self):
+        if not self.useful_404:
+            return []
+        p = select(p.path for p in tor_db.models.page.Page if p.domain==self and p.path in interesting_paths.PATHS and p.code in [200, 206])
+        return p
+
+
+    def construct_url(self, path):
+        first_part = self.index_url()[:-1]
+        return first_part + path
 
 
     def status(self):
@@ -129,7 +150,7 @@ class Domain(db.Entity):
         d['useful_404_scanned_at'] = self.useful_404_scanned_at
         d['useful_404'] = None
         if self.useful_404_scanned_at != NEVER:
-            d['useful_404'] = d.useful_404
+            d['useful_404'] = self.useful_404
 
         if full == False:
             d['more_info'] = "http://%s/onion/%s/json" % (SITE_DOMAIN, self.host)
@@ -147,6 +168,7 @@ class Domain(db.Entity):
             d['links_to']   = []
             d['links_from'] = [] 
             d['emails']     = []
+            d['interesting_paths'] = map(lambda p: self.construct_url(p), self.interesting_paths())
             d['bitcoin_addresses'] = []
             d['open_ports'] = self.get_open_ports()
             for link_to in links_to:

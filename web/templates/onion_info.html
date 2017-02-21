@@ -107,6 +107,35 @@ No open ports found.
 {% endif %}
 </div>
 
+<div id="paths">
+<h3>Interesting Paths:</h3>
+{% if len(paths)==0 %}
+No interesting paths in database.
+{% else %}
+<ul>
+{% for path in paths %}
+<li>
+<a href="{{domain.construct_url(path)}}">{{path}}</a>
+{% set other_paths = len(Domain.domains_for_path(path)) %}
+{% if other_paths>1 %}
+(found {{other_paths-1}} other places <a href="{{url_for('path_list',path=path[1:])}}">[VIEW]</a>)
+{% endif %}
+</li>
+{% endfor %}
+</ul>
+{% endif %}
+{% if domain.useful_404_scanned_at != NEVER %}
+<p>
+{% if domain.useful_404 %}
+This site supports useful 404 messages.
+{% else %}
+This site does not support useful 404 messages.
+{% endif %}
+</p>
+{% endif %}
+
+</div>
+
 <div id="emails">
 <h3>Emails:</h3>
 {% if len(emails)==0 %}

@@ -76,13 +76,16 @@ CREATE TABLE `domain` (
   `next_scheduled_check` datetime DEFAULT CURRENT_TIMESTAMP,
   `is_banned` tinyint(1) DEFAULT '0',
   `portscanned_at` datetime DEFAULT '1969-12-31 19:00:00',
+  `path_scanned_at` datetime DEFAULT '1969-12-31 19:00:00',
+  `useful_404_scanned_at` datetime DEFAULT '1969-12-31 19:00:00',
+  `useful_404` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `created_at_idx` (`created_at`),
   KEY `last_alive_idx` (`last_alive`),
   KEY `host_idx` (`host`),
   KEY `idx_domain__ssh_fingerprint` (`ssh_fingerprint`),
   CONSTRAINT `fk_domain__ssh_fingerprint` FOREIGN KEY (`ssh_fingerprint`) REFERENCES `ssh_fingerprint` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=45165 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=45169 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -132,7 +135,7 @@ CREATE TABLE `open_port` (
   PRIMARY KEY (`id`),
   KEY `idx_open_port__domain` (`domain`),
   CONSTRAINT `fk_open_port__domain` FOREIGN KEY (`domain`) REFERENCES `domain` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3916 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=3970 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -157,7 +160,7 @@ CREATE TABLE `page` (
   UNIQUE KEY `url` (`url`),
   KEY `idx_page__domain` (`domain`),
   CONSTRAINT `fk_page__domain` FOREIGN KEY (`domain`) REFERENCES `domain` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=940000 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1046117 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -189,7 +192,7 @@ CREATE TABLE `ssh_fingerprint` (
   `fingerprint` varchar(450) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `fingerprint` (`fingerprint`)
-) ENGINE=InnoDB AUTO_INCREMENT=109 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=110 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -201,4 +204,4 @@ CREATE TABLE `ssh_fingerprint` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-02-21  2:12:10
+-- Dump completed on 2017-02-21  9:23:32

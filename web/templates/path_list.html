@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% from 'domain_table.macro.html' import domain_table %}
+{% from 'ruler.macro.html' import ruler %}
+{% block body %}
+
+{{ ruler() }}
+
+<div class="contents">
+<h2>Path List</h2>
+<p>Showing domains for path "{{path}}" <a href="{{url_for('path_list_json', path=path[1:])}}">[JSON]</a></p>
+<p></p>
+{{ domain_table(domains)}}
+
+</div>
+{% endblock %}

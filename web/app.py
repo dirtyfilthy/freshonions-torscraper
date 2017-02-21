@@ -100,6 +100,7 @@ def onion_info(onion):
 	links_from = []
 	domain = select(d for d in Domain if d.host==onion).first()
 	fp_count = 0
+	paths = domain.interesting_paths()
 	emails = domain.emails()
 	bitcoin_addresses = domain.bitcoin_addresses()
 	if domain.ssh_fingerprint:
@@ -107,7 +108,7 @@ def onion_info(onion):
 	if domain:
 		links_to   = domain.links_to()
 		links_from = domain.links_from()
-		return render_template('onion_info.html', domain=domain, scanner=portscanner, OpenPort=OpenPort, emails=emails, bitcoin_addresses=bitcoin_addresses, links_to=links_to, links_from = links_from, fp_count=fp_count)
+		return render_template('onion_info.html', domain=domain, scanner=portscanner, OpenPort=OpenPort, paths=paths, emails=emails, bitcoin_addresses=bitcoin_addresses, links_to=links_to, links_from = links_from, fp_count=fp_count)
 	else:
 		return render_template('error.html', code=404, message="Onion not found."), 404
 
@@ -119,6 +120,27 @@ def onion_info_json(onion):
 	links_from = []
 	domain = select(d for d in Domain if d.host==onion).first()
 	return jsonify(domain.to_dict(full=True))
+
+@app.route('/path/<path:path>')
+@db_session
+def path_list(path):
+	path = "/" + path
+	domains = Domain.domains_for_path(path)
+	if count(domains) != 0:
+		return render_template('path_list.html', domains=domains, path=path)
+	else:
+		return render_template('error.html', code=404, message="Path '%s' not found." % path), 404
+
+@app.route('/path_json/<path:path>')
+@db_session
+def path_list_json(path):
+	path = "/" + path
+	domains = Domain.domains_for_path(path)
+	if count(domains) != 0:
+		return jsonify(Domain.to_dict_list(domains))
+	else:
+		return render_template('error.html', code=404, message="Path '%s' not found." % path), 404
+
 
 @app.route('/ssh/<id>')
 @db_session

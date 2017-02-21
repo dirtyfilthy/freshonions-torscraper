@@ -7,6 +7,8 @@ from datetime import *
 from tor_db import *
 from tor_elasticsearch import *
 import random
+import string
+import random
 import timeout_decorator
 import bitcoin
 import email_util
@@ -231,6 +233,18 @@ class TorSpider(scrapy.Spider):
             page.bitcoin_addresses.add(bitcoin_addr)
 
     @db_session
+    def useful_404_detection(self, response):
+        domain = Domain.find_by_url(response.url)
+        if not domain or response.status in [502, 503]:
+            return None
+        if response.status == 404:
+            domain.useful_404 = True
+        else:
+            domain.useful_404 = False
+        domain.useful_404_scanned_at = datetime.now()
+        return None
+
+    @db_session
     def parse(self, response):
         MAX_PARSE_SIZE_KB = 1000
         title = ''
@@ -245,6 +259,8 @@ class TorSpider(scrapy.Spider):
             is_frontpage = Page.is_frontpage_request(response.request)
             size = len(response.body)
             page = self.update_page_info(response.url, title, response.status, is_frontpage, size)
+
+            # extra headers
 
             got_server_response = page.got_server_response()
             if got_server_response and response.headers.get("Server"):
@@ -269,6 +285,8 @@ class TorSpider(scrapy.Spider):
             if got_server_response and content_type and re.match('^text/', content_type.strip()):
                 is_text = True
 
+            # elasticsearch
+
             if is_elasticsearch_enabled() and is_text:
                 self.log('Inserting %s page into elasticsearch' % response.url)
                 pg = PageDocType.from_obj(page, response.body)
@@ -276,11 +294,18 @@ class TorSpider(scrapy.Spider):
 
             commit()
 
+            # interesting paths
+
             if domain.is_up and domain.path_scanned_at == NEVER:
                 domain.path_scanned_at = datetime.now()
                 commit()
                 for url in interesting_paths.construct_urls(domain):
                     yield scrapy.Request(url, callback=self.parse)
+
+            if domain.is_up and page.is_frontpage and domain.useful_404_scanned_at < (datetime.now() - timedelta(weeks=4)):
+                r = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(12))
+                url = domain.index_url() + r
+                yield scrapy.Request(url, callback=self.useful_404_detection)
             
             link_to_list = []
 
