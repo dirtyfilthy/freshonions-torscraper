@@ -5,7 +5,7 @@ import tor_db.models.email
 import tor_db.models.bitcoin_address
 from datetime import *
 import bitcoin
-import tor_elasticsearch
+from tor_elasticsearch import *
 import pretty
 import banned
 import os
