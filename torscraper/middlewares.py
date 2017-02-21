@@ -13,6 +13,9 @@ from tor_db import *
 from collections import defaultdict
 from datetime import *
 from scrapy.exceptions import IgnoreRequest
+from scrapy.http import Request
+from scrapy.exceptions import NotConfigured
+
 
 class FilterTooManySubdomainsMiddleware(object):
     def __init__(self):
@@ -129,12 +132,13 @@ class InjectRangeHeaderMiddleware(object):
     def from_crawler(cls, crawler):
         if not crawler.settings.getbool('INJECT_RANGE_HEADER'):
             raise NotConfigured
+        settings = crawler.settings
         big_download_maxsize = settings.get('BIG_DOWNLOAD_MAXSIZE', 0)
-        allow_big_list = settings.get('ALLOW_BIG_DOWNLOAD', [])
+        allow_list = settings.get('ALLOW_BIG_DOWNLOAD', [])
         download_maxsize = settings.get('DOWNLOAD_MAXSIZE')
         return cls(download_maxsize, allow_list, big_download_maxsize)
 
-    def __init__(download_maxsize, allow_list=[], big_download_maxsize=0):
+    def __init__(self, download_maxsize, allow_list=[], big_download_maxsize=0):
         self.big_download_maxsize = download_maxsize if big_download_maxsize < download_maxsize else big_download_maxsize
         self.download_maxsize = download_maxsize
         self.allow_list = allow_list
@@ -142,7 +146,7 @@ class InjectRangeHeaderMiddleware(object):
     def process_spider_output(self, response, result, spider):
         def _set_range(r):
             if isinstance(r, Request):
-                parsed_url = urlparse.urlparse(request.url)
+                parsed_url = urlparse.urlparse(r.url)
                 host = parsed_url.hostname
                 max_size = self.big_download_maxsize if host in self.allow_list else self.download_maxsize
                 r.headers.setdefault('Range', "bytes=0-%d" % (max_size-1))

@@ -27,6 +27,7 @@ class Domain(db.Entity):
     is_genuine   = Required(bool, default=False)
     is_subdomain = Required(bool, default=False)
     is_banned    = Required(bool, default=False)
+    useful_404   = Required(bool, default=False)
     created_at   = Required(datetime)
     visited_at   = Required(datetime)
     last_alive   = Required(datetime)
@@ -36,6 +37,7 @@ class Domain(db.Entity):
     ssh_fingerprint = Optional('SSHFingerprint')
     portscanned_at  = Required(datetime, default=NEVER)
     path_scanned_at = Required(datetime, default=NEVER)
+    useful_404_scanned_at = Required(datetime, default=NEVER)
 
 
     def status(self):
