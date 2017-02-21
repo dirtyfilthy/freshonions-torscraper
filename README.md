@@ -25,7 +25,7 @@ From the GNU site:
 ## Dependencies
 
 * python
-* tor
+* tor 
 
 ### pip install:
 
@@ -42,8 +42,25 @@ Edit etc/proxy for your TOR setup
     script/push.sh someoniondirectory.onion 
     script/push.sh anotheroniondirectory.onion
 
+Run:
+
     init/scraper_service.sh # to start crawling
     init/isup_service.sh # to keep site status up to date
+
+### Optional ElasticSearch Fulltext Search
+
+The torscraper comes with optional elasticsearch capability (enabled by default). Edit etc/elasticsearch and set vars or set ELASTICSEARCH_ENABLED=false to disable. Run scripts/elasticsearch_migrate.sh to perform the initial setup after configuration. 
+
+if elasticsearch is disabled there will be no fulltext search, however crawling and discovering new sites will still work.
+
+### cronjobs
+
+    1 18 * * * /home/scraper/torscraper/scripts/harvest.sh                  # harvest onions  from various sources
+    1 4,16 * * * /home/scraper/torscraper/scripts/update_fingerprints.sh    # get ssh fingerprints for new sites
+    1 9 * * 1 /home/scraper/torscraper/scripts/get_valid.sh                 # mark sites as genuine / fake from the /r/darknetmarkets superlist
+    */5 * * * * /home/scraper/torscraper/scripts/pastebin.sh                # scrape pastebin for onions (needs paid account / IP whitelisting)
+    1 */6 * * * /home/scraper/torscraper/scripts/portscan_up.sh             # portscan new onions
+
 
 
 ## Infrastructure
