@@ -144,6 +144,7 @@ class Domain(db.Entity):
 
     @db_session
     def to_dict(self, full=False):
+        SITE_DOMAIN = os.environ['SITE_DOMAIN']
         d = dict()
         d['url']        = self.index_url()
         d['title']      = self.title
@@ -154,8 +155,12 @@ class Domain(db.Entity):
         d['is_genuine'] = self.is_genuine
         d['is_fake']    = self.is_fake
         d['server']     = self.server
+        d['hostname']   = self.host
         d['powered_by'] = self.powered_by
         d['portscanned_at'] = self.portscanned_at
+
+        if full == False:
+            d['more_info'] = "http://%s/onion/%s/json" % (SITE_DOMAIN, self.host)
 
         if self.ssh_fingerprint:
             d['ssh_fingerprint']  = self.ssh_fingerprint.fingerprint
