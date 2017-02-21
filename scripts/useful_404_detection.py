@@ -8,6 +8,7 @@ from urllib2 import URLError
 import random
 import string
 import socket
+import ssl
 
 @db_session
 def get_domains():
@@ -17,6 +18,9 @@ def get_domains():
 
 @db_session 
 def scan_404():
+	ctx = ssl.create_default_context()
+	ctx.check_hostname = False
+	ctx.verify_mode = ssl.CERT_NONE
 	domains = get_domains()
 	print("processing %d domains" % count(domains))
 	i = 0
@@ -26,11 +30,11 @@ def scan_404():
 		url = d.index_url() + r
 		code = 0
 		try:
-			res = urllib2.urlopen(url, None, 60)
+			res = urllib2.urlopen(url, None, 60, context=ctx)
 			code = int(res.getcode())		
 		except urllib2.HTTPError, e:
 			code = int(e.code)		
-		except (URLError, socket.timeout) as e:
+		except (URLError, socket.timeout, ssl.CertificateError) as e:
 			print("#%d failed (%s)" % (i, url))
 			continue
 		
