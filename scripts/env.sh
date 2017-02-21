@@ -4,7 +4,10 @@ export SCRIPTDIR=$BASEDIR/scripts
 export ETCDIR=$BASEDIR/etc
 export VARDIR=$BASEDIR/var
 export PYTHONPATH=$PYTHONPATH:$BASEDIR/lib
+
 . $ETCDIR/proxy
+export HIDDEN_SERVICE_PROXY_HOST
+export HIDDEN_SERVICE_PROXY_PORT
 
 . $ETCDIR/database
 export DB_HOST

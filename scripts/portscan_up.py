@@ -8,7 +8,7 @@ import sys
 @db_session
 def get_domains():
 	hostlist = []
-	domains = select(d for d in Domain if d.is_up == True)
+	domains = select(d for d in Domain if d.is_up == True and d.portscanned_at == NEVER)
 	for domain in domains:
 		hostlist.append(domain.host)
 	return list(set(hostlist))

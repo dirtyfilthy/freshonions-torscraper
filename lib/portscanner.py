@@ -9,9 +9,9 @@ from txsocksx.client import SOCKS5ClientEndpoint
 from tor_db import *
 
 from twisted.internet import reactor
-TOR_HOST = '127.0.0.1'
-TOR_PORT = 9050
-MAX_TOTAL_CONNECTIONS = 4
+TOR_HOST = os.environ['HIDDEN_SERVICE_PROXY_HOST']
+TOR_PORT = int(os.environ['HIDDEN_SERVICE_PROXY_PORT'])
+MAX_TOTAL_CONNECTIONS = 16
 MAX_CONNECTIONS_PER_HOST = 1
 
 PORTS = { 8333  : "bitcoin", 
