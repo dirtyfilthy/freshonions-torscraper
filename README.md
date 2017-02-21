@@ -55,11 +55,20 @@ if elasticsearch is disabled there will be no fulltext search, however crawling 
 
 ### cronjobs
 
-    1 18 * * * /home/scraper/torscraper/scripts/harvest.sh                  # harvest onions  from various sources
-    1 4,16 * * * /home/scraper/torscraper/scripts/update_fingerprints.sh    # get ssh fingerprints for new sites
-    1 9 * * 1 /home/scraper/torscraper/scripts/get_valid.sh                 # mark sites as genuine / fake from the /r/darknetmarkets superlist
-    */5 * * * * /home/scraper/torscraper/scripts/pastebin.sh                # scrape pastebin for onions (needs paid account / IP whitelisting)
-    1 */6 * * * /home/scraper/torscraper/scripts/portscan_up.sh             # portscan new onions
+    # harvest onions  from various sources
+    1 18 * * * /home/scraper/torscraper/scripts/harvest.sh
+    
+    # get ssh fingerprints for new sites
+    1 4,16 * * * /home/scraper/torscraper/scripts/update_fingerprints.sh
+    
+    # mark sites as genuine / fake from the /r/darknetmarkets superlist    
+    1 9 * * 1 /home/scraper/torscraper/scripts/get_valid.sh
+    
+    # scrape pastebin for onions (needs paid account / IP whitelisting)                 
+    */5 * * * * /home/scraper/torscraper/scripts/pastebin.sh
+    
+    # portscan new onions               
+    1 */6 * * * /home/scraper/torscraper/scripts/portscan_up.sh             s
 
 
 
