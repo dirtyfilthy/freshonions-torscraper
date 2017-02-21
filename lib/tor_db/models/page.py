@@ -1,6 +1,7 @@
 from pony.orm import *
 from tor_db.db import db
 from tor_db.constants import *
+from tor_db.models.domain import *
 from datetime import *
 import urlparse
 class Page(db.Entity):
@@ -9,6 +10,8 @@ class Page(db.Entity):
     code         = Required(int)
     is_frontpage = Required(bool, default=False)
     domain       = Required('Domain')
+    size         = Required(int, default=0)
+    path         = Optional(str, 1024)
     created_at   = Required(datetime)
     visited_at   = Required(datetime)
     links_to     = Set("Page", reverse="links_from", table="page_link", column="link_to");
@@ -35,6 +38,19 @@ class Page(db.Entity):
             return True
 
         return False
+
+    @classmethod
+    def path_from_url(klass, url):
+        parsed_url = urlparse.urlparse(url)
+        path  = '/' if parsed_url.path=='' else parsed_url.path
+        return path
+
+
+    def before_insert(self):
+        self.path  = Page.path_from_url(self.url)
+
+    def before_update(self):
+        self.path  = Page.path_from_url(self.url)
 
 
     def got_server_response(self):

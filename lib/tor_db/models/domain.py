@@ -1,11 +1,14 @@
 from pony.orm import *
 from tor_db.db import db
 from tor_db.constants import *
+import tor_db.models.email
+import tor_db.models.bitcoin_address
 from datetime import *
 import bitcoin
 import tor_elasticsearch
 import pretty
 import banned
+import os
 import re
 import dateutil.parser
 import urlparse
@@ -205,11 +208,11 @@ class Domain(db.Entity):
 
     @db_session
     def emails(self):
-        return select(e for e in Email for p in e.pages if p.domain == self)
+        return select(e for e in tor_db.models.email.Email for p in e.pages if p.domain == self)
 
     @db_session
     def bitcoin_addresses(self):
-        return select(b for b in BitcoinAddress for p in b.pages if p.domain == self).limit(100)
+        return select(b for b in tor_db.models.bitcoin_address.BitcoinAddress for p in b.pages if p.domain == self).limit(100)
 
 
     @classmethod

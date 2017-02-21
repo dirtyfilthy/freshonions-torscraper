@@ -82,7 +82,7 @@ CREATE TABLE `domain` (
   KEY `host_idx` (`host`),
   KEY `idx_domain__ssh_fingerprint` (`ssh_fingerprint`),
   CONSTRAINT `fk_domain__ssh_fingerprint` FOREIGN KEY (`ssh_fingerprint`) REFERENCES `ssh_fingerprint` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=45161 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=45165 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -151,11 +151,13 @@ CREATE TABLE `page` (
   `created_at` datetime NOT NULL,
   `visited_at` datetime NOT NULL,
   `is_frontpage` tinyint(1) DEFAULT '0',
+  `size` int(11) DEFAULT '0',
+  `path` varchar(1024) COLLATE utf8_unicode_ci DEFAULT '',
   PRIMARY KEY (`id`),
   UNIQUE KEY `url` (`url`),
   KEY `idx_page__domain` (`domain`),
   CONSTRAINT `fk_page__domain` FOREIGN KEY (`domain`) REFERENCES `domain` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=937709 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=940000 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -199,4 +201,4 @@ CREATE TABLE `ssh_fingerprint` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-02-21  0:48:13
+-- Dump completed on 2017-02-21  2:12:10

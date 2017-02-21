@@ -137,7 +137,7 @@ class TorSpider(scrapy.Spider):
 
 
     @db_session
-    def update_page_info(self, url, title, code, is_frontpage):
+    def update_page_info(self, url, title, code, is_frontpage=False, size=0):
         if not Domain.is_onion_url(url):
             return False
 
@@ -188,12 +188,13 @@ class TorSpider(scrapy.Spider):
 
         page = Page.get(url=url)
         if not page:
-            page = Page(url=url, title=title, code=code, created_at=now, visited_at=now, domain=domain, is_frontpage=is_frontpage)
+            page = Page(url=url, title=title, code=code, created_at=now, visited_at=now, domain=domain, is_frontpage=is_frontpage, size=size)
         else:
             if is_up:
                 page.title = title
             page.code = code
             page.visited_at = now
+            page.size = size
             if not page.is_frontpage and is_frontpage:
                 page.is_frontpage = is_frontpage
        
@@ -234,7 +235,8 @@ class TorSpider(scrapy.Spider):
         if host != "zlal32teyptf4tvi.onion":  
             self.log('Got %s (%s)' % (response.url, title))
             is_frontpage = Page.is_frontpage_request(response.request)
-            page = self.update_page_info(response.url, title, response.status, is_frontpage)
+            size = len(response.body)
+            page = self.update_page_info(response.url, title, response.status, is_frontpage, size)
 
             got_server_response = page.got_server_response()
             if got_server_response and response.headers.get("Server"):
