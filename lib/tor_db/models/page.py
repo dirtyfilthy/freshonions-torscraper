@@ -54,7 +54,7 @@ class Page(db.Entity):
 
 
     def got_server_response(self):
-        responded = [200, 401, 403, 500, 302, 304]
+        responded = [200, 401, 403, 500, 302, 304, 206]
         return (self.code in responded)
 
     @classmethod

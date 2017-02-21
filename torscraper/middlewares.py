@@ -123,6 +123,32 @@ class AllowBigDownloadMiddleware(object):
         return None
             
 
+class InjectRangeHeaderMiddleware(object):
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        if not crawler.settings.getbool('INJECT_RANGE_HEADER'):
+            raise NotConfigured
+        big_download_maxsize = settings.get('BIG_DOWNLOAD_MAXSIZE', 0)
+        allow_big_list = settings.get('ALLOW_BIG_DOWNLOAD', [])
+        download_maxsize = settings.get('DOWNLOAD_MAXSIZE')
+        return cls(download_maxsize, allow_list, big_download_maxsize)
+
+    def __init__(download_maxsize, allow_list=[], big_download_maxsize=0):
+        self.big_download_maxsize = download_maxsize if big_download_maxsize < download_maxsize else big_download_maxsize
+        self.download_maxsize = download_maxsize
+        self.allow_list = allow_list
+
+    def process_spider_output(self, response, result, spider):
+        def _set_range(r):
+            if isinstance(r, Request):
+                parsed_url = urlparse.urlparse(request.url)
+                host = parsed_url.hostname
+                max_size = self.big_download_maxsize if host in self.allow_list else self.download_maxsize
+                r.headers.setdefault('Range', "bytes=0-%d" % (max_size-1))
+            return r
+        return (_set_range(r) for r in result or ())
+
 class TorscraperSpiderMiddleware(object):
     # Not all methods need to be defined. If a method is not defined,
     # scrapy acts as if the spider middleware does not modify the

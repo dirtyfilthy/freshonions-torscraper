@@ -35,6 +35,7 @@ class Domain(db.Entity):
     dead_in_a_row   = Required(int, default=0)
     ssh_fingerprint = Optional('SSHFingerprint')
     portscanned_at  = Required(datetime, default=NEVER)
+    path_scanned_at = Required(datetime, default=NEVER)
 
 
     def status(self):

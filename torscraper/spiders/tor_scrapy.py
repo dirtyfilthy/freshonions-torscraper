@@ -10,7 +10,7 @@ import random
 import timeout_decorator
 import bitcoin
 import email_util
-
+import interesting_paths
 
 from scrapy.exceptions import IgnoreRequest
 
@@ -80,7 +80,7 @@ def domain_urls_next_scheduled():
 class TorSpider(scrapy.Spider):
     name = "tor"
     allowed_domains = ['onion']
-    handle_httpstatus_list = [404, 403, 401, 503, 500, 504, 502]
+    handle_httpstatus_list = [404, 403, 401, 503, 500, 504, 502, 206]
     start_urls = domain_urls_recent_no_crap()
     if len(start_urls) == 0:
         start_urls = [
@@ -96,6 +96,7 @@ class TorSpider(scrapy.Spider):
         'ALLOW_BIG_DOWNLOAD': [
             'cratedvnn5z57xhl.onion'
         ],
+        'INJECT_RANGE_HEADER': True,
         'ROBOTSTXT_OBEY': False,
 	    'CONCURRENT_REQUESTS' : 24,
         'DEPTH_PRIORITY' : 8,
@@ -110,6 +111,9 @@ class TorSpider(scrapy.Spider):
             'torscraper.middlewares.FilterDeadDomainMiddleware' : 556,
             'torscraper.middlewares.AllowBigDownloadMiddleware' : 557
          },
+         'SPIDER_MIDDLEWARES' : {
+            'torscraper.middlewares.InjectRangeHeaderMiddleware' : 543,
+         }
         'USER_AGENT': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.87 Safari/537.36'
     }
     spider_exclude = [
@@ -229,7 +233,11 @@ class TorSpider(scrapy.Spider):
     @db_session
     def parse(self, response):
         MAX_PARSE_SIZE_KB = 1000
-        title = response.css('title::text').extract_first()
+        title = ''
+        try:
+            title = response.css('title::text').extract_first()
+        except AttributeError:
+            pass
         parsed_url = urlparse.urlparse(response.url)
         host  = parsed_url.hostname
         if host != "zlal32teyptf4tvi.onion":  
@@ -245,9 +253,9 @@ class TorSpider(scrapy.Spider):
                 page.domain.powered_by = response.headers.get("X-Powered-By")
             if got_server_response and response.headers.get("Powered-By"):
                 page.domain.powered_by = response.headers.get("Powered-By")
-            
+            domain = page.domain
             if hasattr(self, "test") and self.test == "yes":
-                domain = page.domain
+                
                 if domain.is_up:
                     domain.dead_in_a_row = 0
                     domain.next_scheduled_check = datetime.now() + timedelta(minutes = random.randint(60, 180)) 
@@ -266,11 +274,15 @@ class TorSpider(scrapy.Spider):
                 pg = PageDocType.from_obj(page, response.body)
                 pg.save()
 
-
             commit()
+
+            if domain.is_up and domain.path_scanned_at == NEVER:
+                domain.path_scanned_at = datetime.now()
+                commit()
+                for url in interesting_paths.construct_urls(domain):
+                    yield scrapy.Request(url, callback=self.parse)
+            
             link_to_list = []
-
-
 
             if (not hasattr(self, "test") or self.test != "yes") and not host in TorSpider.spider_exclude:
                 for url in response.xpath('//a/@href').extract():
