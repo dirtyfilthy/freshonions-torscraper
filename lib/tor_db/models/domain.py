@@ -126,6 +126,10 @@ class Domain(db.Entity):
         d['hostname']   = self.host
         d['powered_by'] = self.powered_by
         d['portscanned_at'] = self.portscanned_at
+        d['useful_404_scanned_at'] = self.useful_404_scanned_at
+        d['useful_404'] = None
+        if self.useful_404_scanned_at != NEVER:
+            d['useful_404'] = d.useful_404
 
         if full == False:
             d['more_info'] = "http://%s/onion/%s/json" % (SITE_DOMAIN, self.host)

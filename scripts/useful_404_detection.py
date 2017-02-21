@@ -30,7 +30,7 @@ def scan_404():
 			code = int(res.getcode())		
 		except urllib2.HTTPError, e:
 			code = int(e.code)		
-		except URLError, socket.timeout:
+		except (URLError, socket.timeout) as e:
 			print("#%d failed (%s)" % (i, url))
 			continue
 		
