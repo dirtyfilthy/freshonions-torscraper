@@ -235,12 +235,25 @@ class TorSpider(scrapy.Spider):
     @db_session
     def useful_404_detection(self, response):
         domain = Domain.find_by_url(response.url)
+        is_php = re.match(".*\\.php$", response.url)
+        is_dir = re.match(".*/$", response.url)
         if not domain or response.status in [502, 503]:
             return None
         if response.status == 404:
-            domain.useful_404 = True
+            if is_php:
+                domain.useful_404_php = True
+            elif is_dir:
+                domain.useful_404_dir = True
+            else:
+                domain.useful_404     = True
         else:
-            domain.useful_404 = False
+            if is_php:
+                domain.useful_404_php = False
+            elif is_dir:
+                domain.useful_404_dir = False
+            else:
+                domain.useful_404     = False
+    
         domain.useful_404_scanned_at = datetime.now()
         return None
 
@@ -302,9 +315,26 @@ class TorSpider(scrapy.Spider):
                 for url in interesting_paths.construct_urls(domain):
                     yield scrapy.Request(url, callback=self.parse)
 
-            if domain.is_up and page.is_frontpage and domain.useful_404_scanned_at < (datetime.now() - timedelta(weeks=4)):
-                r = ''.join(random.choice(string.ascii_uppercase + string.ascii_lowercase) for _ in range(12))
+            # 404 detections
+
+            if domain.is_up and page.is_frontpage and domain.useful_404_scanned_at < (datetime.now() - timedelta(hours=12)):
+                
+                # standard
+
+                r = ''.join(random.choice(string.ascii_lowercase) for _ in range(random.getint(7,12)))
                 url = domain.index_url() + r
+                yield scrapy.Request(url, callback=self.useful_404_detection)
+
+                # php
+
+                r = ''.join(random.choice(string.ascii_lowercase) for _ in range(random.getint(7,12)))
+                url = domain.index_url() + r +".php"
+                yield scrapy.Request(url, callback=self.useful_404_detection)
+               
+                # dir
+
+                r = ''.join(random.choice(string.ascii_lowercase) for _ in range(random.getint(7,12)))
+                url = domain.index_url() + r +"/"
                 yield scrapy.Request(url, callback=self.useful_404_detection)
             
             link_to_list = []

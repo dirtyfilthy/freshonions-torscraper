@@ -16,24 +16,26 @@ import dateutil.parser
 import urlparse
 
 class Domain(db.Entity):
-    host         = Required(str)
-    port         = Required(int)
-    pages        = Set('Page')
-    ssl          = Required(bool)
-    is_up        = Required(bool)
-    title        = Optional(str)
-    server       = Optional(str)
-    powered_by   = Optional(str)
-    is_crap      = Required(bool, default=False)
-    is_fake      = Required(bool, default=False)
-    is_genuine   = Required(bool, default=False)
-    is_subdomain = Required(bool, default=False)
-    is_banned    = Required(bool, default=False)
-    useful_404   = Required(bool, default=False)
-    created_at   = Required(datetime)
-    visited_at   = Required(datetime)
-    last_alive   = Required(datetime)
-    open_ports   = Set('OpenPort')
+    host           = Required(str)
+    port           = Required(int)
+    pages          = Set('Page')
+    ssl            = Required(bool)
+    is_up          = Required(bool)
+    title          = Optional(str)
+    server         = Optional(str)
+    powered_by     = Optional(str)
+    is_crap        = Required(bool, default=False)
+    is_fake        = Required(bool, default=False)
+    is_genuine     = Required(bool, default=False)
+    is_subdomain   = Required(bool, default=False)
+    is_banned      = Required(bool, default=False)
+    useful_404     = Required(bool, default=False)
+    useful_404_php = Required(bool, default=False)
+    useful_404_dir = Required(bool, default=False)
+    created_at     = Required(datetime)
+    visited_at     = Required(datetime)
+    last_alive     = Required(datetime)
+    open_ports     = Set('OpenPort')
     next_scheduled_check = Required(datetime)
     dead_in_a_row   = Required(int, default=0)
     ssh_fingerprint = Optional('SSHFingerprint')
@@ -45,15 +47,25 @@ class Domain(db.Entity):
     @classmethod
     @db_session
     def domains_for_path(klass, path):
-        d = select(d for d in klass for p in d.pages if d.useful_404 == True and p.code in [200, 206] and p.path == path)
+        d = None
+        if interesting_paths.is_php(path):
+            d = select(d for d in klass for p in d.pages if d.useful_404_php == True and p.code in [200, 206] and p.path == path)
+        elif interesting_paths.is_dir(path):
+            d = select(d for d in klass for p in d.pages if d.useful_404_dir == True and p.code in [200, 206] and p.path == path)
+        else:
+            d = select(d for d in klass for p in d.pages if d.useful_404     == True and p.code in [200, 206] and p.path == path)
         return d
 
     @db_session
     def interesting_paths(self):
-        if not self.useful_404:
-            return []
-        p = select(p.path for p in tor_db.models.page.Page if p.domain==self and p.path in interesting_paths.PATHS and p.code in [200, 206])
-        return p
+        paths = []
+        if self.useful_404:
+            paths += select(p.path for p in tor_db.models.page.Page if p.domain==self and p.path in interesting_paths.PATHS_OTH and p.code in [200, 206])
+        if self.useful_404_dir:
+            paths += select(p.path for p in tor_db.models.page.Page if p.domain==self and p.path in interesting_paths.PATHS_DIR and p.code in [200, 206])
+        if self.useful_404_php:
+            paths += select(p.path for p in tor_db.models.page.Page if p.domain==self and p.path in interesting_paths.PATHS_PHP and p.code in [200, 206])
+        return paths
 
 
     def construct_url(self, path):
@@ -147,10 +159,15 @@ class Domain(db.Entity):
         d['hostname']   = self.host
         d['powered_by'] = self.powered_by
         d['portscanned_at'] = self.portscanned_at
+        
         d['useful_404_scanned_at'] = self.useful_404_scanned_at
         d['useful_404'] = None
+        d['useful_404_dir'] = None
+        d['useful_404_php'] = None
         if self.useful_404_scanned_at != NEVER:
             d['useful_404'] = self.useful_404
+            d['useful_404_dir'] = self.useful_404_dir
+            d['useful_404_php'] = self.useful_404_php
 
         if full == False:
             d['more_info'] = "http://%s/onion/%s/json" % (SITE_DOMAIN, self.host)
