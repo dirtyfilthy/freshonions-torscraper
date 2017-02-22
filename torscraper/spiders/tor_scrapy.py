@@ -235,8 +235,8 @@ class TorSpider(scrapy.Spider):
     @db_session
     def useful_404_detection(self, response):
         domain = Domain.find_by_url(response.url)
-        is_php = re.match(".*\\.php$", response.url)
-        is_dir = re.match(".*/$", response.url)
+        is_php = re.match(r".*\.php$", response.url)
+        is_dir = re.match(r".*/$", response.url)
         if not domain or response.status in [502, 503]:
             return None
         if response.status == 404:
@@ -317,23 +317,23 @@ class TorSpider(scrapy.Spider):
 
             # 404 detections
 
-            if domain.is_up and page.is_frontpage and domain.useful_404_scanned_at < (datetime.now() - timedelta(hours=12)):
+            if domain.is_up and page.is_frontpage and domain.useful_404_scanned_at < (datetime.now() - timedelta(hours=6)):
                 
                 # standard
 
-                r = ''.join(random.choice(string.ascii_lowercase) for _ in range(random.getint(7,12)))
+                r = ''.join(random.choice(string.ascii_lowercase) for _ in range(random.randint(7,12)))
                 url = domain.index_url() + r
                 yield scrapy.Request(url, callback=self.useful_404_detection)
 
                 # php
 
-                r = ''.join(random.choice(string.ascii_lowercase) for _ in range(random.getint(7,12)))
+                r = ''.join(random.choice(string.ascii_lowercase) for _ in range(random.randint(7,12)))
                 url = domain.index_url() + r +".php"
                 yield scrapy.Request(url, callback=self.useful_404_detection)
                
                 # dir
 
-                r = ''.join(random.choice(string.ascii_lowercase) for _ in range(random.getint(7,12)))
+                r = ''.join(random.choice(string.ascii_lowercase) for _ in range(random.randint(7,12)))
                 url = domain.index_url() + r +"/"
                 yield scrapy.Request(url, callback=self.useful_404_detection)
             
