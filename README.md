@@ -68,8 +68,10 @@ if elasticsearch is disabled there will be no fulltext search, however crawling 
     */5 * * * * /home/scraper/torscraper/scripts/pastebin.sh
     
     # portscan new onions               
-    1 */6 * * * /home/scraper/torscraper/scripts/portscan_up.sh             s
+    1 */6 * * * /home/scraper/torscraper/scripts/portscan_up.sh
 
+    # scrape stronghold paste
+    32 */2 * * * /home/scraper/torscraper/scripts/stronghold_paste_rip.sh
 
 
 ## Infrastructure

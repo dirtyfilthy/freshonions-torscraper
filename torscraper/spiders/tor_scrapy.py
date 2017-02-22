@@ -37,7 +37,7 @@ def domain_urls_resurrect():
     urls = []
     now = datetime.now()
     event_horizon = now - timedelta(days=30)
-    n_items = count(d for d in Domain if d.last_alive > event_horizon and d.is_up == False)
+    n_items = count(d for d in Domain if d.last_alive < event_horizon and d.is_up == False)
     for domain in Domain.select(lambda d: d.is_up == False and d.last_alive < event_horizon).random(n_items):
         urls.append(domain.index_url())
     return urls
@@ -317,7 +317,7 @@ class TorSpider(scrapy.Spider):
 
             # 404 detections
 
-            if domain.is_up and page.is_frontpage and domain.useful_404_scanned_at < (datetime.now() - timedelta(hours=6)):
+            if domain.is_up and page.is_frontpage and domain.useful_404_scanned_at < (datetime.now() - timedelta(weeks=2)):
                 
                 # standard
 
