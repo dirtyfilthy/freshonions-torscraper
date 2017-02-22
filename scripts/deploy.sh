@@ -22,9 +22,7 @@ echo $VERSION_STRING > $ETCDIR/version_string
 
 echo "### Deploying $VERSION_STRING: ###"
 
-echo "Updating schema.sql..."
-ssh $FRONTEND_USER@$FRONTEND_HOST "cd $TOP_DIR/scripts/ && ./update_schema.sh"
-scp $FRONTEND_USER@$FRONTEND_HOST:$TOP_DIR/schema.sql $BASEDIR/schema.sql
+$SCRIPTDIR/update_and_pull_schema.sh
 
 echo "Removing old source files.."
 (
