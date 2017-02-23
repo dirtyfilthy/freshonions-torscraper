@@ -6,7 +6,7 @@ DIR=$( cd "$(dirname "$0")" ; pwd -P )
 echo "rsyncing to upstream hosts..."
 (
 	cd $BASEDIR/..
-	rsync -a -i --exclude=.git $TOP_DIR/ $BACKEND_USER@$BACKEND_HOST:$TOP_DIR
+	rsync -a -i --exclude=.git --exclude=var $TOP_DIR/ $BACKEND_USER@$BACKEND_HOST:$TOP_DIR
 )
 
 

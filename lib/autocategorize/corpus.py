@@ -1,3 +1,4 @@
+import os
 from tor_db import *
 from stop_words import get_stop_words
 from nltk.tokenize import RegexpTokenizer
@@ -6,15 +7,25 @@ from gensim import corpora, models
 
 
 EXTRA_STOP_WORDS = [
-			"http"
+			"http",
+			"nbsp",
+			"color",
+			"border",
+			"background"
 	]
+
+DICTIONARY_PATH = os.environ['BASEDIR']+"/var/lib/dictionary"
+CORPUS_PATH = os.environ['BASEDIR']+"/var/lib/corpus.mm"
+MODEL_PATH = os.environ['BASEDIR']+"/var/lib/lda.model"
 
 class FrontpageDocuments(object):
 
+	@db_session
 	def __iter__(self):
-		domains = select(d for d in Domain if d.is_up == True)
+		domains = select(d for d in Domain if d.is_up == True and d.is_fake == False and d.is_subdomain == False)
 		for domain in domains:
 			page = select(p for p in Page if p.domain == domain and p.is_frontpage == True).first()
+			commit()
 			if not page:
 				continue
 			body_stripped = page.get_body_stripped()
@@ -38,7 +49,7 @@ def stem(tokenized_doc):
 
 def clean_tokenized_document(tokenized_doc):
 	cleaned = remove_stopwords(tokenized_doc)
-	cleaned = stem(tokenized_doc)
+	cleaned = stem(cleaned)
 	return cleaned
 
 def tokenize_documents(documents):
@@ -49,12 +60,19 @@ def tokenize_documents(documents):
 
 def build_dictionary(tokenized_documents):
 	dictionary = corpora.Dictionary(tokenized_documents)
-	dictionary.filter_extremes(no_below=5, no_above=1.01)
+	dictionary.filter_extremes(no_below=5, no_above=0.3)
 	return dictionary
 
 def build_corpus(tokenized_documents, dictionary):
 	for text in  tokenized_documents:
 		yield dictionary.doc2bow(text)
+
+def save_corpus(corpus):
+	corpora.MmCorpus.serialize(CORPUS_PATH, corpus)
+
+def load_corpus():
+	corpus = corpora.MmCorpus(CORPUS_PATH)
+	return corpus
 
 
 

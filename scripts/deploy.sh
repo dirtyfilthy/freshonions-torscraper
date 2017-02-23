@@ -43,8 +43,8 @@ DIST_TAR="$BASEDIR/web/static/torscraper-$VERSION_STRING.tar.gz"
 echo "rsyncing to upstream hosts..."
 (
 	cd $BASEDIR/..
-	rsync -a -i --exclude=.git --delete-after $TOP_DIR/ $BACKEND_USER@$BACKEND_HOST:$TOP_DIR
-	rsync -a -i --exclude=.git --delete-after $TOP_DIR/ $FRONTEND_USER@$FRONTEND_HOST:$TOP_DIR
+	rsync -a -i --exclude=.git --exclude=var --delete-after $TOP_DIR/ $BACKEND_USER@$BACKEND_HOST:$TOP_DIR
+	rsync -a -i --exclude=.git --exclude=var --delete-after $TOP_DIR/ $FRONTEND_USER@$FRONTEND_HOST:$TOP_DIR
 )
 # kick the service
 echo "Restarting $SERVICE_NAME frontend service..."

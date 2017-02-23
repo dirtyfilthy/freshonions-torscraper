@@ -10,5 +10,5 @@ Twisted
 txsocksx
 gensim
 stop-words
-ntlk
+nltk==3.2.1
 
