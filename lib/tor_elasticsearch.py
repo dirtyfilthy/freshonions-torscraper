@@ -28,6 +28,15 @@ class JSONSerializerPython2(serializer.JSONSerializer):
         except (ValueError, TypeError) as e:
             raise exceptions.SerializationError(data, e)
 
+
+def elasticsearch_retrieve_page_by_id(page_id):
+    query = Search().filter(Q("term", nid=int(page_id)))[:1]
+    result = query.execute()
+    if result.hits.total == 0:
+        return None
+    return result.hits[0]
+
+
 def elasticsearch_pages(context, sort, page):
     result_limit = int(os.environ['RESULT_LIMIT'])
     max_result_limit = int(os.environ['MAX_RESULT_LIMIT'])
