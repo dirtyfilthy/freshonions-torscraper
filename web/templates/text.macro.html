@@ -1,0 +1,16 @@
+
+{% macro maybe_bold(text, is_bold) %}
+{% if is_bold %}
+<b>{{text}}</b>
+{% else %}
+{{text}}
+{% endif %}
+{% endmacro %}
+
+{% macro good_or_bad(good, bad, is_good, is_bold=False) %}
+{% if is_good %}
+<span class="good">{{ maybe_bold(good, is_bold) }}</span>
+{% else %}
+<span class="bad">{{  maybe_bold(bad,  is_bold) }}</span>
+{% endif %}
+{% endmacro %}

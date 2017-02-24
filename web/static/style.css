@@ -124,7 +124,7 @@ div#stats {
 	letter-spacing: 0.2em;
 }
 
-.genuine, #logo pre, .pagination em {
+.genuine, .good, #logo pre, .pagination em {
 	color:#00CC00;
 }
 
@@ -137,7 +137,7 @@ div#stats {
 	font-style: normal;
 }
 
-.fake {
+.fake, .bad {
 	color:#990000;
 }
 
