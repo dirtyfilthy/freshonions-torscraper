@@ -118,6 +118,10 @@ div#stats {
     margin: 0px;
 }
 
+.warning {
+	color:#DD8500;
+}
+
 
 .tag{
 	font-weight:bold;
@@ -231,7 +235,7 @@ tr.dead td a:hover {
 }
 
 #info_panel #dates{
-	width:350px;
+	width:400px;
 	margin-right: 0.25cm;
 	margin-bottom: 0.25cm;
 	border-width: 2px;

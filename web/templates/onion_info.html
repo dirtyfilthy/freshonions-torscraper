@@ -10,6 +10,10 @@
 <div id="dates">
 <table>
 <tr>
+<td>Status</td>
+<td>{{text.status_text(domain.status())}}</td>
+</tr>
+<tr>
 <td>Created At</td>
 <td>{{domain.created_at}}</td>
 </tr>
@@ -61,6 +65,27 @@
 </td>
 </tr>
 {% endif %}
+{% if domain.useful_404_scanned_at != NEVER %}
+<tr>
+<td>Useful 404 (Gen)</td>
+<td>{{ text.good_or_bad("Yes", "No", domain.useful_404,     is_bold=True) }}</td>
+</td>
+</tr>
+
+<tr>
+<td>Useful 404 (PHP)</td>
+<td>{{ text.good_or_bad("Yes", "No", domain.useful_404_php, is_bold=True) }}</td>
+</td>
+</tr>
+
+<tr>
+<td>Useful 404 (Dir)</td>
+<td>{{ text.good_or_bad("Yes", "No", domain.useful_404_dir, is_bold=True) }}</td>
+</td>
+</tr>
+
+{% endif %}
+
 
 </table>
 </div>
@@ -124,34 +149,6 @@ No interesting paths in database.
 </li>
 {% endfor %}
 </ul>
-{% endif %}
-{% if domain.useful_404_scanned_at != NEVER %}
-<p>
-Useful 404 messages:
-<table>
-<thead>
-	<tr>
-		<th>Type</th><th>Useful 404</th>
-	</tr>
-</thead>
-<tbody>
-	<tr>
-		<td>General</td>
-		<td>{{ text.good_or_bad("Yes", "No", domain.useful_404,     is_bold=True) }}</td>
-	</tr>
-	<tr>
-		<td>PHP</td>
-		<td>{{ text.good_or_bad("Yes", "No", domain.useful_404_php, is_bold=True) }}</td>
-	</tr>
-	<tr>
-		<td>Dir</td>
-		<td>{{ text.good_or_bad("Yes", "No", domain.useful_404_dir, is_bold=True) }}</td>
-	</tr>
-</tbody>
-</table>
-
-
-</p>
 {% endif %}
 
 </div>

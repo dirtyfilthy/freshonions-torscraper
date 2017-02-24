@@ -14,3 +14,15 @@
 <span class="bad">{{  maybe_bold(bad,  is_bold) }}</span>
 {% endif %}
 {% endmacro %}
+
+
+{% macro status_text(status, alive_text="Alive", maybe_text="Problems", dead_text="Dead", is_bold=True) %}
+{% if status == "alive" %}
+<span class="good">{{    maybe_bold(alive_text, is_bold) }}</span>
+{% elif status == "maybe" %}
+<span class="warning">{{ maybe_bold(maybe_text, is_bold) }}</span>
+{% else %}
+<span class="bad">{{     maybe_bold(dead_text,  is_bold) }}</span>
+{% endif %}
+{% endmacro %}
+
