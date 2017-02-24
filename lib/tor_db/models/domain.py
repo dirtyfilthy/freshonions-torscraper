@@ -35,6 +35,8 @@ class Domain(db.Entity):
     created_at     = Required(datetime)
     visited_at     = Required(datetime)
     last_alive     = Required(datetime)
+    clone_group    = Optional('CloneGroup')
+    new_clone_group = Optional('CloneGroup')
     open_ports     = Set('OpenPort')
     next_scheduled_check = Required(datetime)
     dead_in_a_row   = Required(int, default=0)
@@ -89,6 +91,11 @@ class Domain(db.Entity):
         op = map(lambda p: p.port, list(self.open_ports))
         web_ports = select(d.port for d in Domain if d.host == self.host and d.is_up == True)
         return list(set(op + list(web_ports)))
+
+    @db_session
+    def clones(self):
+        d = select(d for d in Domain if d.clone_group == self.clone_group and d.id != self.id)
+        return d
 
 
     def before_insert(self):
@@ -182,11 +189,13 @@ class Domain(db.Entity):
             links_from = self.links_from()
             emails     = self.emails()
             btc_addr   = self.bitcoin_addresses()
+            our_clones  = self.clones()
             d['links_to']   = []
             d['links_from'] = [] 
             d['emails']     = []
             d['interesting_paths'] = map(lambda p: self.construct_url(p), self.interesting_paths())
             d['bitcoin_addresses'] = []
+            d['clones'] = map(lambda d: d.index_url(), our_clones)
             d['open_ports'] = self.get_open_ports()
             for link_to in links_to:
                 d['links_to'].append(link_to.index_url())

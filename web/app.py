@@ -121,6 +121,26 @@ def onion_info_json(onion):
 	domain = select(d for d in Domain if d.host==onion).first()
 	return jsonify(domain.to_dict(full=True))
 
+@app.route('/clones/<onion>')
+@db_session
+def clones_list(onion):
+	domain = select(d for d in Domain if d.host==onion).first()
+	if not domain:
+		return render_template('error.html', code=404, message="Onion not found."), 404
+	domains = domain.clones()
+	return render_template('clones_list.html', onion=onion, domains=domains) 
+
+@app.route('/clones/<onion>/json')
+@db_session
+def clones_list_json(onion):
+	domain = select(d for d in Domain if d.host==onion).first()
+	if not domain:
+		return render_template('error.html', code=404, message="Onion not found."), 404
+	domains = domain.clones()
+	return jsonify(Domain.to_dict_list(domains))
+
+
+
 @app.route('/path/<path:path>')
 @db_session
 def path_list(path):

@@ -2,6 +2,7 @@ from pony.orm import *
 from tor_db.db import db
 from tor_db.constants import *
 from tor_db.models.domain import *
+from tor_elasticsearch import *
 from datetime import *
 import urlparse
 class Page(db.Entity):
@@ -51,6 +52,20 @@ class Page(db.Entity):
 
     def before_update(self):
         self.path  = Page.path_from_url(self.url)
+
+    def get_body_stripped(self):
+        res = elasticsearch_retrieve_page_by_id(self.id)
+        if res:
+            return elasticsearch_retrieve_page_by_id(self.id)["body_stripped"]
+        else:
+            return None
+
+    def get_body(self):
+        res = elasticsearch_retrieve_page_by_id(self.id)
+        if res:
+            return elasticsearch_retrieve_page_by_id(self.id)["body"]
+        else:
+            return None
 
 
     def got_server_response(self):

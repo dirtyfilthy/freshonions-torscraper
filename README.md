@@ -12,6 +12,9 @@ This is a copy of the source for the http://zlal32teyptf4tvi.onion hidden servic
 * Finds bitcoin addresses across hidden services
 * Shows incoming / outgoing links to onion domains
 * Up-to-date alive / dead hidden service status
+* Portscanner
+* Search for "interesting" URL paths, detects useful 404 support
+* Detect clones
 * Doesn't fuck around in general.
 
 ## Licence
@@ -55,7 +58,7 @@ if elasticsearch is disabled there will be no fulltext search, however crawling 
 
 ### cronjobs
 
-    # harvest onions  from various sources
+    # harvest onions from various sources
     1 18 * * * /home/scraper/torscraper/scripts/harvest.sh
     
     # get ssh fingerprints for new sites
@@ -72,6 +75,9 @@ if elasticsearch is disabled there will be no fulltext search, however crawling 
 
     # scrape stronghold paste
     32 */2 * * * /home/scraper/torscraper/scripts/stronghold_paste_rip.sh
+    
+    # detect clones
+    16 3 * * * /home/scraper/torscraper/scripts/detect_clones.sh
 
 
 ## Infrastructure
