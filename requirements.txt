@@ -11,4 +11,7 @@ txsocksx
 gensim
 stop-words
 nltk==3.2.1
+scikit-learn
+scipy
+numpy
 
