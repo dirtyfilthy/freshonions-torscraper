@@ -249,12 +249,18 @@ tr.dead td a:hover {
 	width: 100%;
 }
 
+#info_panel #dates table tr td{
+	width: 50%;
+}
+
 
 thead, thead tr {
 	background-color: #333333;
 }
 
-
+table.domain_list thead tr th {
+	white-space: nowrap;
+}
 
 th, td {
 	text-align: left;
@@ -273,8 +279,8 @@ td.domain {
 td.title {
 	word-wrap:break-all;
 	overflow-wrap: break-all;
-	display: inline-block;
 	white-space:normal;
+	width: 99%;
 }
 
 td.title em {
@@ -285,6 +291,8 @@ td.title em {
 
 td.ago {
 	width: 100px;
+	white-space: nowrap;
+	padding-right:10px;
 }
 
 td.info_link {
