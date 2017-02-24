@@ -189,6 +189,7 @@ No SSH fingerprint in database.
 {% endif %}
 </div>
 
+{% if is_elasticsearch_enabled() %}
 <div id="clones">
 <h3>Clones</h3>
 {% if not domain.clone_group %}
@@ -206,6 +207,7 @@ This site appears to have {{n_clones - 1}} clones<sup>*</sup>. <a href="{{url_fo
 {% endif %}
 
 </div>
+{% endif %}
 
 
 

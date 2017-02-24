@@ -6,6 +6,7 @@ This is a copy of the source for the http://zlal32teyptf4tvi.onion hidden servic
 
 * Crawls the darknet looking for new hidden service
 * Find hidden services from a number of clearnet sources
+* Optional fulltext elasticsearch support
 * Marks clone sites of the /r/darknet superlist
 * Finds SSH fingerprints across hidden services
 * Finds email addresses across hidden  services
@@ -14,7 +15,7 @@ This is a copy of the source for the http://zlal32teyptf4tvi.onion hidden servic
 * Up-to-date alive / dead hidden service status
 * Portscanner
 * Search for "interesting" URL paths, detects useful 404 support
-* Detect clones
+* Detect clones (requires elasticsearch)
 * Doesn't fuck around in general.
 
 ## Licence

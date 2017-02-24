@@ -26,6 +26,7 @@ app.jinja_env.globals.update(len=len)
 app.jinja_env.globals.update(select=select)
 app.jinja_env.globals.update(int=int)
 app.jinja_env.globals.update(break_long_words=tor_text.break_long_words)
+app.jinja_env.globals.update(is_elasticsearch_enabled=is_elasticsearch_enabled)
 
 @app.context_processor
 def inject_elasticsearch():

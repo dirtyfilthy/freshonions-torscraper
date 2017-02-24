@@ -1,6 +1,7 @@
 from tor_db import *
 from sklearn.feature_extraction.text import TfidfVectorizer
 from datetime import *
+from tor_elasticsearch import *
 
 CLONE_THRESHOLD = 0.9
 
@@ -78,6 +79,9 @@ def get_html():
 
 
 def detect():
+	if not is_elasticsearch_enabled():
+		raise NotImplementedError("Sorry, need elasticsearch support")
+
 	domain_index, frontpage_index = get_html()
 	print("Performing similarity matrix comparison...")
 	tfidf = TfidfVectorizer().fit_transform(frontpage_index)
