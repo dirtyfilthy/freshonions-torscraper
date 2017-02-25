@@ -224,7 +224,10 @@ class FrontpageDocuments(object):
 
 	@db_session
 	def __iter__(self):
-		domains = select(d for d in Domain if d.is_up == True and d.is_fake == False and d.is_subdomain == False)
+
+		# select only one page per clone group
+
+		domains = select(d for d in Domain if d.clone_group == None or d.id=max(d2.id for d2 in Domain if d2.clone_group == d.clone_group ))
 		for domain in domains:
 			page = select(p for p in Page if p.domain == domain and p.is_frontpage == True).first()
 			commit()
