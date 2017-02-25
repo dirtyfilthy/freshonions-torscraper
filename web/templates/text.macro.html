@@ -26,3 +26,11 @@
 {% endif %}
 {% endmacro %}
 
+{% macro superscript(text) %}
+<sup><span class="small">{{text}}</span></sup>
+{% endmacro %}
+
+{% macro nbsp(text) %}
+{{text.replace(" ","&nbsp;")|safe}}
+{% endmacro %}
+

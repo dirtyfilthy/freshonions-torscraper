@@ -7,3 +7,4 @@ from tor_db.models.open_port import *
 from tor_db.models.clone_group import *
 from tor_db.models.request_log import *
 from tor_db.models.search_log import *
+from tor_db.models.daily_stat import *

@@ -1,0 +1,118 @@
+{% extends "layout.html" %}
+{% from 'ruler.macro.html' import ruler %}
+{% import 'text.macro.html' as text %}
+{% from 'domain_table.macro.html' import sort_url %}
+{% block body %}
+
+{{ ruler() }}
+
+<div class="contents">
+<h2>Stats</h2>
+<div class="stat_box">
+<table>
+
+<thead>
+<tr>
+<th class="left_column">
+Statistics
+</th>
+<th class="right_column">
+</th>
+</tr>
+</thead>
+
+<tbody>
+
+<tr>
+<td class="left_column">Unique Visitors (24 hours)</td>
+<td class="right_column">{{stats['unique_visitors']}}</td>
+</tr>
+
+<tr>
+<td class="left_column">Total Onions{{text.superscript("1")}}</td>
+<td class="right_column">{{stats['total_onions']}}</td>
+</tr>
+
+<tr>
+<td class="left_column">Total Onions (all){{text.superscript("2")}}</td>
+<td class="right_column">{{stats['total_onions_all']}}</td>
+</tr>
+
+<tr>
+<td class="left_column">New Onions (24 hours){{text.superscript("1")}}</td>
+<td class="right_column">{{stats['new_onions']}}</td>
+</tr>
+
+<tr>
+<td class="left_column">New Onions (all, 24 hours){{text.superscript("2")}}</td>
+<td class="right_column">{{stats['new_onions_all']}}</td>
+</tr>
+
+<tr>
+<td class="left_column">Total Clones</td>
+<td class="right_column">{{stats['total_clones']}}</td>
+</tr>
+
+<tr>
+<td class="left_column">/private_key</td>
+<td class="right_column"><a href="{{url_for('path_list',path='private_key')}}">{{len(Domain.domains_for_path('/private_key'))}}</a></td>
+</tr>
+
+<tr>
+<td class="left_column">/server-status</a></td>
+<td class="right_column"><a href="{{url_for('path_list',path='server-status')}}">{{len(Domain.domains_for_path('/server-status'))}}</a></td>
+</tr>
+
+<tr>
+<td class="left_column">IRC Servers</td>
+<td class="right_column"><a href="{{url_for('port_list', ports='6667')}}">{{irc_servers}}</a></td>
+</tr>
+
+<tr>
+<td class="left_column">Banned Domains</td>
+<td class="right_column">{{banned}}</a></td>
+</tr>
+
+</tbody>
+</table>
+</div>
+
+<div class="stat_box">
+<table>
+<thead>
+<tr>
+
+<th class="left_column">
+Last 10 Search Terms{{text.superscript("3")}}
+</th>
+<th class="right_column">
+Time
+</th>
+</tr>
+</thead>
+<tbody>
+{% for sl in searches %}
+<tr>
+<td class="left_column">
+{{sort_url(sl.searchterms,sl.context["sort"],sl.context)}}
+</td>
+<td class="nowrap right_column">
+{{text.nbsp(Domain.time_ago(sl.created_at))}}
+</td>
+</tr>
+{% endfor %}
+</tbody>
+</table>
+</div>
+
+<div class="footer">
+<span class="small">
+<ol>
+<li>Includes sites that would normally appear on the front index and that have been alive at least once in the past 24 hours</li>
+<li>Includes subdomains and assorted other flotsam</li>
+<li>I'm watching you</li>
+</ol>
+</span>
+</div>
+</div>
+{% endblock %}

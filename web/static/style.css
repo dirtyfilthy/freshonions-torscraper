@@ -337,3 +337,72 @@ table.domain_list {
 	clear: both;
 	padding:5px;
 }
+
+.stat_box {
+	width: 48%;
+	margin-left: 0px;
+	margin-right:0px;
+	padding: 5px;
+	float: left;
+	display: block;
+	
+}
+
+.stat_box table {
+	width: 100%;
+	border-width: 2px;
+	border-color: #333333;
+	border-style: solid;
+}
+
+.stat_box table tr {
+	width: 100%;
+	height: 1.5em;
+}
+
+.stat_box table tbody tr {
+	width: 100%;
+	height: 1.5em;
+}
+
+.stat_box table thead tr {
+	width: 100%;
+	height: 1.5em;
+}
+
+
+.stat_box table thead tr th {
+	height: 1.5em;
+	vertical-align:middle;
+}
+
+.stat_box table tbody tr td {
+	height: 1.5em;
+	vertical-align:middle;
+}
+
+.stat_box table tbody tr td.left_column {
+	width: 99%;
+}
+
+.stat_box table thead tr th.left_column {
+	width: 99%;
+}
+
+.stat_box table tbody tr td.right_column {
+	width: 200px;
+}
+
+.stat_box table thead tr th.right_column {
+	width: 200px;
+}
+
+
+
+.nowrap {
+	white-space: nowrap;
+}
+
+.footer {
+	clear: both;
+}

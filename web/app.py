@@ -322,5 +322,22 @@ def faq():
 	return render_template('faq.html')
 
 
+@app.route('/stats')
+@db_session
+def stats():
+	statz = DailyStat.get_stats()
+	search_terms = select(sl.searchterms for sl in SearchLog if sl.has_searchterms == True 
+						and sl.is_firstpage == True and sl.results > 0).order_by(raw_sql('sl.created_at DESC')).limit(10)
+
+	searches = map(lambda st: select(sl for sl in SearchLog if sl.has_searchterms == True 
+						and sl.is_firstpage == True and sl.results > 0 and 
+						sl.searchterms == st).order_by(desc(SearchLog.created_at)).first(), search_terms)
+
+	irc_servers = count(d for d in Domain for op in OpenPort if op.domain==d and op.port == 6667)
+	banned = count(d for d in Domain if d.is_banned == True)
+	return render_template('stats.html', stats=statz, searches=searches, irc_servers=irc_servers, banned=banned)
+
+
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0")
