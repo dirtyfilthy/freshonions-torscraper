@@ -25,6 +25,6 @@ print "Building LDA model..."
 ldamodel = gensim.models.ldamodel.LdaModel(corp, num_topics=TOPICS, id2word = dictionary, passes=PASSES, chunksize=CHUNKSIZE)
 print "Saving model"
 ldamodel.save(corpus.MODEL_PATH)
-print(ldamodel.print_topics(num_topics=TOPICS, num_words=4))
+print(ldamodel.print_topics(num_topics=TOPICS, num_words=10))
 print "Done!"
 sys.exit(0)

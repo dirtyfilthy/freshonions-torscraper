@@ -4,6 +4,7 @@ from stop_words import get_stop_words
 from nltk.tokenize import RegexpTokenizer
 from nltk.stem.porter import PorterStemmer
 from gensim import corpora, models
+from datetime import *
 import re
 
 
@@ -85,7 +86,7 @@ EXTRA_STOP_WORDS = [
 			"browser",
 			"year",
 			"january",
-			"febuary",
+			"february",
 			"march",
 			"april",
 			"may",
@@ -113,7 +114,24 @@ EXTRA_STOP_WORDS = [
 			"amp",
 			"img",
 			"float",
-			"black"
+			"black",
+			"string",
+			"array",
+			"src",
+			"href"
+			"http",
+			"php",
+			"header",
+			"monday",
+			"tuesday",
+			"wednesday",
+			"thursday",
+			"friday",
+			"saturday",
+			"sunday",
+			"facebook",
+			"facebookcorewwwi",
+			"www"
 	]
 
 POST_STEM_STOP_WORDS = [
@@ -212,7 +230,11 @@ POST_STEM_STOP_WORDS = [
 			"jpg",
 			"document",
 			"woocommerc",
-			"vertic"
+			"vertic",
+			"februari",
+			"toggl",
+			"valu",
+			"modul"
 
 	]
 
@@ -225,18 +247,23 @@ class FrontpageDocuments(object):
 	@db_session
 	def __iter__(self):
 
+		event_horizon = datetime.now() - timedelta(weeks=1)
+
 		# select only one page per clone group
 
-		domains = select(d for d in Domain if d.clone_group == None or d.id=max(d2.id for d2 in Domain if d2.clone_group == d.clone_group ))
+		domains = select(d for d in Domain if d.last_alive > event_horizon and (d.clone_group == None or d.id==max(d2.id for d2 in Domain if d2.clone_group == d.clone_group) ))
 		for domain in domains:
-			page = select(p for p in Page if p.domain == domain and p.is_frontpage == True).first()
+			pages = select(p for p in Page if p.domain == domain and (p.code == 200 or p.code == 206)).order_by(Page.created_at).limit(10)
 			commit()
-			if not page:
+			text=""
+			for page in pages:
+				body_stripped = page.get_body_stripped()
+				if not body_stripped or len(body_stripped) < 1000:
+					continue
+				text = text + body_stripped
+			if len(text) < 5000:
 				continue
-			body_stripped = page.get_body_stripped()
-			if not body_stripped:
-				continue
-			yield body_stripped
+			yield text
 
 
 def tokenize(doc):
