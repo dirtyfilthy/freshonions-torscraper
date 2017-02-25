@@ -322,6 +322,16 @@ def faq():
 	return render_template('faq.html')
 
 
+@app.route('/bot/<kind>')
+@db_session
+def bot(kind):
+	now = datetime.now()
+	hb = HeadlessBot.get(uuid=session["uuid"])
+	if hb is None:
+		hb=HeadlessBot(uuid=session["uuid"], kind=kind, created_at=now)
+		commit()
+	return render_template('error.html', code=404, message="Printer on fire."), 404
+
 @app.route('/stats')
 @db_session
 def stats():
