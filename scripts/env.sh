@@ -27,3 +27,6 @@ export MAX_RESULT_LIMIT
 . $ETCDIR/site
 export SITE_PATH
 export SITE_DOMAIN
+
+. $ETCDIR/private/flask.secret
+export FLASK_SECRET

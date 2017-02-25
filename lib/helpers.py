@@ -35,9 +35,9 @@ def render_elasticsearch(context, json=False):
 	domain_set = domain_set_dict.keys()
 	domain_precache = select(d for d in Domain if d.id in domain_set)
 	if json:
-		return json_elastic_search_results(results, context, orig_count)
+		return (json_elastic_search_results(results, context, orig_count), orig_count)
 	else:
-		return render_template('index_fulltext.html', results=results, context=context, orig_count=orig_count, n_results=n_results, page=page, per_page=result_limit, sort=sort, is_more = is_more)
+		return (render_template('index_fulltext.html', results=results, context=context, orig_count=orig_count, n_results=n_results, page=page, per_page=result_limit, sort=sort, is_more = is_more), orig_count)
 
 
 @db_session
@@ -54,10 +54,10 @@ def maybe_domain_search(context, json=False):
 		is_more = (orig_count > result_limit)
 		
 		if json:
-			return json_domain_search_results(query, context, orig_count)
+			return (json_domain_search_results(query, context, orig_count), orig_count)
 		else:
-			return render_template('index_domains_only.html', domains=query, context=context, orig_count=orig_count, n_results=n_results, per_page=result_limit, page=page, sort=sort, is_more = is_more)
-	return None
+			return (render_template('index_domains_only.html', domains=query, context=context, orig_count=orig_count, n_results=n_results, per_page=result_limit, page=page, sort=sort, is_more = is_more), orig_count)
+	return (None, 0)
 
 def maybe_search_redirect(search):
 	search = search.strip()
@@ -88,8 +88,9 @@ def build_search_context():
 	context["page"] = page
 
 	if not context["search"]:
-		context["search"]=""
+		context["search"] = ""
 	context["search"] = context["search"].strip()
+	context["raw_search"] = context["search"]
 	context["search"] = banned.delete_banned(context["search"])
 
 	if not context["rep"]:
