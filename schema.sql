@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.5.54, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.17, for Linux (x86_64)
 --
 -- Host: groan    Database: tor
 -- ------------------------------------------------------
--- Server version	5.6.33-0ubuntu0.14.04.1
+-- Server version	5.7.17
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -106,7 +106,7 @@ CREATE TABLE `domain` (
   CONSTRAINT `fk_domain__clone_group` FOREIGN KEY (`clone_group`) REFERENCES `clone_group` (`id`),
   CONSTRAINT `fk_domain__new_clone_group` FOREIGN KEY (`new_clone_group`) REFERENCES `clone_group` (`id`),
   CONSTRAINT `fk_domain__ssh_fingerprint` FOREIGN KEY (`ssh_fingerprint`) REFERENCES `ssh_fingerprint` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=45565 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=45643 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -156,7 +156,7 @@ CREATE TABLE `open_port` (
   PRIMARY KEY (`id`),
   KEY `idx_open_port__domain` (`domain`),
   CONSTRAINT `fk_open_port__domain` FOREIGN KEY (`domain`) REFERENCES `domain` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5177 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=5338 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -182,7 +182,7 @@ CREATE TABLE `page` (
   KEY `idx_page__domain` (`domain`),
   KEY `page_path_idx` (`path`(255)),
   CONSTRAINT `fk_page__domain` FOREIGN KEY (`domain`) REFERENCES `domain` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1390497 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1408487 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -203,6 +203,53 @@ CREATE TABLE `page_link` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `request_log`
+--
+
+DROP TABLE IF EXISTS `request_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `request_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(36) COLLATE utf8_unicode_ci DEFAULT '',
+  `uuid_is_fresh` tinyint(1) DEFAULT '1',
+  `created_at` datetime DEFAULT NULL,
+  `agent` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `path` varchar(1024) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `full_path` varchar(1024) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `referrer` varchar(1024) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_reqlog_created_at` (`created_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `search_log`
+--
+
+DROP TABLE IF EXISTS `search_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `search_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `request_log` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `has_searchterms` tinyint(1) DEFAULT '0',
+  `searchterms` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `has_raw_searchterms` tinyint(1) DEFAULT '0',
+  `raw_searchterms` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `is_firstpage` tinyint(1) DEFAULT '0',
+  `is_json` tinyint(1) DEFAULT '0',
+  `context` varchar(1024) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `results` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_searchlog_created_at` (`created_at`),
+  KEY `idx_search_log__request_log` (`request_log`),
+  CONSTRAINT `fk_search_log__request_log` FOREIGN KEY (`request_log`) REFERENCES `request_log` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `ssh_fingerprint`
 --
 
@@ -214,7 +261,7 @@ CREATE TABLE `ssh_fingerprint` (
   `fingerprint` varchar(450) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `fingerprint` (`fingerprint`)
-) ENGINE=InnoDB AUTO_INCREMENT=115 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=116 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -226,4 +273,4 @@ CREATE TABLE `ssh_fingerprint` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-02-24  9:36:09
+-- Dump completed on 2017-02-25  1:59:20
