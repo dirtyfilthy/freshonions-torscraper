@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% from 'domain_table.macro.html' import domain_table %}}
 {% from 'ruler.macro.html' import ruler %}
+{% import 'text.macro.html' as text %}
 {% block body %}
 
 {{ ruler() }}
@@ -8,6 +9,10 @@
 <div id="info_panel" class="contents">
 <div id="dates">
 <table>
+<tr>
+<td>Status</td>
+<td>{{text.status_text(domain.status())}}</td>
+</tr>
 <tr>
 <td>Created At</td>
 <td>{{domain.created_at}}</td>
@@ -60,6 +65,27 @@
 </td>
 </tr>
 {% endif %}
+{% if domain.useful_404_scanned_at != NEVER %}
+<tr>
+<td>Useful 404 (Gen)</td>
+<td>{{ text.good_or_bad("Yes", "No", domain.useful_404,     is_bold=True) }}</td>
+</td>
+</tr>
+
+<tr>
+<td>Useful 404 (PHP)</td>
+<td>{{ text.good_or_bad("Yes", "No", domain.useful_404_php, is_bold=True) }}</td>
+</td>
+</tr>
+
+<tr>
+<td>Useful 404 (Dir)</td>
+<td>{{ text.good_or_bad("Yes", "No", domain.useful_404_dir, is_bold=True) }}</td>
+</td>
+</tr>
+
+{% endif %}
+
 
 </table>
 </div>
@@ -124,15 +150,6 @@ No interesting paths in database.
 {% endfor %}
 </ul>
 {% endif %}
-{% if domain.useful_404_scanned_at != NEVER %}
-<p>
-{% if domain.useful_404 %}
-This site supports useful 404 messages.
-{% else %}
-This site does not support useful 404 messages.
-{% endif %}
-</p>
-{% endif %}
 
 </div>
 
@@ -189,8 +206,28 @@ No SSH fingerprint in database.
 {% endif %}
 </div>
 
-
+{% if is_elasticsearch_enabled() %}
+<div id="clones">
+<h3>Clones</h3>
+{% if not domain.clone_group %}
+<p>
+This site appears to have no clones.
 </p>
+{% else %}
+{% set n_clones = len(domain.clone_group.domains) %}
+<p>
+This site appears to have {{n_clones - 1}} clones<sup>*</sup>. <a href="{{url_for('clones_list', onion=domain.host)}}">[VIEW]</a>
+</p>
+<p>
+<span class="small"><sup>*</sup>Note that except for sites in the /r/darknetmarkets superlist, we cannot tell which &quot;clone&quot; was the original. </span>
+</p>
+{% endif %}
+
+</div>
+{% endif %}
+
+
+
 <div class="links links_to">
 <h3>Links to this domain:</h3>
 {% if links_to.count()!=0 %}

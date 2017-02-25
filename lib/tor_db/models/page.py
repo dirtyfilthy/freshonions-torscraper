@@ -60,6 +60,13 @@ class Page(db.Entity):
         else:
             return None
 
+    def get_body(self):
+        res = elasticsearch_retrieve_page_by_id(self.id)
+        if res:
+            return elasticsearch_retrieve_page_by_id(self.id)["body"]
+        else:
+            return None
+
 
     def got_server_response(self):
         responded = [200, 401, 403, 500, 302, 304, 206]

@@ -118,13 +118,17 @@ div#stats {
     margin: 0px;
 }
 
+.warning {
+	color:#DD8500;
+}
+
 
 .tag{
 	font-weight:bold;
 	letter-spacing: 0.2em;
 }
 
-.genuine, #logo pre, .pagination em {
+.genuine, .good, #logo pre, .pagination em {
 	color:#00CC00;
 }
 
@@ -137,7 +141,7 @@ div#stats {
 	font-style: normal;
 }
 
-.fake {
+.fake, .bad {
 	color:#990000;
 }
 
@@ -231,7 +235,7 @@ tr.dead td a:hover {
 }
 
 #info_panel #dates{
-	width:350px;
+	width:400px;
 	margin-right: 0.25cm;
 	margin-bottom: 0.25cm;
 	border-width: 2px;
@@ -245,12 +249,18 @@ tr.dead td a:hover {
 	width: 100%;
 }
 
+#info_panel #dates table tr td{
+	width: 50%;
+}
+
 
 thead, thead tr {
 	background-color: #333333;
 }
 
-
+table.domain_list thead tr th {
+	white-space: nowrap;
+}
 
 th, td {
 	text-align: left;
@@ -269,8 +279,8 @@ td.domain {
 td.title {
 	word-wrap:break-all;
 	overflow-wrap: break-all;
-	display: inline-block;
 	white-space:normal;
+	width: 99%;
 }
 
 td.title em {
@@ -281,6 +291,8 @@ td.title em {
 
 td.ago {
 	width: 100px;
+	white-space: nowrap;
+	padding-right:10px;
 }
 
 td.info_link {

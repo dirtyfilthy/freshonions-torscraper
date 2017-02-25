@@ -26,6 +26,7 @@ app.jinja_env.globals.update(len=len)
 app.jinja_env.globals.update(select=select)
 app.jinja_env.globals.update(int=int)
 app.jinja_env.globals.update(break_long_words=tor_text.break_long_words)
+app.jinja_env.globals.update(is_elasticsearch_enabled=is_elasticsearch_enabled)
 
 @app.context_processor
 def inject_elasticsearch():
@@ -120,6 +121,26 @@ def onion_info_json(onion):
 	links_from = []
 	domain = select(d for d in Domain if d.host==onion).first()
 	return jsonify(domain.to_dict(full=True))
+
+@app.route('/clones/<onion>')
+@db_session
+def clones_list(onion):
+	domain = select(d for d in Domain if d.host==onion).first()
+	if not domain:
+		return render_template('error.html', code=404, message="Onion not found."), 404
+	domains = domain.clones()
+	return render_template('clones_list.html', onion=onion, domains=domains) 
+
+@app.route('/clones/<onion>/json')
+@db_session
+def clones_list_json(onion):
+	domain = select(d for d in Domain if d.host==onion).first()
+	if not domain:
+		return render_template('error.html', code=404, message="Onion not found."), 404
+	domains = domain.clones()
+	return jsonify(Domain.to_dict_list(domains))
+
+
 
 @app.route('/path/<path:path>')
 @db_session
