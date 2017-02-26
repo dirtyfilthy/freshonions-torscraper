@@ -12,6 +12,9 @@ class DailyStat(db.Entity):
     new_onions       = Required(int)
     new_onions_all   = Required(int)
     total_clones     = Required(int)
+    banned           = Required(int)
+    up_right_now     = Required(int)
+    up_right_now_all = Required(int)
 
     @classmethod
     @db_session
@@ -21,9 +24,12 @@ class DailyStat(db.Entity):
     	r = dict()
     	r['unique_visitors']  = tor_db.models.request_log.RequestLog.unique_visitors_since(event_horizon)
     	r['total_onions_all'] = count(d for d in tor_db.models.domain.Domain if d.last_alive > event_horizon)
+    	r['up_right_now_all'] = count(d for d in tor_db.models.domain.Domain if d.last_alive > event_horizon and d.is_up == True)
     	r['new_onions_all']   = count(d for d in tor_db.models.domain.Domain if d.last_alive > event_horizon and d.created_at > event_horizon)
-    	r['new_onions']		  = count(d for d in tor_db.models.domain.Domain if d.last_alive > event_horizon and d.created_at > event_horizon and d.is_subdomain == False and d.is_crap == False)
-    	r['total_onions']     = count(d for d in tor_db.models.domain.Domain if d.last_alive > event_horizon and d.is_subdomain == False and d.is_crap == False)
+    	r['new_onions']		  = count(d for d in tor_db.models.domain.Domain if d.last_alive > event_horizon and d.created_at > event_horizon and d.is_subdomain == False and d.is_crap == False and d.is_banned == False) 
+    	r['total_onions']     = count(d for d in tor_db.models.domain.Domain if d.last_alive > event_horizon and d.is_subdomain == False and d.is_crap == False and d.is_banned == False)
+    	r['up_right_now']     = count(d for d in tor_db.models.domain.Domain if d.last_alive > event_horizon and d.is_subdomain == False and d.is_crap == False and d.is_banned == False and d.is_up == True)
+    	r['banned']           = count(d for d in tor_db.models.domain.Domain if d.is_banned == True)
     	r['total_clones']     = count(d for d in tor_db.models.domain.Domain if d.last_alive > event_horizon and d.clone_group != None)
     	clone_groups     = count(d.clone_group for d in tor_db.models.domain.Domain if d.last_alive > event_horizon and d.clone_group != None)
     	r['total_clones'] -= clone_groups
@@ -42,4 +48,7 @@ class DailyStat(db.Entity):
     					 total_onions_all = stats['total_onions_all'], 
     					 new_onions       = stats['new_onions'],
     					 new_onions_all   = stats['new_onions_all'],
+    					 up_right_now     = stats['up_right_now'],
+    					 up_right_now_all = stats['up_right_now_all'],
+    					 banned           = stats['banned'],
     					 total_clones     = stats['total_clones'] )
