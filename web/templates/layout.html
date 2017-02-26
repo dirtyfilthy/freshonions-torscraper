@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <title>Fresh Onions</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}?{{revision}}">
     {% if uuid_is_fresh %}
     <link rel="stylesheet" type="text/css" href="{{ url_for('blank',  random=uuid) }}">
     <script src="/static/b.js?{{uuid}}"></script>

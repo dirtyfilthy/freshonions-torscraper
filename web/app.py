@@ -16,6 +16,7 @@ import helpers
 import re
 import os
 import bitcoin
+import version
 import email_util
 import banned
 import tor_text
@@ -73,6 +74,10 @@ def inject_random_integer():
 def inject_uuid():
 	return dict(uuid=session['uuid'], uuid_is_fresh=g.uuid_is_fresh)
 
+
+@app.context_processor
+def inject_revision():
+	return dict(revision=version.revision())
 
 @app.context_processor
 @db_session
@@ -139,11 +144,7 @@ def blank(random):
 	
 @app.route('/src')
 def src():
-	current = os.path.dirname(os.path.realpath(__file__))
-	version_file = current+"/../etc/version_string"
-	with open(version_file,'r') as f:
-		version_string = f.read().strip()
-
+	version_string = version.version()
 	source_name="torscraper-%s.tar.gz" % version_string
 	source_link="/static/%s" % source_name
 	return render_template('src.html', source_name=source_name, source_link=source_link)
