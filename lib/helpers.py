@@ -61,6 +61,9 @@ def maybe_domain_search(context, json=False):
 
 def maybe_search_redirect(search):
 	search = search.strip()
+	if Domain.is_onion_url(search):
+		parsedurl = urlparse.urlparse(search)
+		search = parsedurl.hostname
 	if search != "":
 		if re.match('.*\.onion$', search):
 			return redirect(url_for("onion_info",onion=search), code=302)

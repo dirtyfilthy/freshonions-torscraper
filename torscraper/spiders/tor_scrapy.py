@@ -344,12 +344,13 @@ class TorSpider(scrapy.Spider):
             if (not hasattr(self, "test") or self.test != "yes") and not host in TorSpider.spider_exclude:
                 for url in response.xpath('//a/@href').extract():
                     try:
+                        fullurl = response.urljoin(url)
                         yield scrapy.Request(url, callback=self.parse)
-                        if got_server_response and Domain.is_onion_url(url):
-                            parsed_link = urlparse.urlparse(url)
+                        if got_server_response and Domain.is_onion_url(fullurl):
+                            parsed_link = urlparse.urlparse(fullurl)
                             link_host   = parsed_link.hostname
                             if host != link_host:
-                                link_to_list.append(url)
+                                link_to_list.append(fullurl)
                     except:
                         continue
 
@@ -357,7 +358,7 @@ class TorSpider(scrapy.Spider):
                     small_body = response.body[:(1024*MAX_PARSE_SIZE_KB)]
                     page.links_to.clear()
                     for url in link_to_list:
-                        link_to = Page.find_stub_by_url(url)
+                        link_to = Page.find_stub_by_url(fullurl)
                         page.links_to.add(link_to)
 
                     try:

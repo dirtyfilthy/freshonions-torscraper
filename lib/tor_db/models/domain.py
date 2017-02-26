@@ -341,6 +341,9 @@ class Domain(db.Entity):
 
     @classmethod
     def is_onion_url(klass, url):
+        url = url.strip()
+        if not re.match(r"http[s]?://", url):
+            return False
         try:
             parsed_url = urlparse.urlparse(url)
             host  = parsed_url.hostname
