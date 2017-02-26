@@ -11,3 +11,4 @@ txsocksx
 numpy
 scipy
 scikit-learn
+tabulate

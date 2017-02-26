@@ -32,6 +32,7 @@ class Domain(db.Entity):
     useful_404     = Required(bool, default=False)
     useful_404_php = Required(bool, default=False)
     useful_404_dir = Required(bool, default=False)
+    ban_exempt     = Required(bool, default=False)
     created_at     = Required(datetime)
     visited_at     = Required(datetime)
     last_alive     = Required(datetime)
@@ -86,6 +87,11 @@ class Domain(db.Entity):
         else:
             return 'dead'
 
+    @classmethod
+    @db_session
+    def banned(klass):
+        return select(d for d in klass if d.is_banned == True).order_by(desc(Domain.created_at))
+
     @db_session
     def get_open_ports(self):
         op = map(lambda p: p.port, list(self.open_ports))
@@ -114,7 +120,7 @@ class Domain(db.Entity):
         if self.host.count(".") > 1:
             self.is_subdomain = True
 
-        if banned.contains_banned(self.title):
+        if banned.contains_banned(self.title) and not self.ban_exempt:
             self.is_banned = True
 
         if is_elasticsearch_enabled():
@@ -140,7 +146,7 @@ class Domain(db.Entity):
             self.dead_in_a_row = 0
             self.next_scheduled_check = datetime.now() + timedelta(hours=1)
 
-        if banned.contains_banned(self.title):
+        if banned.contains_banned(self.title) and not self.ban_exempt:
             self.is_banned = True
 
         if is_elasticsearch_enabled():
