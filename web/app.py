@@ -156,13 +156,14 @@ def onion_info(onion):
 	links_to = []
 	links_from = []
 	domain = select(d for d in Domain if d.host==onion).first()
-	fp_count = 0
-	paths = domain.interesting_paths()
-	emails = domain.emails()
-	bitcoin_addresses = domain.bitcoin_addresses()
-	if domain.ssh_fingerprint:
-		fp_count = len(domain.ssh_fingerprint.domains)
+	
 	if domain:
+		fp_count = 0
+		paths = domain.interesting_paths()
+		emails = domain.emails()
+		bitcoin_addresses = domain.bitcoin_addresses()
+		if domain.ssh_fingerprint:
+			fp_count = len(domain.ssh_fingerprint.domains)
 		links_to   = domain.links_to()
 		links_from = domain.links_from()
 		return render_template('onion_info.html', domain=domain, scanner=portscanner, OpenPort=OpenPort, paths=paths, emails=emails, bitcoin_addresses=bitcoin_addresses, links_to=links_to, links_from = links_from, fp_count=fp_count)
