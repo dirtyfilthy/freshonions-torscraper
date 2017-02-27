@@ -148,6 +148,11 @@ class TorSpider(scrapy.Spider):
             return False
 
         failed_codes = [666, 503, 504, 502]
+        responded_codes = [200, 206,403, 500, 401, 301, 302, 304, 400]
+        if (hasattr(self, "only_success") and self.only_success == "yes" and 
+            code not in responded_codes):
+            return False
+
         if not title:
             title = ''
         parsed_url = urlparse.urlparse(url)
@@ -271,7 +276,10 @@ class TorSpider(scrapy.Spider):
             self.log('Got %s (%s)' % (response.url, title))
             is_frontpage = Page.is_frontpage_request(response.request)
             size = len(response.body)
+            
             page = self.update_page_info(response.url, title, response.status, is_frontpage, size)
+            if not page:
+                return
 
             # extra headers
 

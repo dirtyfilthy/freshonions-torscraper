@@ -14,6 +14,7 @@ import os
 import re
 import dateutil.parser
 import urlparse
+import random
 
 class Domain(db.Entity):
     host           = Required(str)
@@ -46,6 +47,14 @@ class Domain(db.Entity):
     path_scanned_at = Required(datetime, default=NEVER)
     useful_404_scanned_at = Required(datetime, default=NEVER)
 
+    @classmethod
+    def random(klass, number=1000):
+        chars = "abcdefghijklmnopqrstuvwxyz234567"
+        onions = []
+        for i in range(number):
+            r = ''.join(random.choice(chars) for _ in range(16))
+            onions.append(r+".onion")
+        return onions
 
     @classmethod
     @db_session
