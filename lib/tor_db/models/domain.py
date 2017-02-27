@@ -106,7 +106,9 @@ class Domain(db.Entity):
 
     def before_insert(self):
         if (self.title.find("Site Hosted by Freedom Hosting II") != -1 or
-            self.title.find("Freedom Hosting II - hacked") != -1):
+            self.title.find("Freedom Hosting II - hacked") != -1 or 
+            self.title.find("This site is hosted by Freedom Hosting III") != -1 or
+            self.title.find("Site hosted by Daniel's hosting service") != -1):
             self.is_crap = True
         else:
             self.is_crap = False
@@ -132,7 +134,9 @@ class Domain(db.Entity):
 
     def before_update(self):
         if (self.title.find("Site Hosted by Freedom Hosting II") != -1 or
-            self.title.find("Freedom Hosting II - hacked") != -1):
+            self.title.find("Freedom Hosting II - hacked") != -1 or 
+            self.title.find("This site is hosted by Freedom Hosting III") != -1 or
+            self.title.find("Site hosted by Daniel's hosting service") != -1):
             self.is_crap = True
         else:
             self.is_crap = False
