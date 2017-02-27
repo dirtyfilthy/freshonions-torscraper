@@ -2,21 +2,19 @@
 <html lang="en">
 <head>
     <title>Fresh Onions</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}?{{revision}}">
+    {% if uuid_is_fresh %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('blank',  random=uuid) }}">
+    <script src="/static/b.js?{{uuid}}"></script>
+    {% endif %}
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
 	<link rel="icon" type="image/png" sizes="96x96" href="/static/favicon-96x96.png">
 	<link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+
 </head>
 <body>
 	<div id="logo">
-	<pre>
-.-:::::':::::::..  .,:::::: .::::::.   ::   .:         ...   :::.    :::.:::    ...   :::.    :::. .::::::. 
-;;;'''' ;;;;``;;;; ;;;;'''';;;`    `  ,;;   ;;,     .;;;;;;;.`;;;;,  `;;;;;; .;;;;;;;.`;;;;,  `;;;;;;`    ` 
-[[[,,==  [[[,/[[['  [[cccc '[==/[[[[,,[[[,,,[[[    ,[[     \[[,[[[[[. '[[[[[,[[     \[[,[[[[[. '[['[==/[[[[,
-`$$$"``  $$$$$$c    $$""""   '''    $"$$$"""$$$    $$$,     $$$$$$ "Y$c$$$$$$$$,     $$$$$$ "Y$c$$  '''    $
- 888     888b "88bo,888oo,__88b    dP 888   "88o   "888,_ _,88P888    Y88888"888,_ _,88P888    Y88 88b    dP
- "MM,    MMMM   "W" """"YUMMM"YMmMY"  MMM    YMM     "YMMMMMP" MMM     YMMMM  "YMMMMMP" MMM     YM  "YMmMY" 
- </pre>
+	<img src="/static/logo.png" />
  </div>
 	<div id="topbar">
 	<ul id="menu">
@@ -33,6 +31,9 @@
 	</li>
 	<li>
 		<a href="{{ url_for('src') }}">SRC</a>
+	</li>
+	<li>
+		<a href="{{ url_for('stats') }}">STATS</a>
 	</li>
 	</ul>
 	<div id="stats">

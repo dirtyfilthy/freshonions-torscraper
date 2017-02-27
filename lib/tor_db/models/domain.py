@@ -32,9 +32,12 @@ class Domain(db.Entity):
     useful_404     = Required(bool, default=False)
     useful_404_php = Required(bool, default=False)
     useful_404_dir = Required(bool, default=False)
+    ban_exempt     = Required(bool, default=False)
     created_at     = Required(datetime)
     visited_at     = Required(datetime)
     last_alive     = Required(datetime)
+    clone_group    = Optional('CloneGroup')
+    new_clone_group = Optional('CloneGroup')
     open_ports     = Set('OpenPort')
     next_scheduled_check = Required(datetime)
     dead_in_a_row   = Required(int, default=0)
@@ -84,11 +87,21 @@ class Domain(db.Entity):
         else:
             return 'dead'
 
+    @classmethod
+    @db_session
+    def banned(klass):
+        return select(d for d in klass if d.is_banned == True).order_by(desc(Domain.created_at))
+
     @db_session
     def get_open_ports(self):
         op = map(lambda p: p.port, list(self.open_ports))
         web_ports = select(d.port for d in Domain if d.host == self.host and d.is_up == True)
         return list(set(op + list(web_ports)))
+
+    @db_session
+    def clones(self):
+        d = select(d for d in Domain if d.clone_group == self.clone_group and d.id != self.id)
+        return d
 
 
     def before_insert(self):
@@ -107,7 +120,7 @@ class Domain(db.Entity):
         if self.host.count(".") > 1:
             self.is_subdomain = True
 
-        if banned.contains_banned(self.title):
+        if banned.contains_banned(self.title) and not self.ban_exempt:
             self.is_banned = True
 
         if is_elasticsearch_enabled():
@@ -133,7 +146,7 @@ class Domain(db.Entity):
             self.dead_in_a_row = 0
             self.next_scheduled_check = datetime.now() + timedelta(hours=1)
 
-        if banned.contains_banned(self.title):
+        if banned.contains_banned(self.title) and not self.ban_exempt:
             self.is_banned = True
 
         if is_elasticsearch_enabled():
@@ -182,11 +195,13 @@ class Domain(db.Entity):
             links_from = self.links_from()
             emails     = self.emails()
             btc_addr   = self.bitcoin_addresses()
+            our_clones  = self.clones()
             d['links_to']   = []
             d['links_from'] = [] 
             d['emails']     = []
             d['interesting_paths'] = map(lambda p: self.construct_url(p), self.interesting_paths())
             d['bitcoin_addresses'] = []
+            d['clones'] = map(lambda d: d.index_url(), our_clones)
             d['open_ports'] = self.get_open_ports()
             for link_to in links_to:
                 d['links_to'].append(link_to.index_url())
@@ -326,6 +341,9 @@ class Domain(db.Entity):
 
     @classmethod
     def is_onion_url(klass, url):
+        url = url.strip()
+        if not re.match(r"http[s]?://", url):
+            return False
         try:
             parsed_url = urlparse.urlparse(url)
             host  = parsed_url.hostname

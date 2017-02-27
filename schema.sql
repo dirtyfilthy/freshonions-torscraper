@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.5.54, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.17, for Linux (x86_64)
 --
 -- Host: groan    Database: tor
 -- ------------------------------------------------------
--- Server version	5.6.33-0ubuntu0.14.04.1
+-- Server version	5.7.17
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -49,6 +49,44 @@ CREATE TABLE `bitcoin_address_link` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `clone_group`
+--
+
+DROP TABLE IF EXISTS `clone_group`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `clone_group` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1684 DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `daily_stat`
+--
+
+DROP TABLE IF EXISTS `daily_stat`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `daily_stat` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `created_at` datetime DEFAULT NULL,
+  `unique_visitors` int(11) DEFAULT NULL,
+  `total_onions` int(11) DEFAULT NULL,
+  `new_onions` int(11) DEFAULT NULL,
+  `total_clones` int(11) DEFAULT NULL,
+  `total_onions_all` int(11) DEFAULT NULL,
+  `new_onions_all` int(11) DEFAULT NULL,
+  `banned` int(11) DEFAULT NULL,
+  `up_right_now` int(11) DEFAULT NULL,
+  `up_right_now_all` int(11) DEFAULT NULL,
+  `banned_up_last_24` int(11) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `idx_daily_stat_created_at` (`created_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `domain`
 --
 
@@ -81,13 +119,20 @@ CREATE TABLE `domain` (
   `useful_404` tinyint(1) DEFAULT '0',
   `useful_404_php` tinyint(1) DEFAULT '0',
   `useful_404_dir` tinyint(1) DEFAULT '0',
+  `clone_group` int(11) DEFAULT NULL,
+  `new_clone_group` int(11) DEFAULT NULL,
+  `ban_exempt` tinyint(1) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `created_at_idx` (`created_at`),
   KEY `last_alive_idx` (`last_alive`),
   KEY `host_idx` (`host`),
   KEY `idx_domain__ssh_fingerprint` (`ssh_fingerprint`),
+  KEY `idx_domain__clone_group` (`clone_group`),
+  KEY `idx_domain__new_clone_group` (`new_clone_group`),
+  CONSTRAINT `fk_domain__clone_group` FOREIGN KEY (`clone_group`) REFERENCES `clone_group` (`id`),
+  CONSTRAINT `fk_domain__new_clone_group` FOREIGN KEY (`new_clone_group`) REFERENCES `clone_group` (`id`),
   CONSTRAINT `fk_domain__ssh_fingerprint` FOREIGN KEY (`ssh_fingerprint`) REFERENCES `ssh_fingerprint` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=45383 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=45725 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -124,6 +169,37 @@ CREATE TABLE `email_link` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `headless_bot`
+--
+
+DROP TABLE IF EXISTS `headless_bot`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `headless_bot` (
+  `uuid` varchar(36) COLLATE utf8_unicode_ci NOT NULL,
+  `kind` varchar(128) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`uuid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `headlessbot`
+--
+
+DROP TABLE IF EXISTS `headlessbot`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `headlessbot` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(36) NOT NULL,
+  `kind` varchar(128) NOT NULL,
+  `created_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `open_port`
 --
 
@@ -137,7 +213,7 @@ CREATE TABLE `open_port` (
   PRIMARY KEY (`id`),
   KEY `idx_open_port__domain` (`domain`),
   CONSTRAINT `fk_open_port__domain` FOREIGN KEY (`domain`) REFERENCES `domain` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4568 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=5442 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -163,7 +239,7 @@ CREATE TABLE `page` (
   KEY `idx_page__domain` (`domain`),
   KEY `page_path_idx` (`path`(255)),
   CONSTRAINT `fk_page__domain` FOREIGN KEY (`domain`) REFERENCES `domain` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1309489 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1440859 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -184,6 +260,53 @@ CREATE TABLE `page_link` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `request_log`
+--
+
+DROP TABLE IF EXISTS `request_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `request_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `uuid` varchar(36) COLLATE utf8_unicode_ci DEFAULT '',
+  `uuid_is_fresh` tinyint(1) DEFAULT '1',
+  `created_at` datetime DEFAULT NULL,
+  `agent` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `path` varchar(1024) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `full_path` varchar(1024) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `referrer` varchar(1024) COLLATE utf8_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_reqlog_created_at` (`created_at`)
+) ENGINE=InnoDB AUTO_INCREMENT=9004 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `search_log`
+--
+
+DROP TABLE IF EXISTS `search_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `search_log` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `request_log` int(11) DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `has_searchterms` tinyint(1) DEFAULT '0',
+  `searchterms` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `has_raw_searchterms` tinyint(1) DEFAULT '0',
+  `raw_searchterms` varchar(256) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `is_firstpage` tinyint(1) DEFAULT '0',
+  `is_json` tinyint(1) DEFAULT '0',
+  `context` varchar(1024) COLLATE utf8_unicode_ci DEFAULT NULL,
+  `results` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_searchlog_created_at` (`created_at`),
+  KEY `idx_search_log__request_log` (`request_log`),
+  CONSTRAINT `fk_search_log__request_log` FOREIGN KEY (`request_log`) REFERENCES `request_log` (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1957 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `ssh_fingerprint`
 --
 
@@ -195,7 +318,7 @@ CREATE TABLE `ssh_fingerprint` (
   `fingerprint` varchar(450) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `fingerprint` (`fingerprint`)
-) ENGINE=InnoDB AUTO_INCREMENT=111 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=119 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -207,4 +330,4 @@ CREATE TABLE `ssh_fingerprint` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-02-22  3:52:56
+-- Dump completed on 2017-02-26  5:06:29
