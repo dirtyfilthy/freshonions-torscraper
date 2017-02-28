@@ -175,6 +175,18 @@ a.info_link:hover {
 	color:#AAAAFF !important;
 }
 
+a.black:link {
+	color:#FFFFF0 !important;
+}
+
+a.black:visited {
+	color:#FFFFF0 !important;
+}
+
+a.black:hover {
+	color:#FFFFF0 !important;
+}
+
 
 
 tr.alive td a:link {
@@ -267,6 +279,10 @@ th, td {
 	vertical-align: top;
 	margin: 0px;
 	padding: 5px;
+}
+
+.black {
+	color: #ffffff;
 }
 
 td.domain {
