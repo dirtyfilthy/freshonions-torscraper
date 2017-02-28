@@ -317,9 +317,11 @@ class TorSpider(scrapy.Spider):
 
             commit()
 
+            path_event_horizon = datetime.now() - timedelta(weeks=2)
+
             # interesting paths
 
-            if domain.is_up and domain.path_scanned_at == NEVER:
+            if domain.is_up and domain.path_scanned_at < path_event_horizon:
                 domain.path_scanned_at = datetime.now()
                 commit()
                 for url in interesting_paths.construct_urls(domain):
