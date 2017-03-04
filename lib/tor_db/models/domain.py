@@ -30,6 +30,7 @@ class Domain(db.Entity):
     is_genuine     = Required(bool, default=False)
     is_subdomain   = Required(bool, default=False)
     is_banned      = Required(bool, default=False)
+    manual_genuine = Required(bool, default=False)
     useful_404     = Required(bool, default=False)
     useful_404_php = Required(bool, default=False)
     useful_404_dir = Required(bool, default=False)
