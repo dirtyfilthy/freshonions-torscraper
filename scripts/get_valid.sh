@@ -12,4 +12,6 @@ echo "[?} VALID LIST:"
 cat $LIST
 echo "[+] Marking genuine ... "
 $SCRIPTDIR/make_genuine.py $LIST
+echo "[+] Updating fakes from clone groups ... "
+$SCRIPTDIR/update_clone_fakes.sh
 rm $LIST
