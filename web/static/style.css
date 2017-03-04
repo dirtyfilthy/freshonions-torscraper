@@ -1,6 +1,9 @@
 body {
     background-color: #111111;
-    font-family: "Lucida Console", Monaco, monospace;
+}
+
+.normal, body, table tbody tr td {
+	font-family: "Lucida Console", Monaco, monospace;
     color:#DDDDDD;
 }
 
@@ -145,6 +148,10 @@ div#stats {
 	color:#990000;
 }
 
+.dead_span {
+	color:#CC0000;
+}
+
 .article {
 	margin-left:2cm;
 	margin-right:2cm;
@@ -154,6 +161,10 @@ h2, h3 {
 	color:#00AA00;
 	font-weight:bold;
 } 
+
+.bold {
+	font-weight:bold;
+}
 
 h2 {
 	font-size: 1.3em;
@@ -189,6 +200,7 @@ a.black:hover {
 
 
 
+
 tr.alive td a:link {
 	color:#00CC00;
 }
@@ -210,7 +222,7 @@ tr.maybe td a:visited {
 }
 
 tr.maybe td a:hover {
-	color:#FFA500;w
+	color:#FFA500;
 }
 
 
@@ -223,7 +235,7 @@ tr.dead td a:visited {
 }
 
 tr.dead td a:hover {
-	color:#FF0000;w
+	color:#FF0000;
 }
 
 .small {
