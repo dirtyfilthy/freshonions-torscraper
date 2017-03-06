@@ -13,6 +13,7 @@ import timeout_decorator
 import bitcoin
 import email_util
 import interesting_paths
+import tor_text
 
 from scrapy.exceptions import IgnoreRequest
 
@@ -327,9 +328,15 @@ class TorSpider(scrapy.Spider):
                 for url in interesting_paths.construct_urls(domain):
                     yield scrapy.Request(url, callback=self.parse)
 
+            # language detection
+
+            if domain.is_up and is_frontpage and (response.status == 200 or response.status == 206):
+                domain.detect_language(tor_text.strip_html(response.body))
+                commit()
+
             # 404 detections
 
-            if domain.is_up and page.is_frontpage and domain.useful_404_scanned_at < (datetime.now() - timedelta(weeks=2)):
+            if domain.is_up and is_frontpage and domain.useful_404_scanned_at < (datetime.now() - timedelta(weeks=2)):
                 
                 # standard
 

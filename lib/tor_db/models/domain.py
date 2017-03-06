@@ -4,6 +4,7 @@ from tor_db.constants import *
 import tor_db.models.email
 import tor_db.models.bitcoin_address
 import tor_db.models.page
+import detect_language
 from datetime import *
 import bitcoin
 from tor_elasticsearch import *
@@ -35,6 +36,7 @@ class Domain(db.Entity):
     useful_404_php = Required(bool, default=False)
     useful_404_dir = Required(bool, default=False)
     ban_exempt     = Required(bool, default=False)
+    language       = Optional(str, 2)
     created_at     = Required(datetime)
     visited_at     = Required(datetime)
     last_alive     = Required(datetime)
@@ -289,6 +291,14 @@ class Domain(db.Entity):
     def bitcoin_addresses(self):
         return select(b for b in tor_db.models.bitcoin_address.BitcoinAddress for p in b.pages if p.domain == self).limit(100)
 
+    @db_session
+    def firstpage(self):
+        return select(p for p in self.pages if p.is_firstpage == True and (p.code==200 or p.code==206)).first()
+
+    @classmethod
+    @db_session
+    def has_firstpage(klass):
+        return leftjoin(d for d in klas for p in self.pages if p.is_firstpage == True and (p.code==200 or p.code==206))
 
     @classmethod
     @db_session
@@ -307,6 +317,19 @@ class Domain(db.Entity):
         
         commit()
         return None
+
+    def detect_language(self, body_stripped = None):
+        if body_stripped is None:
+            fp = domain.firstpage()
+            if fp is None:
+                return None
+            body_stripped = fp.get_body_stripped()
+        lang = detect_language.classify(body_stripped)
+        if lang is None:
+            lang = ''
+        self.language = lang
+        return lang
+            
 
     
     @classmethod

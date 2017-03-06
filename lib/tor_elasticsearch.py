@@ -8,6 +8,7 @@ from elasticsearch_dsl import Search
 from elasticsearch_dsl import Q
 from elasticsearch_dsl import Index
 import re
+import tor_text
 try:
     import simplejson as json
 except ImportError:
@@ -167,7 +168,7 @@ class PageDocType(DocType):
             code=obj.code,
             domain_id=obj.domain.id,
             body=body,
-            body_stripped=re.sub('<[^<]+?>', '', body),
+            body_stripped=tor_text.strip_html(body),
             nid=obj.id
         )
 
