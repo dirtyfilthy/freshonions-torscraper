@@ -186,7 +186,7 @@ class Domain(db.Entity):
         d['is_fake']    = self.is_fake
         d['server']     = self.server
         d['hostname']   = self.host
-        d['language']   = self.language
+        d['language']   = self.language if self.language!='' else None
         d['powered_by'] = self.powered_by
         d['portscanned_at'] = self.portscanned_at
         
