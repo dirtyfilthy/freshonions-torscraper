@@ -112,7 +112,7 @@ class Domain(db.Entity):
 
     @db_session
     def clones(self):
-        d = select(d for d in Domain if d.clone_group == self.clone_group and d.id != self.id)
+        d = select(d for d in Domain if d.clone_group is not None and d.clone_group == self.clone_group and d.id != self.id)
         return d
 
 
