@@ -47,6 +47,8 @@ Edit etc/proxy for your TOR setup
     script/push.sh someoniondirectory.onion 
     script/push.sh anotheroniondirectory.onion
 
+Edit etc/uwsgi_only and set BASEDIR to wherever torscraper is installed (i.e. /home/user/torscraper)
+
 Run:
 
     init/scraper_service.sh # to start crawling

@@ -1,5 +1,7 @@
 #!/bin/sh
-export BASEDIR=$DIR/..
+BASEDIR=$DIR/..
+BASEDIR=$( cd "$BASEDIR" ; pwd -P )
+export BASEDIR
 export SCRIPTDIR=$BASEDIR/scripts
 export ETCDIR=$BASEDIR/etc
 export VARDIR=$BASEDIR/var

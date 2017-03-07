@@ -1,6 +1,7 @@
 import os
 import re
-INTERESTING_PATHS_FILENAME = os.environ['ETCDIR'] + "/interesting_paths"
+import tor_paths
+INTERESTING_PATHS_FILENAME = tor_paths.ETCDIR + "/interesting_paths"
 PATHS = [line.strip() for line in open(INTERESTING_PATHS_FILENAME)]
 PATHS_DIR   = []
 PATHS_PHP   = []
