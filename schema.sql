@@ -58,7 +58,7 @@ DROP TABLE IF EXISTS `clone_group`;
 CREATE TABLE `clone_group` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2905 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=4018 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -83,7 +83,7 @@ CREATE TABLE `daily_stat` (
   `banned_up_last_24` int(11) DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `idx_daily_stat_created_at` (`created_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -123,6 +123,7 @@ CREATE TABLE `domain` (
   `new_clone_group` int(11) DEFAULT NULL,
   `ban_exempt` tinyint(1) DEFAULT '0',
   `manual_genuine` tinyint(1) DEFAULT '0',
+  `language` varchar(2) COLLATE utf8_unicode_ci DEFAULT '',
   PRIMARY KEY (`id`),
   KEY `created_at_idx` (`created_at`),
   KEY `last_alive_idx` (`last_alive`),
@@ -130,10 +131,11 @@ CREATE TABLE `domain` (
   KEY `idx_domain__ssh_fingerprint` (`ssh_fingerprint`),
   KEY `idx_domain__clone_group` (`clone_group`),
   KEY `idx_domain__new_clone_group` (`new_clone_group`),
+  KEY `language_idx` (`language`),
   CONSTRAINT `fk_domain__clone_group` FOREIGN KEY (`clone_group`) REFERENCES `clone_group` (`id`),
   CONSTRAINT `fk_domain__new_clone_group` FOREIGN KEY (`new_clone_group`) REFERENCES `clone_group` (`id`),
   CONSTRAINT `fk_domain__ssh_fingerprint` FOREIGN KEY (`ssh_fingerprint`) REFERENCES `ssh_fingerprint` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=47261 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=48465 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -215,7 +217,7 @@ CREATE TABLE `open_port` (
   PRIMARY KEY (`id`),
   KEY `idx_open_port__domain` (`domain`),
   CONSTRAINT `fk_open_port__domain` FOREIGN KEY (`domain`) REFERENCES `domain` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5953 DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB AUTO_INCREMENT=6567 DEFAULT CHARSET=latin1;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -241,7 +243,7 @@ CREATE TABLE `page` (
   KEY `idx_page__domain` (`domain`),
   KEY `page_path_idx` (`path`(255)),
   CONSTRAINT `fk_page__domain` FOREIGN KEY (`domain`) REFERENCES `domain` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1597141 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=1714932 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -279,7 +281,7 @@ CREATE TABLE `request_log` (
   `referrer` varchar(1024) COLLATE utf8_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `idx_reqlog_created_at` (`created_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=158239 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=246205 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -305,7 +307,7 @@ CREATE TABLE `search_log` (
   KEY `idx_searchlog_created_at` (`created_at`),
   KEY `idx_search_log__request_log` (`request_log`),
   CONSTRAINT `fk_search_log__request_log` FOREIGN KEY (`request_log`) REFERENCES `request_log` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13628 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21316 DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -332,4 +334,4 @@ CREATE TABLE `ssh_fingerprint` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2017-03-04  1:30:15
+-- Dump completed on 2017-03-07  7:32:12

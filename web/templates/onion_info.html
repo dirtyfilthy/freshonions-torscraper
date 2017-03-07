@@ -48,6 +48,21 @@
 </td>
 </tr>
 
+<tr>
+<td>Language</td>
+<td>
+{% if language %}
+{% set n_lang = count(Domain.by_language(domain.language)) %}
+{{language}}
+{% if n_lang > 1 and domain.language!="en" %}
+<a class="small" href="{{url_for('language_list', code=domain.language)}}">[+{{n_lang-1}}]</a>
+{% endif %}
+{% else %}
+<span class="never">Unknown</span>
+{% endif %}
+</td>
+</tr>
+
 {% if domain.server != '' %}
 <tr>
 <td>Server</td>

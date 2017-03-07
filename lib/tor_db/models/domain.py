@@ -4,6 +4,7 @@ from tor_db.constants import *
 import tor_db.models.email
 import tor_db.models.bitcoin_address
 import tor_db.models.page
+import detect_language
 from datetime import *
 import bitcoin
 from tor_elasticsearch import *
@@ -35,6 +36,7 @@ class Domain(db.Entity):
     useful_404_php = Required(bool, default=False)
     useful_404_dir = Required(bool, default=False)
     ban_exempt     = Required(bool, default=False)
+    language       = Optional(str, 2)
     created_at     = Required(datetime)
     visited_at     = Required(datetime)
     last_alive     = Required(datetime)
@@ -184,6 +186,7 @@ class Domain(db.Entity):
         d['is_fake']    = self.is_fake
         d['server']     = self.server
         d['hostname']   = self.host
+        d['language']   = self.language
         d['powered_by'] = self.powered_by
         d['portscanned_at'] = self.portscanned_at
         
@@ -191,6 +194,7 @@ class Domain(db.Entity):
         d['useful_404'] = None
         d['useful_404_dir'] = None
         d['useful_404_php'] = None
+
         if self.useful_404_scanned_at != NEVER:
             d['useful_404'] = self.useful_404
             d['useful_404_dir'] = self.useful_404_dir
@@ -289,6 +293,20 @@ class Domain(db.Entity):
     def bitcoin_addresses(self):
         return select(b for b in tor_db.models.bitcoin_address.BitcoinAddress for p in b.pages if p.domain == self).limit(100)
 
+    @db_session
+    def frontpage(self):
+        return select( p for p in tor_db.models.page.Page if p.domain==self and 
+                       p.is_frontpage == True and (p.code==200 or p.code==206) ).first()
+
+    @classmethod
+    @db_session
+    def has_frontpage(klass):
+        return leftjoin(d for d in klass for p in self.pages if p.is_frontpage == True and (p.code==200 or p.code==206))
+
+    @classmethod
+    @db_session
+    def by_language(klass, code):
+        return select(d for d in klass if d.language == code)
 
     @classmethod
     @db_session
@@ -307,6 +325,21 @@ class Domain(db.Entity):
         
         commit()
         return None
+
+    def detect_language(self, body_stripped = None, debug = False):
+        if body_stripped is None:
+            fp = self.frontpage()
+            if fp is None:
+                return None
+            body_stripped = fp.get_body_stripped()
+        if debug:
+            return detect_language.classify(body_stripped, debug = True)
+        lang = detect_language.classify(body_stripped)
+        if lang is None:
+            lang = ''
+        self.language = lang
+        return lang
+            
 
     
     @classmethod
