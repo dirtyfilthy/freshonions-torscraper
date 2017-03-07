@@ -14,7 +14,10 @@
 </head>
 <body>
 	<div id="logo">
-	<img src="/static/logo.png" />
+	<img src="/static/logo.png" /> 
+	{% if uuid_is_fresh %}
+	<a class="black" href="{{url_for('bot', kind=uuid)}}">.</a>
+	{% endif %}
  </div>
 	<div id="topbar">
 	<ul id="menu">

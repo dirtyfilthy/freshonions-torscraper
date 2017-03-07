@@ -14,7 +14,8 @@ This is a copy of the source for the http://zlal32teyptf4tvi.onion hidden servic
 * Shows incoming / outgoing links to onion domains
 * Up-to-date alive / dead hidden service status
 * Portscanner
-* Search for "interesting" URL paths, detects useful 404 support
+* Search for "interesting" URL paths, useful 404 detection
+* Automatic language detection
 * Fuzzy clone detection (requires elasticsearch, more advanced than superlist clone detection)
 * Doesn't fuck around in general.
 

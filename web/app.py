@@ -25,10 +25,12 @@ import urllib
 import random
 import sys
 import uuid
+import detect_language
 app = Flask(__name__)
 app.jinja_env.globals.update(Domain=Domain)
 app.jinja_env.globals.update(NEVER=NEVER)
 app.jinja_env.globals.update(len=len)
+app.jinja_env.globals.update(count=count)
 app.jinja_env.globals.update(select=select)
 app.jinja_env.globals.update(int=int)
 app.jinja_env.globals.update(break_long_words=tor_text.break_long_words)
@@ -156,16 +158,21 @@ def onion_info(onion):
 	links_to = []
 	links_from = []
 	domain = select(d for d in Domain if d.host==onion).first()
-	fp_count = 0
-	paths = domain.interesting_paths()
-	emails = domain.emails()
-	bitcoin_addresses = domain.bitcoin_addresses()
-	if domain.ssh_fingerprint:
-		fp_count = len(domain.ssh_fingerprint.domains)
+	
 	if domain:
+		fp_count = 0
+		paths = domain.interesting_paths()
+		emails = domain.emails()
+		bitcoin_addresses = domain.bitcoin_addresses()
+		if domain.language != '':
+			language = detect_language.code_to_lang(domain.language)
+		else:
+			language = None
+		if domain.ssh_fingerprint:
+			fp_count = len(domain.ssh_fingerprint.domains)
 		links_to   = domain.links_to()
 		links_from = domain.links_from()
-		return render_template('onion_info.html', domain=domain, scanner=portscanner, OpenPort=OpenPort, paths=paths, emails=emails, bitcoin_addresses=bitcoin_addresses, links_to=links_to, links_from = links_from, fp_count=fp_count)
+		return render_template('onion_info.html', domain=domain, language=language, scanner=portscanner, OpenPort=OpenPort, paths=paths, emails=emails, bitcoin_addresses=bitcoin_addresses, links_to=links_to, links_from = links_from, fp_count=fp_count)
 	else:
 		return render_template('error.html', code=404, message="Onion not found."), 404
 
@@ -196,7 +203,48 @@ def clones_list_json(onion):
 	domains = domain.clones()
 	return jsonify(Domain.to_dict_list(domains))
 
+@app.route('/languages')
+@db_session
+def languages():
+	lang = request.args.get("lang")
+	if lang:
+		return redirect(url_for("language_list",code=lang), code=302)
 
+	languages = select(d.language for d in Domain if d.language!='')
+	options = []
+	for code in languages:
+		if code == "en" or code == '':
+			continue
+		lang_count = count(Domain.by_language(code))
+		lang_name  = detect_language.code_to_lang(code)
+		lang_disp  = "%s (%d)" % (lang_name, lang_count)
+		option = []
+		option.append(code)
+		option.append(lang_disp)
+		options.append(option)
+	options.sort(key=lambda o: o[1])
+	options = [["", "Choose language..."]] + options
+	return render_template('languages.html', options=options) 
+
+
+@app.route('/language/<code>')
+@db_session
+def language_list(code):
+	domains = Domain.by_language(code)
+	if count(domains) != 0:
+		language = detect_language.code_to_lang(code)
+		return render_template('language_list.html', domains=domains, code=code, language=language)
+	else:
+		return render_template('error.html', code=404, message="No domains with language '%s'." % code), 404
+
+@app.route('/language/<code>/json')
+@db_session
+def language_list_json(code):
+	domains = Domain.by_language(code)
+	if count(domains) != 0:
+		return jsonify(Domain.to_dict_list(domains))
+	else:
+		return render_template('error.html', code=404, message="No domains with language '%s'." % code), 404
 
 @app.route('/path/<path:path>')
 @db_session

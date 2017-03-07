@@ -1,0 +1,21 @@
+{% extends "layout.html" %}
+{% from 'domain_table.macro.html' import domain_table %}
+{% from 'ruler.macro.html' import ruler %}
+{% import 'input.macro.html' as input %}
+{% block body %}
+
+{{ ruler() }}
+
+<div class="contents">
+<h2>Find Onions By Language</h2>
+<form>
+<p>
+Pick a language. The number in (brackets) is the current count of sites in that language.
+</p>
+<p>
+{{input.dropdown('lang', options, selected='')}}
+{{input.submit('GO >>>')}}
+</p>
+</form>
+</div>
+{% endblock %}

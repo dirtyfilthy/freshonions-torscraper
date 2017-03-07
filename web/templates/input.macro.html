@@ -17,6 +17,14 @@
 <input type="text" name="{{name}}" id="input_{{name}}" value="{{value}}">
 {% endmacro %}
 
+{% macro dropdown(name, options, selected='') %}
+<select name="{{name}}">
+{% for option in options %}
+<option value="{{option[0]}}" {{"selected" if option[0]==selected else ""}}>{{option[1]}}</option>
+{% endfor %}
+</select>
+{% endmacro %}
+
 
 {% macro submit(text) %}
 <input type="submit" name="submit" value="{{text}}">

@@ -14,6 +14,7 @@ $SCRIPTDIR/extract_from_url.sh 'https://www.deepdotweb.com/2013/10/28/updated-ll
 $SCRIPTDIR/extract_from_url.sh 'https://darkwebnews.com/deep-web-links/' >> $LIST
 $SCRIPTDIR/extract_from_url.sh 'https://raw.githubusercontent.com/alecmuffett/onion-sites-that-dont-suck/master/README.md' >> $LIST
 $SCRIPTDIR/extract_from_url.sh 'https://en.wikipedia.org/wiki/List_of_Tor_hidden_services' >> $LIST
+$SCRIPTDIR/extract_from_url.sh 'https://www.reddit.com/r/darknetmarkets/wiki/superlist.json' >> $LIST 
 $SCRIPTDIR/tor_extract_from_url.sh 'http://tt3j2x4k5ycaa5zt.onion/onions.php?format=text' >> $LIST
 $SCRIPTDIR/tor_extract_from_url.sh 'http://skunksworkedp2cg.onion/sites.html' >> $LIST
 $SCRIPTDIR/extract_from_url.sh 'https://www.reddit.com/r/HiddenService/' >> $LIST

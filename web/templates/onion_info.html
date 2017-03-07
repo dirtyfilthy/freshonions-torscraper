@@ -48,6 +48,21 @@
 </td>
 </tr>
 
+<tr>
+<td>Language</td>
+<td>
+{% if language %}
+{% set n_lang = count(Domain.by_language(domain.language)) %}
+{{language}}
+{% if n_lang > 1 and domain.language!="en" %}
+<a class="small" href="{{url_for('language_list', code=domain.language)}}">[+{{n_lang-1}}]</a>
+{% endif %}
+{% else %}
+<span class="never">Unknown</span>
+{% endif %}
+</td>
+</tr>
+
 {% if domain.server != '' %}
 <tr>
 <td>Server</td>
@@ -104,10 +119,10 @@ No title for this domain.
 <p>
 <div id="tags">
 {% if domain.is_fake %}
-<span class="tag fake">[FAKE]</span> -- this domain is a clone of an onion listed in the /r/darknetmarkets <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">superlist</a> 
+<span class="tag fake">[FAKE]</span> -- this domain is a clone of an onion listed in the /r/darknetmarkets <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">superlist</a>, or of a site that has been validated by the admin.
 {% endif %}
 {% if domain.is_genuine %}
-<span class="tag genuine">[GENUINE]</span> -- this onion is listed as genuine in the /r/darknetmarkets <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">superlist</a> 
+<span class="tag genuine">[GENUINE]</span> -- this onion is listed as genuine in the /r/darknetmarkets <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">superlist</a>, or has been validated by the admin.
 {% endif %}
 </div>
 
