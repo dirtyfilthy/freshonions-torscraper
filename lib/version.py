@@ -1,6 +1,7 @@
 import os
-VERSION_PATH  = os.environ["ETCDIR"]+"/version_string"
-REVISION_PATH = os.environ["ETCDIR"]+"/revision"
+import tor_paths
+VERSION_PATH  = tor_paths.ETCDIR + "/version_string"
+REVISION_PATH = tor_paths.ETCDIR + "/revision"
 
 def version():
 	with open(VERSION_PATH,'r') as f:
