@@ -146,7 +146,11 @@ class TorSpider(scrapy.Spider):
 
     @db_session
     def update_page_info(self, url, title, code, is_frontpage=False, size=0):
+        
         if not Domain.is_onion_url(url):
+            return False
+        
+        if title == "ERROR: The requested URL could not be retrieved":
             return False
 
         failed_codes = [666, 503, 504, 502]
