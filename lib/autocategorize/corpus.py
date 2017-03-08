@@ -14,6 +14,15 @@ EXTRA_STOP_WORDS = [
 			"http"
 	]
 
+POST_STEM_STOP_WORDS = [
+
+			"nbsp",
+			"gt",
+			"lt",
+			"amp",
+			"quot"
+	]
+
 class FrontpageDocuments(object):
 
 	@db_session
@@ -34,6 +43,7 @@ class FrontpageDocuments(object):
 			if not body_stripped:
 				continue
 			yield body_stripped
+		commit()
 
 
 def tokenize(doc):
@@ -41,17 +51,21 @@ def tokenize(doc):
 	tokenizer = RegexpTokenizer(r'\w+')
 	return tokenizer.tokenize(raw)
 
-def remove_stopwords(tokenized_doc):
-	stop_words = get_stop_words("en") + EXTRA_STOP_WORDS
+def remove_stopwords(tokenized_doc, stop_words):
 	return [i for i in tokenized_doc if not i in stop_words]
+
+def remove_numbers(tokenized_doc):
+	return [i for i in tokenized_doc if not re.match(r"^\d+$", i)]
 
 def stem(tokenized_doc):
 	p_stemmer = PorterStemmer()
 	return [p_stemmer.stem(i) for i in tokenized_doc]
 
 def clean_tokenized_document(tokenized_doc):
-	cleaned = remove_stopwords(tokenized_doc)
+	cleaned = remove_stopwords(tokenized_doc, get_stop_words("en") + EXTRA_STOP_WORDS)
 	cleaned = stem(cleaned)
+	cleaned = remove_stopwords(cleaned, POST_STEM_STOP_WORDS)
+	cleaned = remove_numbers(cleaned)
 	return cleaned
 
 def tokenize_documents(documents):
@@ -66,14 +80,21 @@ def build_dictionary(tokenized_documents):
 	return dictionary
 
 def build_corpus(tokenized_documents, dictionary):
+	plain = []
+	i = 0
 	for text in  tokenized_documents:
-		yield dictionary.doc2bow(text)
+		plain.append(dictionary.doc2bow(text))
+		i += 1
+		if (i % 10) == 0:
+			print("processed %d documents" % i)
+		
+	return plain
 
 def save_corpus(corpus):
-	corpora.MmCorpus.serialize(corpus, CORPUS_PATH)
+	corpora.MmCorpus.serialize(CORPUS_PATH, corpus)
 
 def load_corpus():
-	return corpora.MmCorpus.load(CORPUS_PATH)
+	return corpora.MmCorpus(CORPUS_PATH)
 
 
 

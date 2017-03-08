@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import autocategorize.corpus as corpus
 import sys
+from gensim import corpora, models
 print "Loading dictionary..."
 dictionary = corpora.Dictionary.load(corpus.DICTIONARY_PATH)
 print "Building corpus..."
