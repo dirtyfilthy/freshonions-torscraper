@@ -127,6 +127,7 @@ No title for this domain.
 </div>
 
 
+
 <div id="ports">
 <h3>Open Ports:</h3>
 {% set open_ports = domain.get_open_ports() %}
@@ -238,6 +239,33 @@ This site appears to have {{n_clones - 1}} clones<sup>*</sup>. <a href="{{url_fo
 </p>
 {% endif %}
 
+</div>
+{% endif %}
+
+{% if domain.description_json and isinstance(domain.description_json, dict) %}
+<div id="description_json">
+<h3>/description.json</h3>
+<table>
+<thead>
+<tr>
+<th>
+Key
+</th>
+<th>
+Value
+</th>
+</tr>
+</thead>
+<tbody>
+{% for key, value in domain.description_json.iteritems() %}
+{% if isinstance(value, str) or isinstance(value, unicode) %}
+<tr>
+<td>{{key}}</td><td>{{value}}</td>
+</tr>
+{% endif %}
+{% endfor %}
+</tbody>
+</table>
 </div>
 {% endif %}
 

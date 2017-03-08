@@ -43,12 +43,14 @@ class Domain(db.Entity):
     clone_group    = Optional('CloneGroup')
     new_clone_group = Optional('CloneGroup')
     open_ports     = Set('OpenPort')
-    next_scheduled_check = Required(datetime)
+    next_scheduled_check = Required(datetime, default=NEVER)
     dead_in_a_row   = Required(int, default=0)
     ssh_fingerprint = Optional('SSHFingerprint')
     portscanned_at  = Required(datetime, default=NEVER)
     path_scanned_at = Required(datetime, default=NEVER)
     useful_404_scanned_at = Required(datetime, default=NEVER)
+    description_json = Optional(Json)
+    description_json_at = Required(datetime, default=NEVER)
 
     @classmethod
     def random(klass, number=1000):
@@ -189,6 +191,7 @@ class Domain(db.Entity):
         d['language']   = self.language if self.language!='' else None
         d['powered_by'] = self.powered_by
         d['portscanned_at'] = self.portscanned_at
+        d['description_json'] = self.description_json
         
         d['useful_404_scanned_at'] = self.useful_404_scanned_at
         d['useful_404'] = None

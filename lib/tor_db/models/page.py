@@ -2,6 +2,7 @@ from pony.orm import *
 from tor_db.db import db
 from tor_db.constants import *
 from tor_db.models.domain import *
+import tor_db.models.domain
 from tor_elasticsearch import *
 from datetime import *
 import urlparse
@@ -26,7 +27,7 @@ class Page(db.Entity):
         now = datetime.now()
         p = klass.get(url=url)
         if not p:
-            domain = Domain.find_stub_by_url(url)
+            domain = tor_db.models.domain.Domain.find_stub_by_url(url)
             p = klass(url=url, domain=domain, code=666, created_at=now, visited_at=NEVER, title='')
 
         return p

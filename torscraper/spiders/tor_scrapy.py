@@ -6,6 +6,7 @@ from pony.orm import *
 from datetime import *
 from tor_db import *
 from tor_elasticsearch import *
+import json
 import random
 import string
 import random
@@ -238,6 +239,19 @@ class TorSpider(scrapy.Spider):
                 bitcoin_addr = BitcoinAddress(address=addr)
             page.bitcoin_addresses.add(bitcoin_addr)
 
+
+    @db_session
+    def description_json(self, response):
+        domain = Domain.find_by_url(response.url)
+        if not domain or response.status in [502, 503]:
+            return None
+        if response.status in [200, 206]:
+            domain.description_json = json.loads(response.body)
+        else:
+            domain.description_json = None
+
+
+
     @db_session
     def useful_404_detection(self, response):
         domain = Domain.find_by_url(response.url)
@@ -327,6 +341,13 @@ class TorSpider(scrapy.Spider):
                 commit()
                 for url in interesting_paths.construct_urls(domain):
                     yield scrapy.Request(url, callback=self.parse)
+
+            # /description.json
+
+            if domain.is_up and domain.description_json_at < path_event_horizon:
+                domain.description_json_at = datetime.now()
+                commit()
+                yield scrapy.Request(domain.construct_url("/description.json"), callback=self.description_json)
 
             # language detection
 
