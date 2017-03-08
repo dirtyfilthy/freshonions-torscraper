@@ -4,7 +4,7 @@ from nltk.tokenize import RegexpTokenizer
 from nltk.stem.porter import PorterStemmer
 from gensim import corpora, models
 import tor_paths
-import datetime
+from datetime import *
 
 DICTIONARY_PATH = tor_paths.VARDIR + "/lib/autocategorize.dict"
 CORPUS_PATH     = tor_paths.VARDIR + "/lib/autocategorize.mm"
@@ -16,16 +16,21 @@ EXTRA_STOP_WORDS = [
 
 class FrontpageDocuments(object):
 
+	@db_session
 	def __iter__(self):
 		event_horizon = datetime.now() - timedelta(hours=48)
-		domains = select(d for d in Domain if d.is_up == True and d.last_alive > event_horizon 
+		domain_ids = select(d.id for d in Domain if d.is_up == True and d.last_alive > event_horizon 
                          and (d.clone_group is None or d.created_at == 
                          min(d2.created_at for d2 in Domain if d2.clone_group==d.clone_group)))
-		for domain in domains:
+		domain_ids = list(domain_ids)
+
+		for d_id in domain_ids:
+			domain = Domain.get(id = d_id)
 			page = domain.frontpage()
 			if not page:
 				continue
 			body_stripped = page.get_body_stripped()
+			commit()
 			if not body_stripped:
 				continue
 			yield body_stripped
