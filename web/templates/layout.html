@@ -2,14 +2,22 @@
 <html lang="en">
 <head>
     <title>Fresh Onions</title>
-    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}?{{revision}}">
+    {% if uuid_is_fresh %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('blank',  random=uuid) }}">
+    <script src="/static/b.js?{{uuid}}"></script>
+    {% endif %}
     <link rel="icon" type="image/png" sizes="32x32" href="/static/favicon-32x32.png">
 	<link rel="icon" type="image/png" sizes="96x96" href="/static/favicon-96x96.png">
 	<link rel="icon" type="image/png" sizes="16x16" href="/static/favicon-16x16.png">
+
 </head>
 <body>
 	<div id="logo">
-	<img src="/static/logo.png" />
+	<img src="/static/logo.png" /> 
+	{% if uuid_is_fresh %}
+	<a class="black" href="{{url_for('bot', kind=uuid)}}">.</a>
+	{% endif %}
  </div>
 	<div id="topbar">
 	<ul id="menu">
@@ -26,6 +34,9 @@
 	</li>
 	<li>
 		<a href="{{ url_for('src') }}">SRC</a>
+	</li>
+	<li>
+		<a href="{{ url_for('stats') }}">STATS</a>
 	</li>
 	</ul>
 	<div id="stats">

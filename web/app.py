@@ -5,6 +5,8 @@ from flask import jsonify
 from flask import url_for
 from flask import redirect
 from flask import send_from_directory
+from flask import session
+from flask import g
 import urlparse
 from pony.orm import *
 from datetime import *
@@ -14,24 +16,75 @@ import helpers
 import re
 import os
 import bitcoin
+import version
 import email_util
 import banned
 import tor_text
 import portscanner
 import urllib
+import random
+import sys
+import uuid
+import detect_language
 app = Flask(__name__)
 app.jinja_env.globals.update(Domain=Domain)
 app.jinja_env.globals.update(NEVER=NEVER)
 app.jinja_env.globals.update(len=len)
+app.jinja_env.globals.update(count=count)
 app.jinja_env.globals.update(select=select)
+app.jinja_env.globals.update(isinstance=isinstance)
+app.jinja_env.globals.update(dict=dict)
 app.jinja_env.globals.update(int=int)
+app.jinja_env.globals.update(str=str)
+app.jinja_env.globals.update(unicode=unicode)
 app.jinja_env.globals.update(break_long_words=tor_text.break_long_words)
 app.jinja_env.globals.update(is_elasticsearch_enabled=is_elasticsearch_enabled)
+
+
+app.secret_key = os.environ['FLASK_SECRET'].decode("string-escape")
+
+@app.before_request
+def setup_session():
+    session.permanent = True
+    app.permanent_session_lifetime = timedelta(days=365*30)
+    if not 'uuid' in session:
+    	session['uuid'] = str(uuid.uuid4())
+    	g.uuid_is_fresh = True
+    else:
+    	g.uuid_is_fresh = False
+    now = datetime.now()
+    agent     = request.headers.get('User-Agent', '')
+    referrer  = request.headers.get('Referer', '')
+    path      = request.path
+    full_path = request.full_path
+    with db_session:
+    	req_log   = RequestLog( uuid=session['uuid'], 
+    							uuid_is_fresh=g.uuid_is_fresh, 
+    							created_at=now, 
+    							agent=agent,
+    							referrer=referrer,
+    							path=path,
+    							full_path=full_path)
+    	flush()
+    	g.request_log_id = req_log.id
+
 
 @app.context_processor
 def inject_elasticsearch():
 	return dict(elasticsearch_enabled=is_elasticsearch_enabled())
 
+@app.context_processor
+def inject_random_integer():
+	return dict(random_integer=random.randint(0, sys.maxint-1))
+
+@app.context_processor
+def inject_uuid():
+	return dict(uuid=session['uuid'], uuid_is_fresh=g.uuid_is_fresh)
+
+
+@app.context_processor
+def inject_revision():
+	return dict(revision=version.revision())
 
 @app.context_processor
 @db_session
@@ -56,18 +109,22 @@ def json():
 @app.route("/")
 @db_session
 def index():
-
+	now = datetime.now()
 	context = helpers.build_search_context()
 
 	r = helpers.maybe_search_redirect(context["search"])
 	if r:
 		return r
+	request_log = RequestLog.get(id=g.request_log_id)
 
-	r = helpers.maybe_domain_search(context)
+	r, n_results = helpers.maybe_domain_search(context)
 	if r:
+		sl = SearchLog(request_log=request_log, context=context, is_json=False, created_at=now, results=n_results)
 		return r
 
-	return helpers.render_elasticsearch(context)
+	r, n_results = helpers.render_elasticsearch(context)
+	sl = SearchLog(request_log=request_log, context=context, is_json=False, created_at=now, results=n_results)
+	return r
 
 @app.route("/json")
 @db_session
@@ -75,20 +132,26 @@ def index_json():
 	
 	context = helpers.build_search_context()
 
-	r = helpers.maybe_domain_search(context, json=True)
+	request_log = RequestLog.get(id=g.request_log_id)
+
+	r, n_results = helpers.maybe_domain_search(context, json=True)
+
 	if r:
+		sl = SearchLog(request_log=request_log, context=context, is_json=True, created_at=now, results=n_results)
 		return r
 
-	return helpers.render_elasticsearch(context, json=True)
+	r, n_results = helpers.render_elasticsearch(context, json=True)
+	sl = SearchLog(request_log=request_log, context=context, is_json=True, created_at=now, results=n_results)
 
+	return r
+
+@app.route('/blank/<random>.css')
+def blank(random):
+	return render_template("blank.html")
 	
 @app.route('/src')
 def src():
-	current = os.path.dirname(os.path.realpath(__file__))
-	version_file = current+"/../etc/version_string"
-	with open(version_file,'r') as f:
-		version_string = f.read().strip()
-
+	version_string = version.version()
 	source_name="torscraper-%s.tar.gz" % version_string
 	source_link="/static/%s" % source_name
 	return render_template('src.html', source_name=source_name, source_link=source_link)
@@ -100,16 +163,21 @@ def onion_info(onion):
 	links_to = []
 	links_from = []
 	domain = select(d for d in Domain if d.host==onion).first()
-	fp_count = 0
-	paths = domain.interesting_paths()
-	emails = domain.emails()
-	bitcoin_addresses = domain.bitcoin_addresses()
-	if domain.ssh_fingerprint:
-		fp_count = len(domain.ssh_fingerprint.domains)
+	
 	if domain:
+		fp_count = 0
+		paths = domain.interesting_paths()
+		emails = domain.emails()
+		bitcoin_addresses = domain.bitcoin_addresses()
+		if domain.language != '':
+			language = detect_language.code_to_lang(domain.language)
+		else:
+			language = None
+		if domain.ssh_fingerprint:
+			fp_count = len(domain.ssh_fingerprint.domains)
 		links_to   = domain.links_to()
 		links_from = domain.links_from()
-		return render_template('onion_info.html', domain=domain, scanner=portscanner, OpenPort=OpenPort, paths=paths, emails=emails, bitcoin_addresses=bitcoin_addresses, links_to=links_to, links_from = links_from, fp_count=fp_count)
+		return render_template('onion_info.html', domain=domain, language=language, scanner=portscanner, OpenPort=OpenPort, paths=paths, emails=emails, bitcoin_addresses=bitcoin_addresses, links_to=links_to, links_from = links_from, fp_count=fp_count)
 	else:
 		return render_template('error.html', code=404, message="Onion not found."), 404
 
@@ -140,7 +208,48 @@ def clones_list_json(onion):
 	domains = domain.clones()
 	return jsonify(Domain.to_dict_list(domains))
 
+@app.route('/languages')
+@db_session
+def languages():
+	lang = request.args.get("lang")
+	if lang:
+		return redirect(url_for("language_list",code=lang), code=302)
 
+	languages = select(d.language for d in Domain if d.language!='')
+	options = []
+	for code in languages:
+		if code == "en" or code == '':
+			continue
+		lang_count = count(Domain.by_language(code))
+		lang_name  = detect_language.code_to_lang(code)
+		lang_disp  = "%s (%d)" % (lang_name, lang_count)
+		option = []
+		option.append(code)
+		option.append(lang_disp)
+		options.append(option)
+	options.sort(key=lambda o: o[1])
+	options = [["", "Choose language..."]] + options
+	return render_template('languages.html', options=options) 
+
+
+@app.route('/language/<code>')
+@db_session
+def language_list(code):
+	domains = Domain.by_language(code)
+	if count(domains) != 0:
+		language = detect_language.code_to_lang(code)
+		return render_template('language_list.html', domains=domains, code=code, language=language)
+	else:
+		return render_template('error.html', code=404, message="No domains with language '%s'." % code), 404
+
+@app.route('/language/<code>/json')
+@db_session
+def language_list_json(code):
+	domains = Domain.by_language(code)
+	if count(domains) != 0:
+		return jsonify(Domain.to_dict_list(domains))
+	else:
+		return render_template('error.html', code=404, message="No domains with language '%s'." % code), 404
 
 @app.route('/path/<path:path>')
 @db_session
@@ -265,6 +374,33 @@ def favicon():
 @app.route('/faq')
 def faq():
 	return render_template('faq.html')
+
+
+@app.route('/bot/<kind>')
+@db_session
+def bot(kind):
+	now = datetime.now()
+	hb = HeadlessBot.get(uuid=session["uuid"])
+	if hb is None:
+		hb=HeadlessBot(uuid=session["uuid"], kind=kind, created_at=now)
+		commit()
+	return render_template('error.html', code=404, message="Printer on fire."), 404
+
+@app.route('/stats')
+@db_session
+def stats():
+	statz = DailyStat.get_stats()
+	search_terms = select(sl.searchterms for sl in SearchLog if sl.has_searchterms == True 
+						and sl.is_firstpage == True and sl.results > 0).order_by(raw_sql('sl.created_at DESC')).limit(10)
+
+	searches = map(lambda st: select(sl for sl in SearchLog if sl.has_searchterms == True 
+						and sl.is_firstpage == True and sl.results > 0 and 
+						sl.searchterms == st).order_by(desc(SearchLog.created_at)).first(), search_terms)
+
+	irc_servers = count(d for d in Domain for op in OpenPort if op.domain==d and op.port == 6667)
+	banned = count(d for d in Domain if d.is_banned == True)
+	return render_template('stats.html', stats=statz, searches=searches, irc_servers=irc_servers, banned=banned)
+
 
 
 if __name__ == "__main__":

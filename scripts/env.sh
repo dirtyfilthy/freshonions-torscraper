@@ -1,5 +1,7 @@
 #!/bin/sh
-export BASEDIR=$DIR/..
+BASEDIR=$DIR/..
+BASEDIR=$( cd "$BASEDIR" ; pwd -P )
+export BASEDIR
 export SCRIPTDIR=$BASEDIR/scripts
 export ETCDIR=$BASEDIR/etc
 export VARDIR=$BASEDIR/var
@@ -27,3 +29,6 @@ export MAX_RESULT_LIMIT
 . $ETCDIR/site
 export SITE_PATH
 export SITE_DOMAIN
+
+. $ETCDIR/private/flask.secret
+export FLASK_SECRET

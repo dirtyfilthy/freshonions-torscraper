@@ -14,3 +14,8 @@ nltk==3.2.1
 scikit-learn
 scipy
 numpy
+scikit-learn
+tabulate
+langdetect
+pycountry
+networkx

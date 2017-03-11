@@ -25,7 +25,7 @@
 {% endmacro %}
 
 
-{% macro domain_table(domains, sortable=False, context=None) %}
+{% macro domain_table(domains, sortable=False, context=None, extra=None, extra_args=None) %}
 	<table class="domain_list">
 		<thead>
 		{% if not sortable %}
@@ -64,6 +64,9 @@
 				    {% endif %}
 				    {% if domain.is_fake %}
 				    <span class="tag fake">[F]</span>
+				    {% endif %}
+				    {% if extra %}
+				    {{extra(domain, extra_args)}}
 				    {% endif %}
 
 				</td>

@@ -48,6 +48,21 @@
 </td>
 </tr>
 
+<tr>
+<td>Language</td>
+<td>
+{% if language %}
+{% set n_lang = count(Domain.by_language(domain.language)) %}
+{{language}}
+{% if n_lang > 1 and domain.language!="en" %}
+<a class="small" href="{{url_for('language_list', code=domain.language)}}">[+{{n_lang-1}}]</a>
+{% endif %}
+{% else %}
+<span class="never">Unknown</span>
+{% endif %}
+</td>
+</tr>
+
 {% if domain.server != '' %}
 <tr>
 <td>Server</td>
@@ -104,12 +119,13 @@ No title for this domain.
 <p>
 <div id="tags">
 {% if domain.is_fake %}
-<span class="tag fake">[FAKE]</span> -- this domain is a clone of an onion listed in the /r/darknetmarkets <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">superlist</a> 
+<span class="tag fake">[FAKE]</span> -- this domain is a clone of an onion listed in the /r/darknetmarkets <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">superlist</a>, or of a site that has been validated by the admin.
 {% endif %}
 {% if domain.is_genuine %}
-<span class="tag genuine">[GENUINE]</span> -- this onion is listed as genuine in the /r/darknetmarkets <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">superlist</a> 
+<span class="tag genuine">[GENUINE]</span> -- this onion is listed as genuine in the /r/darknetmarkets <a href="https://www.reddit.com/r/darknetmarkets/wiki/superlist">superlist</a>, or has been validated by the admin.
 {% endif %}
 </div>
+
 
 
 <div id="ports">
@@ -223,6 +239,33 @@ This site appears to have {{n_clones - 1}} clones<sup>*</sup>. <a href="{{url_fo
 </p>
 {% endif %}
 
+</div>
+{% endif %}
+
+{% if domain.description_json and isinstance(domain.description_json, dict) %}
+<div id="description_json">
+<h3>/description.json</h3>
+<table>
+<thead>
+<tr>
+<th>
+Key
+</th>
+<th>
+Value
+</th>
+</tr>
+</thead>
+<tbody>
+{% for key, value in domain.description_json.iteritems() %}
+{% if isinstance(value, str) or isinstance(value, unicode) %}
+<tr>
+<td>{{key}}</td><td>{{value}}</td>
+</tr>
+{% endif %}
+{% endfor %}
+</tbody>
+</table>
 </div>
 {% endif %}
 

@@ -4,6 +4,7 @@ from tor_db.constants import *
 import tor_db.models.email
 import tor_db.models.bitcoin_address
 import tor_db.models.page
+import detect_language
 from datetime import *
 import bitcoin
 from tor_elasticsearch import *
@@ -14,6 +15,7 @@ import os
 import re
 import dateutil.parser
 import urlparse
+import random
 
 class Domain(db.Entity):
     host           = Required(str)
@@ -29,22 +31,35 @@ class Domain(db.Entity):
     is_genuine     = Required(bool, default=False)
     is_subdomain   = Required(bool, default=False)
     is_banned      = Required(bool, default=False)
+    manual_genuine = Required(bool, default=False)
     useful_404     = Required(bool, default=False)
     useful_404_php = Required(bool, default=False)
     useful_404_dir = Required(bool, default=False)
+    ban_exempt     = Required(bool, default=False)
+    language       = Optional(str, 2)
     created_at     = Required(datetime)
     visited_at     = Required(datetime)
     last_alive     = Required(datetime)
     clone_group    = Optional('CloneGroup')
     new_clone_group = Optional('CloneGroup')
     open_ports     = Set('OpenPort')
-    next_scheduled_check = Required(datetime)
+    next_scheduled_check = Required(datetime, default=NEVER)
     dead_in_a_row   = Required(int, default=0)
     ssh_fingerprint = Optional('SSHFingerprint')
     portscanned_at  = Required(datetime, default=NEVER)
     path_scanned_at = Required(datetime, default=NEVER)
     useful_404_scanned_at = Required(datetime, default=NEVER)
+    description_json = Optional(Json)
+    description_json_at = Required(datetime, default=NEVER)
 
+    @classmethod
+    def random(klass, number=1000):
+        chars = "abcdefghijklmnopqrstuvwxyz234567"
+        onions = []
+        for i in range(number):
+            r = ''.join(random.choice(chars) for _ in range(16))
+            onions.append(r+".onion")
+        return onions
 
     @classmethod
     @db_session
@@ -86,6 +101,11 @@ class Domain(db.Entity):
         else:
             return 'dead'
 
+    @classmethod
+    @db_session
+    def banned(klass):
+        return select(d for d in klass if d.is_banned == True).order_by(desc(Domain.created_at))
+
     @db_session
     def get_open_ports(self):
         op = map(lambda p: p.port, list(self.open_ports))
@@ -94,13 +114,15 @@ class Domain(db.Entity):
 
     @db_session
     def clones(self):
-        d = select(d for d in Domain if d.clone_group == self.clone_group and d.id != self.id)
+        d = select(d for d in Domain if d.clone_group is not None and d.clone_group == self.clone_group and d.id != self.id)
         return d
 
 
     def before_insert(self):
         if (self.title.find("Site Hosted by Freedom Hosting II") != -1 or
-            self.title.find("Freedom Hosting II - hacked") != -1):
+            self.title.find("Freedom Hosting II - hacked") != -1 or 
+            self.title.find("This site is hosted by Freedom Hosting III") != -1 or
+            self.title.find("Site hosted by Daniel's hosting service") != -1):
             self.is_crap = True
         else:
             self.is_crap = False
@@ -114,7 +136,7 @@ class Domain(db.Entity):
         if self.host.count(".") > 1:
             self.is_subdomain = True
 
-        if banned.contains_banned(self.title):
+        if banned.contains_banned(self.title) and not self.ban_exempt:
             self.is_banned = True
 
         if is_elasticsearch_enabled():
@@ -126,7 +148,9 @@ class Domain(db.Entity):
 
     def before_update(self):
         if (self.title.find("Site Hosted by Freedom Hosting II") != -1 or
-            self.title.find("Freedom Hosting II - hacked") != -1):
+            self.title.find("Freedom Hosting II - hacked") != -1 or 
+            self.title.find("This site is hosted by Freedom Hosting III") != -1 or
+            self.title.find("Site hosted by Daniel's hosting service") != -1):
             self.is_crap = True
         else:
             self.is_crap = False
@@ -140,7 +164,7 @@ class Domain(db.Entity):
             self.dead_in_a_row = 0
             self.next_scheduled_check = datetime.now() + timedelta(hours=1)
 
-        if banned.contains_banned(self.title):
+        if banned.contains_banned(self.title) and not self.ban_exempt:
             self.is_banned = True
 
         if is_elasticsearch_enabled():
@@ -164,13 +188,16 @@ class Domain(db.Entity):
         d['is_fake']    = self.is_fake
         d['server']     = self.server
         d['hostname']   = self.host
+        d['language']   = self.language if self.language!='' else None
         d['powered_by'] = self.powered_by
         d['portscanned_at'] = self.portscanned_at
+        d['description_json'] = self.description_json
         
         d['useful_404_scanned_at'] = self.useful_404_scanned_at
         d['useful_404'] = None
         d['useful_404_dir'] = None
         d['useful_404_php'] = None
+
         if self.useful_404_scanned_at != NEVER:
             d['useful_404'] = self.useful_404
             d['useful_404_dir'] = self.useful_404_dir
@@ -269,6 +296,20 @@ class Domain(db.Entity):
     def bitcoin_addresses(self):
         return select(b for b in tor_db.models.bitcoin_address.BitcoinAddress for p in b.pages if p.domain == self).limit(100)
 
+    @db_session
+    def frontpage(self):
+        return select( p for p in tor_db.models.page.Page if p.domain==self and 
+                       p.is_frontpage == True and (p.code==200 or p.code==206) ).first()
+
+    @classmethod
+    @db_session
+    def has_frontpage(klass):
+        return leftjoin(d for d in klass for p in self.pages if p.is_frontpage == True and (p.code==200 or p.code==206))
+
+    @classmethod
+    @db_session
+    def by_language(klass, code):
+        return select(d for d in klass if d.language == code)
 
     @classmethod
     @db_session
@@ -287,6 +328,21 @@ class Domain(db.Entity):
         
         commit()
         return None
+
+    def detect_language(self, body_stripped = None, debug = False):
+        if body_stripped is None:
+            fp = self.frontpage()
+            if fp is None:
+                return None
+            body_stripped = fp.get_body_stripped()
+        if debug:
+            return detect_language.classify(body_stripped, debug = True)
+        lang = detect_language.classify(body_stripped)
+        if lang is None:
+            lang = ''
+        self.language = lang
+        return lang
+            
 
     
     @classmethod
@@ -335,6 +391,9 @@ class Domain(db.Entity):
 
     @classmethod
     def is_onion_url(klass, url):
+        url = url.strip()
+        if not re.match(r"http[s]?://", url):
+            return False
         try:
             parsed_url = urlparse.urlparse(url)
             host  = parsed_url.hostname

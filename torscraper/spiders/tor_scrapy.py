@@ -6,6 +6,7 @@ from pony.orm import *
 from datetime import *
 from tor_db import *
 from tor_elasticsearch import *
+import json
 import random
 import string
 import random
@@ -13,6 +14,7 @@ import timeout_decorator
 import bitcoin
 import email_util
 import interesting_paths
+import tor_text
 
 from scrapy.exceptions import IgnoreRequest
 
@@ -144,10 +146,19 @@ class TorSpider(scrapy.Spider):
 
     @db_session
     def update_page_info(self, url, title, code, is_frontpage=False, size=0):
+        
         if not Domain.is_onion_url(url):
+            return False
+        
+        if title == "ERROR: The requested URL could not be retrieved":
             return False
 
         failed_codes = [666, 503, 504, 502]
+        responded_codes = [200, 206,403, 500, 401, 301, 302, 304, 400]
+        if (hasattr(self, "only_success") and self.only_success == "yes" and 
+            code not in responded_codes):
+            return False
+
         if not title:
             title = ''
         parsed_url = urlparse.urlparse(url)
@@ -232,6 +243,19 @@ class TorSpider(scrapy.Spider):
                 bitcoin_addr = BitcoinAddress(address=addr)
             page.bitcoin_addresses.add(bitcoin_addr)
 
+
+    @db_session
+    def description_json(self, response):
+        domain = Domain.find_by_url(response.url)
+        if not domain or response.status in [502, 503]:
+            return None
+        if response.status in [200, 206]:
+            domain.description_json = json.loads(response.body)
+        else:
+            domain.description_json = None
+
+
+
     @db_session
     def useful_404_detection(self, response):
         domain = Domain.find_by_url(response.url)
@@ -271,7 +295,10 @@ class TorSpider(scrapy.Spider):
             self.log('Got %s (%s)' % (response.url, title))
             is_frontpage = Page.is_frontpage_request(response.request)
             size = len(response.body)
+            
             page = self.update_page_info(response.url, title, response.status, is_frontpage, size)
+            if not page:
+                return
 
             # extra headers
 
@@ -309,17 +336,32 @@ class TorSpider(scrapy.Spider):
 
             commit()
 
+            path_event_horizon = datetime.now() - timedelta(weeks=2)
+
             # interesting paths
 
-            if domain.is_up and domain.path_scanned_at == NEVER:
+            if domain.is_up and domain.path_scanned_at < path_event_horizon:
                 domain.path_scanned_at = datetime.now()
                 commit()
                 for url in interesting_paths.construct_urls(domain):
                     yield scrapy.Request(url, callback=self.parse)
 
+            # /description.json
+
+            if domain.is_up and domain.description_json_at < path_event_horizon:
+                domain.description_json_at = datetime.now()
+                commit()
+                yield scrapy.Request(domain.construct_url("/description.json"), callback=self.description_json)
+
+            # language detection
+
+            if domain.is_up and is_frontpage and (response.status == 200 or response.status == 206):
+                domain.detect_language(tor_text.strip_html(response.body))
+                commit()
+
             # 404 detections
 
-            if domain.is_up and page.is_frontpage and domain.useful_404_scanned_at < (datetime.now() - timedelta(weeks=2)):
+            if domain.is_up and is_frontpage and domain.useful_404_scanned_at < (datetime.now() - timedelta(weeks=2)):
                 
                 # standard
 
@@ -344,12 +386,13 @@ class TorSpider(scrapy.Spider):
             if (not hasattr(self, "test") or self.test != "yes") and not host in TorSpider.spider_exclude:
                 for url in response.xpath('//a/@href').extract():
                     try:
+                        fullurl = response.urljoin(url)
                         yield scrapy.Request(url, callback=self.parse)
-                        if got_server_response and Domain.is_onion_url(url):
-                            parsed_link = urlparse.urlparse(url)
+                        if got_server_response and Domain.is_onion_url(fullurl):
+                            parsed_link = urlparse.urlparse(fullurl)
                             link_host   = parsed_link.hostname
                             if host != link_host:
-                                link_to_list.append(url)
+                                link_to_list.append(fullurl)
                     except:
                         continue
 
@@ -357,7 +400,7 @@ class TorSpider(scrapy.Spider):
                     small_body = response.body[:(1024*MAX_PARSE_SIZE_KB)]
                     page.links_to.clear()
                     for url in link_to_list:
-                        link_to = Page.find_stub_by_url(url)
+                        link_to = Page.find_stub_by_url(fullurl)
                         page.links_to.add(link_to)
 
                     try:

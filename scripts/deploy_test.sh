@@ -3,6 +3,8 @@ DIR=$( cd "$(dirname "$0")" ; pwd -P )
 . $DIR/env.sh
 . $ETCDIR/deploy.cfg
 
+$SCRIPTDIR/update_and_pull_schema.sh
+
 echo "rsyncing to upstream hosts..."
 (
 	cd $BASEDIR/..

@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+{% from 'domain_table.macro.html' import domain_table %}
+{% from 'ruler.macro.html' import ruler %}
+{% block body %}
+
+{{ ruler() }}
+
+<div class="contents">
+<h2>Language</h2>
+<p>Showing domains which use {{language}} language <a href="{{url_for('language_list_json', code=code)}}">[JSON]</a></p>
+<p>You can find other languages <a href="{{url_for('languages')}}">here</a></p>
+{{ domain_table(domains)}}
+
+</div>
+{% endblock %}

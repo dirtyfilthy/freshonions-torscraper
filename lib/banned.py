@@ -1,7 +1,8 @@
 import os
 import re
-BANNED_WORD_FILENAME = os.environ['ETCDIR'] + "/banned_words"
-BANNED_WORDS = [line.strip() for line in open(BANNED_WORD_FILENAME)]
+import tor_paths
+BANNED_WORD_FILENAME = tor_paths.ETCDIR + "/banned_words"
+BANNED_WORDS = [line.strip() for line in open(BANNED_WORD_FILENAME) if line.strip()!='']
 BANNED_WORDS_REGEX_STR = ""
 start = True
 
