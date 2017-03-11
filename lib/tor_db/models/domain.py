@@ -21,6 +21,7 @@ class Domain(db.Entity):
     host           = Required(str)
     port           = Required(int)
     pages          = Set('Page')
+    category_links = Set('CategoryLink')
     ssl            = Required(bool)
     is_up          = Required(bool)
     title          = Optional(str)
@@ -83,6 +84,19 @@ class Domain(db.Entity):
         if self.useful_404_php:
             paths += select(p.path for p in tor_db.models.page.Page if p.domain==self and p.path in interesting_paths.PATHS_PHP and p.code in [200, 206])
         return paths
+
+
+    def corpus_text(self):
+        text = ""
+        fp = self.frontpage()
+        if fp:
+            text = fp.get_body_stripped()
+        if self.description_json:
+            for k, v in self.description_json.iteritems():
+                text = text + " " + v
+
+        return text.strip()
+
 
 
     def construct_url(self, path):
