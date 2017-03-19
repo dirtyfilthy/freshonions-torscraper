@@ -9,3 +9,4 @@ from tor_db.models.request_log import *
 from tor_db.models.search_log import *
 from tor_db.models.daily_stat import *
 from tor_db.models.headless_bot import *
+from tor_db.models.web_component import *

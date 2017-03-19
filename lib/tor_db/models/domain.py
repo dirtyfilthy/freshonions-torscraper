@@ -44,6 +44,7 @@ class Domain(db.Entity):
     new_clone_group = Optional('CloneGroup')
     open_ports     = Set('OpenPort')
     next_scheduled_check = Required(datetime, default=NEVER)
+    whatweb_at      = Required(datetime, default=NEVER)
     dead_in_a_row   = Required(int, default=0)
     ssh_fingerprint = Optional('SSHFingerprint')
     portscanned_at  = Required(datetime, default=NEVER)
@@ -51,6 +52,7 @@ class Domain(db.Entity):
     useful_404_scanned_at = Required(datetime, default=NEVER)
     description_json = Optional(Json)
     description_json_at = Required(datetime, default=NEVER)
+    web_components  = Set("WebComponent", reverse="domain", table="web_component_link", column="web_component")
 
     @classmethod
     def random(klass, number=1000):
