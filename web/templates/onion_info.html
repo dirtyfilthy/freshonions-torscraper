@@ -269,6 +269,47 @@ Value
 </div>
 {% endif %}
 
+{% if len(domain.web_components) > 0 %}
+<div id="whatweb">
+<h3>WhatWeb Plugins</h3>
+<ul>
+{% for plugin in domain.web_components %}
+{% set plugin_count  = count(WebComponent.find_domains(plugin.name)) - 1 %}
+{% set version_count = count(WebComponent.find_domains(plugin.name, version=plugin.version)) - 1 %}
+{% set account_count = count(WebComponent.find_domains(plugin.name, account=plugin.account)) - 1 %}
+{% set string_count  = count(WebComponent.find_domains(plugin.name, string=plugin.string))   - 1 %}
+
+<li><b>{{plugin.name}}</b>
+{% if plugin_count > 0 %}
+<a href="{{url_for('whatweb_list', name=plugin.name)}}">({{plugin_count}} others)</a>
+{% endif %}
+
+{% if plugin.version != "" %}
+Version: {{plugin.version}}
+{% if version_count > 0 %}
+<a href="{{url_for('whatweb_list', name=plugin.name, version=plugin.version)}}">({{version_count}} others)</a>
+{% endif %}
+{% endif %}
+
+{% if plugin.account != "" %}
+Account: {{plugin.account}}
+{% if account_count > 0 %}
+<a href="{{url_for('whatweb_list', name=plugin.name, account=plugin.account)}}">({{account_count}} others)</a>
+{% endif %}
+{% endif %}
+
+{% if plugin.string  !="" %}
+{{plugin.string}}
+{% if string_count > 0 %}
+<a href="{{url_for('whatweb_list', name=plugin.name, string=plugin.string)}}">({{string_count}} others)</a>
+{% endif %}
+{% endif %}
+</li>
+{% endfor %}
+</ul>
+</div>
+{% endif %}
+
 
 
 <div class="links links_to">

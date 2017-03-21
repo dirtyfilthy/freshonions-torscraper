@@ -1,11 +1,12 @@
 import tor_paths
-import tor_db
+from tor_db import *
 from datetime import *
 import tempfile
 import json
 import os
-from subprocess import call
+import subprocess
 
+TIMEOUT_BIN = "/usr/bin/timeout"
 WHATWEB_BIN = tor_paths.THIRDPARTY_DIR + "/WhatWeb/whatweb"
 IGNORE_PLUGINS = [ "title", "email" ]
 
@@ -15,10 +16,13 @@ def from_html(html):
 		input_file.write(html)
 		input_file.flush()
 
-		fh, output_path = tempfile.mkstemp()
-		fh.close()
+		outfd, output_path = tempfile.mkstemp()
+		outsock = os.fdopen(outfd,'r')
+		outsock.close()
 
-		subprocess.call([WHATWEB_BIN, "--log-json", output_path, input_file.name])
+		ret = subprocess.call([TIMEOUT_BIN, "60", WHATWEB_BIN, "--log-json", output_path, input_file.name])
+		if ret != 0:
+			return None
 		with open(output_path, "r") as fh2:
 			json_raw = fh2.read()
 
@@ -37,7 +41,7 @@ def domain(dom):
 	if html is None:
 		return None
 
-	return whatweb_from_html(html)
+	return from_html(html)
 
 
 @db_session
@@ -58,7 +62,7 @@ def process(dom):
 		dom.web_components.add(wc)
 
 @db_session
-def process_all:
+def process_all():
 	horizon  = datetime.now() - timedelta(weeks=1)
 	horizon2 = datetime.now() - timedelta(hours=48)
 	domain_ids = list(select(d.id for d in Domain if d.whatweb_at < horizon and d.last_alive > horizon2))

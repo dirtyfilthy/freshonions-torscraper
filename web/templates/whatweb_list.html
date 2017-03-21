@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% from 'domain_table.macro.html' import domain_table %}
+{% from 'ruler.macro.html' import ruler %}
+{% block body %}
+
+{{ ruler() }}
+
+<div class="contents">
+<h2>WhatWeb Plugin '{{name}}'</h2>
+{% if version %}
+<p>
+Version: {{version}}
+</p>
+{% endif %}
+{% if account %}
+<p>
+Account: {{account}}
+</p>
+{% endif %}
+{% if string %}
+<p>
+String: &quot;{{string}}&quot;
+</p>
+{% endif %}
+<p>Showing domains for plugin. <a href="{{url_for('whatweb_list_json', name=name, version=version, string=string, account=account)}}">[JSON]</a></p>
+<p></p>
+{{ domain_table(domains)}}
+
+</div>
+{% endblock %}

@@ -52,7 +52,7 @@ class Domain(db.Entity):
     useful_404_scanned_at = Required(datetime, default=NEVER)
     description_json = Optional(Json)
     description_json_at = Required(datetime, default=NEVER)
-    web_components  = Set("WebComponent", reverse="domain", table="web_component_link", column="web_component")
+    web_components  = Set("WebComponent", table="web_component_link", reverse="domains", column="web_component")
 
     @classmethod
     def random(klass, number=1000):
@@ -219,6 +219,7 @@ class Domain(db.Entity):
             emails     = self.emails()
             btc_addr   = self.bitcoin_addresses()
             our_clones  = self.clones()
+
             d['links_to']   = []
             d['links_from'] = [] 
             d['emails']     = []
@@ -226,6 +227,20 @@ class Domain(db.Entity):
             d['bitcoin_addresses'] = []
             d['clones'] = map(lambda d: d.index_url(), our_clones)
             d['open_ports'] = self.get_open_ports()
+
+            whatweb_plugins = {}
+            for wc in self.web_components:
+                plugin = {}
+                if wc.string != "":
+                    plugin["string"]  = wc.string
+                if wc.version != "":
+                    plugin["version"] = wc.version
+                if wc.account != "":
+                    plugin["account"] = wc.account
+                whatweb_plugins[wc.name] = plugin
+
+            d["whatweb_plugins"] = whatweb_plugins
+
             for link_to in links_to:
                 d['links_to'].append(link_to.index_url())
             for link_from in links_from:

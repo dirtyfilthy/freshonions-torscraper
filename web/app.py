@@ -28,6 +28,7 @@ import uuid
 import detect_language
 app = Flask(__name__)
 app.jinja_env.globals.update(Domain=Domain)
+app.jinja_env.globals.update(WebComponent=WebComponent)
 app.jinja_env.globals.update(NEVER=NEVER)
 app.jinja_env.globals.update(len=len)
 app.jinja_env.globals.update(count=count)
@@ -206,6 +207,24 @@ def clones_list_json(onion):
 	if not domain:
 		return render_template('error.html', code=404, message="Onion not found."), 404
 	domains = domain.clones()
+	return jsonify(Domain.to_dict_list(domains))
+
+@app.route('/whatweb/<name>')
+@db_session
+def whatweb_list(name):
+	version = request.args.get("version")
+	account = request.args.get("account")
+	string  = request.args.get("string")
+	domains = WebComponent.find_domains(name, version=version, account=account, string=string)
+	return render_template('whatweb_list.html', domains=domains, name=name, version=version, account=account, string=string) 
+
+@app.route('/whatweb/<name>/json')
+@db_session
+def whatweb_list_json(name):
+	version = request.args.get("version")
+	account = request.args.get("account")
+	string  = request.args.get("string")
+	domains = WebComponent.find_domains(name, version=version, account=account, string=string)
 	return jsonify(Domain.to_dict_list(domains))
 
 @app.route('/languages')
