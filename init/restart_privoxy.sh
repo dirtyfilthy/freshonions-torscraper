@@ -1,9 +1,9 @@
 #!/bin/sh
-service privoxy1 restart
-service privoxy2 restart
-service privoxy3 restart
-service privoxy4 restart
-service privoxy5 restart
-service privoxy6 restart
-service privoxy7 restart
-service privoxy8 restart
+/usr/bin/service privoxy1 restart
+/usr/bin/service privoxy2 restart
+/usr/bin/service privoxy3 restart
+/usr/bin/service privoxy4 restart
+/usr/bin/service privoxy5 restart
+/usr/bin/service privoxy6 restart
+/usr/bin/service privoxy7 restart
+/usr/bin/service privoxy8 restart
