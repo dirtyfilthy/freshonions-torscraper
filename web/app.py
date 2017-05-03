@@ -164,6 +164,8 @@ def onion_info(onion):
 	links_to = []
 	links_from = []
 	domain = select(d for d in Domain if d.host==onion).first()
+	if domain and domain.is_banned:
+		domain = None
 	
 	if domain:
 		fp_count = 0
@@ -197,7 +199,7 @@ def clones_list(onion):
 	domain = select(d for d in Domain if d.host==onion).first()
 	if not domain:
 		return render_template('error.html', code=404, message="Onion not found."), 404
-	domains = domain.clones()
+	domains = Domain.hide_banned(domain.clones())
 	return render_template('clones_list.html', onion=onion, domains=domains) 
 
 @app.route('/clones/<onion>/json')
@@ -206,7 +208,7 @@ def clones_list_json(onion):
 	domain = select(d for d in Domain if d.host==onion).first()
 	if not domain:
 		return render_template('error.html', code=404, message="Onion not found."), 404
-	domains = domain.clones()
+	domains = Domain.hide_banned(domain.clones())
 	return jsonify(Domain.to_dict_list(domains))
 
 @app.route('/whatweb/<name>')
@@ -254,8 +256,8 @@ def languages():
 @app.route('/language/<code>')
 @db_session
 def language_list(code):
-	domains = Domain.by_language(code)
-	if count(domains) != 0:
+	domains = Domain.hide_banned(Domain.by_language(code))
+	if len(domains) != 0:
 		language = detect_language.code_to_lang(code)
 		return render_template('language_list.html', domains=domains, code=code, language=language)
 	else:
@@ -264,8 +266,8 @@ def language_list(code):
 @app.route('/language/<code>/json')
 @db_session
 def language_list_json(code):
-	domains = Domain.by_language(code)
-	if count(domains) != 0:
+	domains = Domain.hide_banned(Domain.by_language(code))
+	if len(domains) != 0:
 		return jsonify(Domain.to_dict_list(domains))
 	else:
 		return render_template('error.html', code=404, message="No domains with language '%s'." % code), 404
@@ -274,8 +276,8 @@ def language_list_json(code):
 @db_session
 def path_list(path):
 	path = "/" + path
-	domains = Domain.domains_for_path(path)
-	if count(domains) != 0:
+	domains = Domain.hide_banned(Domain.domains_for_path(path))
+	if len(domains) != 0:
 		return render_template('path_list.html', domains=domains, path=path)
 	else:
 		return render_template('error.html', code=404, message="Path '%s' not found." % path), 404
@@ -284,8 +286,8 @@ def path_list(path):
 @db_session
 def path_list_json(path):
 	path = "/" + path
-	domains = Domain.domains_for_path(path)
-	if count(domains) != 0:
+	domains = Domain.hide_banned(Domain.domains_for_path(path))
+	if len(domains) != 0:
 		return jsonify(Domain.to_dict_list(domains))
 	else:
 		return render_template('error.html', code=404, message="Path '%s' not found." % path), 404
@@ -296,7 +298,7 @@ def path_list_json(path):
 def ssh_list(id):
 	fp = SSHFingerprint.get(id=id)
 	if fp:
-		domains = fp.domains
+		domains = Domain.hide_banned(fp.domains)
 		fingerprint = fp.fingerprint
 		return render_template('ssh_list.html', id=id, domains=domains, fingerprint=fingerprint)
 	else:
@@ -307,7 +309,7 @@ def ssh_list(id):
 def ssh_list_json(id):
 	fp = SSHFingerprint.get(id=id)
 	if fp:
-		domains = fp.domains
+		domains = Domain.hide_banned(fp.domains)
 		return jsonify(Domain.to_dict_list(domains))
 	else:
 		return render_template('error.html', code=404, message="Fingerprint not found."), 404
@@ -317,7 +319,7 @@ def ssh_list_json(id):
 def email_list(addr):
 	email = Email.get(address=addr)
 	if email:
-		domains = email.domains()
+		domains = Domain.hide_banned(email.domains())
 		return render_template('email_list.html', domains=domains, email=addr)
 	else:
 		return render_template('error.html', code=404, message="Email not found."), 404
@@ -327,7 +329,7 @@ def email_list(addr):
 def email_list_json(addr):
 	email = Email.get(address=addr)
 	if email:
-		domains = email.domains()
+		domains = Domain.hide_banned(email.domains())
 		return jsonify(Domain.to_dict_list(domains))
 	else:
 		return render_template('error.html', code=404, message="Email not found."), 404
@@ -343,7 +345,7 @@ def port_list(ports):
 		except ValueError:
 			pass
 	port_list_str = ", ".join(map(lambda p: "%s:%s" % (str(p), portscanner.get_service_name(p)), port_list))
-	domains = select(d for d in Domain for op in OpenPort if op.domain==d and op.port in port_list)
+	domains = select(d for d in Domain for op in OpenPort if op.domain==d and op.port in port_list and not d.is_banned)
 	if len(domains) > 0:
 		return render_template('port_list.html', domains=domains, ports=ports, port_list_str = port_list_str)
 	else:
@@ -359,7 +361,7 @@ def port_list_json(ports):
 			port_list.append(int(p.strip()))
 		except ValueError:
 			pass
-	domains = select(d for d in Domain for op in OpenPort if op.domain==d and op.port in port_list)
+	domains = select(d for d in Domain for op in OpenPort if op.domain==d and op.port in port_list and not d.is_banned)
 	if len(domains) > 0:
 		return jsonify(Domain.to_dict_list(domains))
 	else:
@@ -370,7 +372,7 @@ def port_list_json(ports):
 def bitcoin_list(addr):
 	btc_addr = BitcoinAddress.get(address=addr)
 	if btc_addr:
-		domains = btc_addr.domains()
+		domains = Domain.hide_banned(btc_addr.domains())
 		return render_template('bitcoin_list.html', domains=domains, addr=addr)
 	else:
 		return render_template('error.html', code=404, message="Email not found."), 404
@@ -381,7 +383,7 @@ def bitcoin_list(addr):
 def bitcoin_list_json(addr):
 	btc_addr = BitcoinAddress.get(address=addr)
 	if btc_addr:
-		domains = btc_addr.domains()
+		domains = Domain.hide_banned(btc_addr.domains())
 		return jsonify(Domain.to_dict_list(domains))
 	else:
 		return render_template('error.html', code=404, message="Email not found."), 404

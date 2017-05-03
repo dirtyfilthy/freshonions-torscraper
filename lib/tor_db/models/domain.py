@@ -119,6 +119,10 @@ class Domain(db.Entity):
         d = select(d for d in Domain if d.clone_group is not None and d.clone_group == self.clone_group and d.id != self.id)
         return d
 
+    @classmethod
+    def hide_banned(klass, domains):
+        return [d for d in domains if not d.is_banned]
+
 
     def before_insert(self):
         if (self.title.find("Site Hosted by Freedom Hosting II") != -1 or
