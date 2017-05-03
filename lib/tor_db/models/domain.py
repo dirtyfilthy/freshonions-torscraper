@@ -360,7 +360,10 @@ class Domain(db.Entity):
             body_stripped = fp.get_body_stripped()
         if debug:
             return detect_language.classify(body_stripped, debug = True)
-        lang = detect_language.classify(body_stripped)
+        try:
+            lang = detect_language.classify(body_stripped)
+        except:
+            lang = None
         if lang is None:
             lang = ''
         self.language = lang

@@ -9,6 +9,7 @@ from elasticsearch_dsl import Q
 from elasticsearch_dsl import Index
 import re
 import tor_text
+import logging
 try:
     import simplejson as json
 except ImportError:
@@ -189,3 +190,5 @@ def migrate():
     hidden_services.settings(number_of_shards=8, number_of_replicas=1)
     hidden_services.create()
 
+tracer = logging.getLogger('elasticsearch')
+tracer.setLevel(logging.CRITICAL)
