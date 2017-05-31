@@ -10,6 +10,9 @@ from elasticsearch_dsl import Index
 import re
 import tor_text
 import logging
+
+NEVER = datetime.fromtimestamp(0)
+
 try:
     import simplejson as json
 except ImportError:
@@ -38,6 +41,11 @@ def elasticsearch_retrieve_page_by_id(page_id):
         return None
     return result.hits[0]
 
+def elasticsearch_delete_old():
+    _from = NEVER
+    _to   = datetime.now() - timedelta(days=30)
+    query = Search().filter(Q("range", visited_at={'from': _from, 'to': _to}))
+    result = query.delete()
 
 def elasticsearch_pages(context, sort, page):
     result_limit = int(os.environ['RESULT_LIMIT'])

@@ -3,6 +3,7 @@ from tor_db.db import db
 from tor_db.constants import *
 from tor_db.models.domain import *
 import tor_db.models.domain
+import elasticsearch.exceptions
 from tor_elasticsearch import *
 from datetime import *
 import urlparse
@@ -33,6 +34,34 @@ class Page(db.Entity):
         return p
 
     @classmethod
+    def find_old(klass):
+        now = datetime.now()
+        event_horizon = now - timedelta(days=30)
+        pages = select(p for p in Page if p.visited_at < event_horizon).limit(100)
+        return pages
+
+
+    @classmethod
+    @db_session
+    def delete_old(klass):
+        print "find old"
+        i = 1
+        pages = Page.find_old()
+        while(len(pages) > 0):
+            for page in pages:
+                page.links_from.clear()
+                page.links_to.clear()
+                page.delete()
+                
+                
+                if (i % 50) == 0:
+                    print i
+                i += 1
+            
+            commit()
+            pages = Page.find_old()
+
+    @classmethod
     def is_frontpage_url(klass, url):
         parsed_url = urlparse.urlparse(url)
         path  = '/' if parsed_url.path=='' else parsed_url.path
@@ -47,6 +76,14 @@ class Page(db.Entity):
         path  = '/' if parsed_url.path=='' else parsed_url.path
         return path
 
+
+
+    def before_delete(self):
+        try:
+            ep = PageDocType.get(id = self.url, parent = self.domain.host)
+            ep.delete()
+        except elasticsearch.exceptions.NotFoundError:
+            pass
 
     def before_insert(self):
         self.path  = Page.path_from_url(self.url)
