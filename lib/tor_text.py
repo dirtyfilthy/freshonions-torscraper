@@ -11,3 +11,7 @@ def strip_html(text):
 	cleaned = re.sub('<[^<]+?>',        '',   cleaned)
 	cleaned = re.sub(COMPRESS_WS_REGEX, "\n", cleaned)
 	return cleaned
+
+
+def utf8_conv(s):
+	return unicode(s, "utf-8", "replace")

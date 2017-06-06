@@ -8,6 +8,7 @@ from tor_db import *
 from tor_elasticsearch import *
 import json
 import random
+import tor_text
 import string
 import random
 import timeout_decorator
@@ -304,11 +305,11 @@ class TorSpider(scrapy.Spider):
 
             got_server_response = page.got_server_response()
             if got_server_response and response.headers.get("Server"):
-                page.domain.server = response.headers.get("Server")
+                page.domain.server = tor_text.utf8_conv(response.headers.get("Server"))
             if got_server_response and response.headers.get("X-Powered-By"):
-                page.domain.powered_by = response.headers.get("X-Powered-By")
+                page.domain.powered_by = tor_text.utf8_conv(response.headers.get("X-Powered-By"))
             if got_server_response and response.headers.get("Powered-By"):
-                page.domain.powered_by = response.headers.get("Powered-By")
+                page.domain.powered_by = tor_text.utf8_conv(response.headers.get("Powered-By"))
             domain = page.domain
             if hasattr(self, "test") and self.test == "yes":
                 
