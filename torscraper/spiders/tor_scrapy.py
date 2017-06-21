@@ -317,8 +317,8 @@ class TorSpider(scrapy.Spider):
                     domain.next_scheduled_check = datetime.now() + timedelta(minutes = random.randint(60, 180)) 
                 else:
                     domain.dead_in_a_row += 1
-                    if domain.dead_in_a_row > 15:
-                        domain.dead_in_a_row = 15
+                    if domain.dead_in_a_row > 16:
+                        domain.dead_in_a_row = 16
                     domain.next_scheduled_check = (datetime.now() + 
                         timedelta(minutes = random.randint(60, 180) * (1.5 ** domain.dead_in_a_row)))
 
