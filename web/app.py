@@ -50,9 +50,6 @@ BLACKLIST_AGENT = ['python-requests/2.18.1', 'Mozilla/5.0 (Windows NT x.y; rv:10
 @app.before_request
 def setup_session():
 
-	if agent in BLACKLIST_AGENT or len(agent) < 15:
-    	return render_template('error.html',code=200,message="Layer 8 error. If you want my data, DON'T SCRAPE (too much cpu load), contact me and I will give it to you"), 200
-
     session.permanent = True
     app.permanent_session_lifetime = timedelta(days=365*30)
     if not 'uuid' in session:
@@ -61,10 +58,16 @@ def setup_session():
     else:
     	g.uuid_is_fresh = False
     now = datetime.now()
-    agent     = request.headers.get('User-Agent', '')
+    
     referrer  = request.headers.get('Referer', '')
     path      = request.path
     full_path = request.full_path
+    agent     = request.headers.get('User-Agent', '')
+
+    if agent in BLACKLIST_AGENT or len(agent) < 15:
+        g.request_log_id = 0
+        return render_template('error.html',code=200,message="Layer 8 error. If you want my data, DON'T SCRAPE (too much cpu load), contact me and I will give it to you"), 200
+
     with db_session:
     	req_log   = RequestLog( uuid=session['uuid'], 
     							uuid_is_fresh=g.uuid_is_fresh, 
