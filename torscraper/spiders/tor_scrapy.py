@@ -140,7 +140,7 @@ class TorSpider(scrapy.Spider):
             self.start_urls = [maybe_add_scheme(line) for line in open(self.load_links)]
         elif hasattr(self, "test") and self.test == "yes":
             self.start_urls = domain_urls_next_scheduled()
-            self.custom_settings['CONCURRENT_REQUESTS'] = 36
+            self.custom_settings['CONCURRENT_REQUESTS'] = 40
         else:
             self.start_urls = domain_urls_recent_no_crap()
 
