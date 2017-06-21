@@ -78,13 +78,13 @@ class FilterNotScheduledMiddleware():
     def __init__(self, test_mode):
         self.test_mode = test_mode
         logger = logging.getLogger()
-        logger.info("FilterNotScheduledMiddleware loaded")
+        logger.info("FilterNotScheduledMiddleware loaded, test_mode %s" % str(test_mode))
 
     @classmethod
     def from_crawler(cls, crawler):
         settings = crawler.settings
         spider_name = crawler.spider.name
-        test_mode = hasattr(spider, "test") and spider.test == "yes"
+        test_mode = hasattr(crawler.spider, "test") and crawler.spider.test == "yes"
         o = cls(test_mode)
         return o
 
@@ -94,6 +94,7 @@ class FilterNotScheduledMiddleware():
         
         if not self.test_mode or not parsed_url.path in ["/", ""]:
             return None
+
         if not Domain.is_onion_url(request.url):
             return None
 
