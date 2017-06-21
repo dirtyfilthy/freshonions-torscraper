@@ -76,9 +76,8 @@ def domain_urls_recent():
 def domain_urls_next_scheduled():
     urls = []
     now = datetime.now()
-    event_horizon = now - timedelta(days=30)
 
-    for domain in Domain.select(lambda d: d.last_alive > event_horizon and now > d.next_scheduled_check).order_by(Domain.visited_at):
+    for domain in Domain.select(lambda d: now > d.next_scheduled_check).order_by(Domain.visited_at):
         urls.append(domain.index_url())
     return urls
 
