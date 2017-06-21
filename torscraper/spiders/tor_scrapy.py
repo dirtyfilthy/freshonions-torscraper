@@ -113,7 +113,8 @@ class TorSpider(scrapy.Spider):
             'torscraper.middlewares.FilterDomainByPageLimitMiddleware' : 551,
             'torscraper.middlewares.FilterTooManySubdomainsMiddleware' : 550,
             'torscraper.middlewares.FilterDeadDomainMiddleware' : 556,
-            'torscraper.middlewares.AllowBigDownloadMiddleware' : 557
+            'torscraper.middlewares.AllowBigDownloadMiddleware' : 557,
+            'torscraper.middlewares.FilterNotScheduledMiddlware' : 556,
          },
          'SPIDER_MIDDLEWARES' : {
             'torscraper.middlewares.InjectRangeHeaderMiddleware' : 543,

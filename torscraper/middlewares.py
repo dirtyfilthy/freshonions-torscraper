@@ -73,6 +73,43 @@ class FilterDeadDomainMiddleware(object):
 
         raise IgnoreRequest('Domain %s is dead, skipping' % domain.host)
 
+
+class FilterNotScheduledMiddleware():
+    def __init__(self, test_mode):
+        self.test_mode = test_mode
+        logger = logging.getLogger()
+        logger.info("FilterNotScheduledMiddleware loaded")
+
+    @classmethod
+    def from_crawler(cls, crawler):
+        settings = crawler.settings
+        spider_name = crawler.spider.name
+        test_mode = hasattr(spider, "test") and spider.test == "yes"
+        o = cls(test_mode)
+        return o
+
+    @db_session
+    def process_request(self, request, spider): 
+        parsed_url = urlparse.urlparse(request.url)
+        
+        if not self.test_mode or not parsed_url.path in ["/", ""]:
+            return None
+        if not Domain.is_onion_url(request.url):
+            return None
+
+        d = Domain.find_by_url(request.url)
+
+        if d is None:
+            return None
+
+        now = datetime.now()
+
+        if now > d.next_scheduled_check:
+            return None
+        else:
+            raise IgnoreRequest('FilterNotScheduledMiddleware: %s is not scheduled to check' % d.host)
+
+
 class FilterDomainByPageLimitMiddleware(object):
     def __init__(self, max_pages):
         logger = logging.getLogger()
