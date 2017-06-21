@@ -102,7 +102,7 @@ class TorSpider(scrapy.Spider):
         ],
         'INJECT_RANGE_HEADER': True,
         'ROBOTSTXT_OBEY': False,
-	    'CONCURRENT_REQUESTS' : 24,
+	    'CONCURRENT_REQUESTS' : 36,
         'DEPTH_PRIORITY' : 8,
         'DOWNLOAD_TIMEOUT': 90,
         'RETRY_TIMES': 1,
