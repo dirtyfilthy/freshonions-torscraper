@@ -122,6 +122,7 @@ class TorSpider(scrapy.Spider):
     }
     spider_exclude = [
         'blockchainbdgpzk.onion',
+        'ypqmhx5z3q5o6beg.onion'
     ]
 
     
