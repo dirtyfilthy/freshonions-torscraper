@@ -81,6 +81,15 @@ def domain_urls_next_scheduled():
         urls.append(domain.index_url())
     return urls
 
+@db_session
+def domain_urls_next_scheduled_old():
+    urls = []
+    now = datetime.now()
+    event_horizon = now - timedelta(days=30)
+    for domain in Domain.select(lambda d: now > d.next_scheduled_check and d.last_alive > event_horizon).order_by(Domain.visited_at):
+        urls.append(domain.index_url())
+    return urls
+
 class TorSpider(scrapy.Spider):
     name = "tor"
     allowed_domains = ['onion']
@@ -139,7 +148,10 @@ class TorSpider(scrapy.Spider):
         elif hasattr(self, "load_links"):
             self.start_urls = [maybe_add_scheme(line) for line in open(self.load_links)]
         elif hasattr(self, "test") and self.test == "yes":
-            self.start_urls = domain_urls_next_scheduled()
+            if hasattr(self, "alive") and self.alive == "yes":
+                self.start_urls = domain_urls_next_scheduled_old()
+            else:
+                self.start_urls = domain_urls_next_scheduled()
             self.custom_settings['CONCURRENT_REQUESTS'] = 40
         else:
             self.start_urls = domain_urls_recent_no_crap()

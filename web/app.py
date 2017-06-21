@@ -44,6 +44,9 @@ app.jinja_env.globals.update(is_elasticsearch_enabled=is_elasticsearch_enabled)
 
 app.secret_key = os.environ['FLASK_SECRET'].decode("string-escape")
 
+#BLACKLIST_AGENT = [ 'Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0']
+BLACKLIST_AGENT = []
+
 @app.before_request
 def setup_session():
     session.permanent = True
@@ -69,6 +72,9 @@ def setup_session():
     	flush()
     	g.request_log_id = req_log.id
 
+
+    if agent in BLACKLIST_AGENT or len(agent) < 15:
+    	return render_template('error.html',code=404,message="Page not found."), 404
 
 @app.context_processor
 def inject_elasticsearch():
