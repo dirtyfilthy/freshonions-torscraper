@@ -20,7 +20,7 @@ class cached(object):
         def my_decorator(*args, **kwargs):
         	if _cache is None:
         		return f(*args, **kwargs)
-        	response = _cache.get(request.path)
+        	response = _cache.get(request.full_path)
         	if response is None:
         		response = f(*args, **kwargs)
         		_cache.set(request.path, response, self.timeout)
