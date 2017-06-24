@@ -12,6 +12,7 @@ from pony.orm import *
 from datetime import *
 from tor_db import *
 from tor_elasticsearch import *
+from tor_cache import *
 import helpers
 import re
 import os
@@ -42,10 +43,18 @@ app.jinja_env.globals.update(break_long_words=tor_text.break_long_words)
 app.jinja_env.globals.update(is_elasticsearch_enabled=is_elasticsearch_enabled)
 
 
+
+
 app.secret_key = os.environ['FLASK_SECRET'].decode("string-escape")
 
 #BLACKLIST_AGENT = [ 'Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0']
-BLACKLIST_AGENT = ['python-requests/2.18.1', 'Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0']
+BLACKLIST_AGENT = [ 'python-requests/2.18.1', 
+					'Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0',
+					'Mozilla/5.0 (compatible; YandexBot/3.0; +http://yandex.com/bots)',
+					'Go-http-client/1.1',
+					'Scrapy/1.3.3 (+http://scrapy.org)',
+					'Mozilla/5.0 (Windows NT 6.1; rv:24.0) Gecko/20100101 Firefox/42.2']
+
 
 @app.before_request
 def setup_session():
@@ -120,6 +129,7 @@ def json():
 	return jsonify(Domain.to_dict_list(domains))
 
 @app.route("/")
+@cached(timeout=500)
 @db_session
 def index():
 	now = datetime.now()
@@ -140,6 +150,7 @@ def index():
 	return r
 
 @app.route("/json")
+@cached(timeout=500)
 @db_session
 def index_json():
 	
@@ -171,6 +182,7 @@ def src():
 
 
 @app.route('/onion/<onion>')
+@cached(timeout=None)
 @db_session
 def onion_info(onion):
 	links_to = []
@@ -198,6 +210,7 @@ def onion_info(onion):
 
 
 @app.route('/onion/<onion>/json')
+@cached(timeout=None)
 @db_session
 def onion_info_json(onion):
 	links_to = []
@@ -437,5 +450,4 @@ def stats():
 
 
 if __name__ == "__main__":
-	app.jinja_env.cache = {}
-    app.run(host="0.0.0.0")
+	app.run(host="0.0.0.0")

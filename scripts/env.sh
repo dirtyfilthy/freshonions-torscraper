@@ -32,3 +32,8 @@ export SITE_DOMAIN
 
 . $ETCDIR/private/flask.secret
 export FLASK_SECRET
+
+. $ETCDIR/memcached
+export MEMCACHED_ENABLED
+export MEMCACHED_HOST
+export MEMCACHED_PORT

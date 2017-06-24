@@ -4,6 +4,7 @@ from tor_db.constants import *
 import tor_db.models.email
 import tor_db.models.bitcoin_address
 import tor_db.models.page
+from tor_cache import *
 import detect_language
 from datetime import *
 import bitcoin
@@ -85,6 +86,9 @@ class Domain(db.Entity):
         if self.useful_404_php:
             paths += select(p.path for p in tor_db.models.page.Page if p.domain==self and p.path in interesting_paths.PATHS_PHP and p.code in [200, 206])
         return paths
+
+    def canonical_path(self):
+        return "/onion/%s" % self.host    
 
 
     def construct_url(self, path):
@@ -179,7 +183,8 @@ class Domain(db.Entity):
             dom = DomainDocType.from_obj(self)
             dom.save()
 
-
+    def after_update(self):
+        invalidate_cache(self)
  
 
     @db_session
