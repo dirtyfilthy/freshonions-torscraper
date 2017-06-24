@@ -6,7 +6,7 @@ from werkzeug.contrib.cache import MemcachedCache
 import os
 import functools 
 
-CACHE_TIMEOUT = 60 * 60 * 24 * 14
+CACHE_TIMEOUT = 60 * 60 * 24 * 365
 
 _cache = None
 if os.environ['MEMCACHED_ENABLED'] == "true":
