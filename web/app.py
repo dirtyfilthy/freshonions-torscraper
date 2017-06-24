@@ -41,7 +41,7 @@ app.jinja_env.globals.update(str=str)
 app.jinja_env.globals.update(unicode=unicode)
 app.jinja_env.globals.update(break_long_words=tor_text.break_long_words)
 app.jinja_env.globals.update(is_elasticsearch_enabled=is_elasticsearch_enabled)
-
+app.jinja_env.globals.update(is_cached=is_cached)
 
 
 
