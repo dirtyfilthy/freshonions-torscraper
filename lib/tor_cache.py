@@ -38,6 +38,7 @@ def invalidate_cache(obj):
 		return None
 	path = obj.canonical_path()
 	_cache.delete(path)
+	_cache.delete("%s/json" % path)
 	return path
 
 
