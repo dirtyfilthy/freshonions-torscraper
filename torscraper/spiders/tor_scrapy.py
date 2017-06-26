@@ -357,7 +357,7 @@ class TorSpider(scrapy.Spider):
                     if domain.dead_in_a_row > MAX_DEAD_IN_A_ROW:
                         domain.dead_in_a_row = MAX_DEAD_IN_A_ROW
                     domain.next_scheduled_check = (datetime.now() + 
-                        timedelta(minutes = penalty + random.randint(60, 60 + rng) * (1.5 ** domain.dead_in_a_row)))
+                        timedelta(minutes = penalty + random.randint(60, 60 + rng) * (1.6 ** domain.dead_in_a_row)))
 
                 commit()
                 if yield_later:
