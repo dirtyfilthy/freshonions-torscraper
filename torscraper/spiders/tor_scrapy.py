@@ -112,6 +112,7 @@ class TorSpider(scrapy.Spider):
         'INJECT_RANGE_HEADER': True,
         'ROBOTSTXT_OBEY': False,
 	    'CONCURRENT_REQUESTS' : 24,
+        'CONCURRENT_REQUESTS_PER_DOMAIN' : 6,
         'DEPTH_PRIORITY' : 8,
         'DOWNLOAD_TIMEOUT': 90,
         'RETRY_TIMES': 1,
@@ -297,7 +298,7 @@ class TorSpider(scrapy.Spider):
         return None
 
     @db_session
-    def parse(self, response):
+    def parse(self, response, recent_alive_check=False):
         MAX_PARSE_SIZE_KB = 1000
         title = ''
         try:
@@ -331,11 +332,23 @@ class TorSpider(scrapy.Spider):
                 domain.dead_in_a_row = 0
                 domain.next_scheduled_check = datetime.now() + timedelta(minutes = random.randint(60, 180)) 
             else:
-                domain.dead_in_a_row += 1
-                if domain.dead_in_a_row > 16:
-                    domain.dead_in_a_row = 16
-                domain.next_scheduled_check = (datetime.now() + 
-                    timedelta(minutes = random.randint(60, 180) * (1.5 ** domain.dead_in_a_row)))
+                yield_later = None
+                # check newly dead domains immediately
+                if domain.dead_in_a_row == 0 and not recent_alive_check:
+                    self.log('checking the freshly dead (%s) for movement' % domain.host)
+                    r = ''.join(random.choice(string.ascii_lowercase) for _ in range(random.randint(7,12)))
+                    test_url = domain.index_url() + r
+                    yield_later = scrapy.Request(test_url, callback=lambda r: self.parse(r, recent_alive_check=True))
+                if not recent_alive_check:
+                    domain.dead_in_a_row += 1
+                    if domain.dead_in_a_row > 16:
+                        domain.dead_in_a_row = 16
+                    domain.next_scheduled_check = (datetime.now() + 
+                        timedelta(minutes = random.randint(60, 180) * (1.5 ** domain.dead_in_a_row)))
+
+                commit()
+                if yield_later:
+                    yield yield_later
 
             is_text = False
             content_type = response.headers.get("Content-Type") 
@@ -351,7 +364,9 @@ class TorSpider(scrapy.Spider):
 
             commit()
 
-            path_event_horizon = datetime.now() - timedelta(weeks=2)
+            # add some randomness to the check
+
+            path_event_horizon = datetime.now() - timedelta(days=14+random.randint(0, 14))
 
             # interesting paths
 
