@@ -20,6 +20,7 @@ import tor_text
 SUBDOMAIN_PENALTY    = 6 * 60
 NORMAL_RAND_RANGE    = 2 * 60
 SUBDOMAIN_RAND_RANGE = 6 * 60
+MAX_DEAD_IN_A_ROW    = 17
 
 from scrapy.exceptions import IgnoreRequest
 
@@ -353,8 +354,8 @@ class TorSpider(scrapy.Spider):
                     yield_later = scrapy.Request(test_url, callback=lambda r: self.parse(r, recent_alive_check=True))
                 if not recent_alive_check:
                     domain.dead_in_a_row += 1
-                    if domain.dead_in_a_row > 16:
-                        domain.dead_in_a_row = 16
+                    if domain.dead_in_a_row > MAX_DEAD_IN_A_ROW:
+                        domain.dead_in_a_row = MAX_DEAD_IN_A_ROW
                     domain.next_scheduled_check = (datetime.now() + 
                         timedelta(minutes = penalty + random.randint(60, 60 + rng) * (1.5 ** domain.dead_in_a_row)))
 
