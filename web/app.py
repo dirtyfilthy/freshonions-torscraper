@@ -299,6 +299,7 @@ def language_list_json(code):
 		return render_template('error.html', code=404, message="No domains with language '%s'." % code), 404
 
 @app.route('/path/<path:path>')
+@cached(timeout=600)
 @db_session
 def path_list(path):
 	path = "/" + path
@@ -309,6 +310,7 @@ def path_list(path):
 		return render_template('error.html', code=404, message="Path '%s' not found." % path), 404
 
 @app.route('/path_json/<path:path>')
+@cached(timeout=600, render_layout=False)
 @db_session
 def path_list_json(path):
 	path = "/" + path
