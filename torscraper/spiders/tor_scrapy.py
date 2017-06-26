@@ -17,6 +17,10 @@ import email_util
 import interesting_paths
 import tor_text
 
+SUBDOMAIN_PENALTY    = 3 * 60
+NORMAL_RAND_RANGE    = 2 * 60
+SUBDOMAIN_RAND_RANGE = 4 * 60
+
 from scrapy.exceptions import IgnoreRequest
 
 def maybe_add_scheme(onion):
@@ -329,14 +333,16 @@ class TorSpider(scrapy.Spider):
             
             # don't check subdomains that often
 
-            subdomain_penalty = 0
+            penalty = 0
+            rng = NORMAL_RAND_RANGE
             if domain.is_subdomain:
-                subdomain_penalty = 180
+                penalty = SUBDOMAIN_PENALTY
+                rng     = SUBDOMAIN_RAND_RANGE
 
             if domain.is_up:
                 domain.dead_in_a_row = 0
 
-                domain.next_scheduled_check = datetime.now() + timedelta(minutes = subdomain_penalty + random.randint(60, 180)) 
+                domain.next_scheduled_check = datetime.now() + timedelta(minutes = penalty + random.randint(60, 60 + rng)) 
             else:
                 yield_later = None
                 # check newly dead domains immediately
@@ -350,7 +356,7 @@ class TorSpider(scrapy.Spider):
                     if domain.dead_in_a_row > 16:
                         domain.dead_in_a_row = 16
                     domain.next_scheduled_check = (datetime.now() + 
-                        timedelta(minutes = subdomain_penalty + random.randint(60, 180) * (1.5 ** domain.dead_in_a_row)))
+                        timedelta(minutes = penalty + random.randint(60, 60 + rng) * (1.5 ** domain.dead_in_a_row)))
 
                 commit()
                 if yield_later:
