@@ -17,9 +17,9 @@ import email_util
 import interesting_paths
 import tor_text
 
-SUBDOMAIN_PENALTY    = 4 * 60
+SUBDOMAIN_PENALTY    = 6 * 60
 NORMAL_RAND_RANGE    = 2 * 60
-SUBDOMAIN_RAND_RANGE = 4 * 60
+SUBDOMAIN_RAND_RANGE = 6 * 60
 
 from scrapy.exceptions import IgnoreRequest
 
