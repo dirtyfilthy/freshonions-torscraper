@@ -220,6 +220,7 @@ def onion_info_json(onion):
 	return jsonify(domain.to_dict(full=True))
 
 @app.route('/clones/<onion>')
+@cached(timeout=600)
 @db_session
 def clones_list(onion):
 	domain = select(d for d in Domain if d.host==onion).first()
@@ -229,6 +230,7 @@ def clones_list(onion):
 	return render_template('clones_list.html', onion=onion, domains=domains) 
 
 @app.route('/clones/<onion>/json')
+@cached(timeout=600, render_layout=False)
 @db_session
 def clones_list_json(onion):
 	domain = select(d for d in Domain if d.host==onion).first()
@@ -238,6 +240,7 @@ def clones_list_json(onion):
 	return jsonify(Domain.to_dict_list(domains))
 
 @app.route('/whatweb/<name>')
+@cached(timeout=600)
 @db_session
 def whatweb_list(name):
 	version = request.args.get("version")
@@ -247,6 +250,7 @@ def whatweb_list(name):
 	return render_template('whatweb_list.html', domains=domains, name=name, version=version, account=account, string=string) 
 
 @app.route('/whatweb/<name>/json')
+@cached(timeout=600, render_layout=False)
 @db_session
 def whatweb_list_json(name):
 	version = request.args.get("version")
@@ -278,8 +282,8 @@ def languages():
 	options = [["", "Choose language..."]] + options
 	return render_template('languages.html', options=options) 
 
-
 @app.route('/language/<code>')
+@cached(timeout=600)
 @db_session
 def language_list(code):
 	domains = Domain.hide_banned(Domain.by_language(code))
@@ -290,6 +294,7 @@ def language_list(code):
 		return render_template('error.html', code=404, message="No domains with language '%s'." % code), 404
 
 @app.route('/language/<code>/json')
+@cached(timeout=600, render_layout=False)
 @db_session
 def language_list_json(code):
 	domains = Domain.hide_banned(Domain.by_language(code))
@@ -322,6 +327,7 @@ def path_list_json(path):
 
 
 @app.route('/ssh/<id>')
+@cached(timeout=600)
 @db_session
 def ssh_list(id):
 	fp = SSHFingerprint.get(id=id)
@@ -333,6 +339,7 @@ def ssh_list(id):
 		return render_template('error.html', code=404, message="Fingerprint not found."), 404
 
 @app.route('/ssh/<id>/json')
+@cached(timeout=600, render_layout=False)
 @db_session
 def ssh_list_json(id):
 	fp = SSHFingerprint.get(id=id)
@@ -343,6 +350,7 @@ def ssh_list_json(id):
 		return render_template('error.html', code=404, message="Fingerprint not found."), 404
 
 @app.route('/email/<addr>')
+@cached(timeout=600)
 @db_session
 def email_list(addr):
 	email = Email.get(address=addr)
@@ -353,6 +361,7 @@ def email_list(addr):
 		return render_template('error.html', code=404, message="Email not found."), 404
 
 @app.route('/email/<addr>/json')
+@cached(timeout=600, render_layout=False)
 @db_session
 def email_list_json(addr):
 	email = Email.get(address=addr)
@@ -363,6 +372,7 @@ def email_list_json(addr):
 		return render_template('error.html', code=404, message="Email not found."), 404
 
 @app.route('/port/<ports>')
+@cached(timeout=600)
 @db_session
 def port_list(ports):
 	port_list_s = ports.split(",")
@@ -380,6 +390,7 @@ def port_list(ports):
 		return render_template('error.html', code=404, message="Email not found."), 404
 
 @app.route('/port/<ports>/json')
+@cached(timeout=600, render_layout=False)
 @db_session
 def port_list_json(ports):
 	port_list_s = ports.split(",")
@@ -396,6 +407,7 @@ def port_list_json(ports):
 		return render_template('error.html', code=404, message="Email not found."), 404
 
 @app.route('/bitcoin/<addr>')
+@cached(timeout=600)
 @db_session
 def bitcoin_list(addr):
 	btc_addr = BitcoinAddress.get(address=addr)
@@ -407,6 +419,7 @@ def bitcoin_list(addr):
 
 
 @app.route('/bitcoin/<addr>/json')
+@cached(timeout=600, render_layout=False)
 @db_session
 def bitcoin_list_json(addr):
 	btc_addr = BitcoinAddress.get(address=addr)
@@ -436,6 +449,7 @@ def bot(kind):
 	return render_template('error.html', code=404, message="Printer on fire."), 404
 
 @app.route('/stats')
+@cached(timeout=600)
 @db_session
 def stats():
 	statz = DailyStat.get_stats()
