@@ -112,14 +112,15 @@ def inject_revision():
 @db_session
 def inject_counts():
 	event_horizon = datetime.now() - timedelta(days=1)
-	domain_count = count(d for d in Domain if d.is_up == True and d.is_crap == False and d.is_subdomain == False  and d.is_banned == False)
-	day_count    = count(d for d in Domain if d.is_up == True and d.is_crap == False and d.is_subdomain == False  and d.is_banned == False and d.created_at > event_horizon)
+	domain_count = cache_memoize("count.domain",    lambda: count(d for d in Domain if d.is_up == True and d.is_crap == False and d.is_subdomain == False  and d.is_banned == False))
+	day_count    = cache_memoize("count.new_today", lambda: count(d for d in Domain if d.is_up == True and d.is_crap == False and d.is_subdomain == False  and d.is_banned == False and d.created_at > event_horizon))
 	return dict(day_count=day_count, domain_count=domain_count)
 
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('error.html',code=404,message="Page not found."), 404
 
+@cached(timeout=600, render_layout=False)
 @app.route('/json/all')
 @db_session
 def json():
@@ -129,7 +130,7 @@ def json():
 	return jsonify(Domain.to_dict_list(domains))
 
 @app.route("/")
-@cached(timeout=500)
+@cached(timeout=300)
 @db_session
 def index():
 	now = datetime.now()
@@ -150,7 +151,7 @@ def index():
 	return r
 
 @app.route("/json")
-@cached(timeout=500)
+@cached(timeout=300, render_layout=False)
 @db_session
 def index_json():
 	
@@ -210,7 +211,7 @@ def onion_info(onion):
 
 
 @app.route('/onion/<onion>/json')
-@cached(timeout=None)
+@cached(timeout=None, render_layout=False)
 @db_session
 def onion_info_json(onion):
 	links_to = []

@@ -14,10 +14,22 @@ if os.environ['MEMCACHED_ENABLED'] == "true":
 
 _is_cached = False
 
+
+def cache_memoize(key, func, timeout=300):
+	if _cache is None:
+		return func()
+	real_key = "memoize." + key
+	obj = _cache.get(real_key)
+	if obj is None:
+		obj = func()
+		_cache.set(real_key, obj, timeout)
+	return obj
+
 class cached(object):
 
-    def __init__(self, timeout=0):
+    def __init__(self, timeout=0, render_layout=True):
         self.timeout = timeout or CACHE_TIMEOUT
+        self.render_layout = render_layout
 
     def __call__(self, f):
     	@functools.wraps(f)
@@ -31,7 +43,10 @@ class cached(object):
         		response = f(*args, **kwargs)
         		_cache.set(request.path, response, self.timeout)
         	_is_cached = False
-        	return "%s%s%s" % (render_template("layout_header.html"), response, render_template("layout_footer.html"))
+        	if self.render_layout:
+        		return "%s%s%s" % (render_template("layout_header.html"), response, render_template("layout_footer.html"))
+        	else:
+        		return response
 
         functools.update_wrapper(my_decorator, f)
         return my_decorator
