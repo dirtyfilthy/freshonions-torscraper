@@ -327,10 +327,16 @@ class TorSpider(scrapy.Spider):
                 page.domain.powered_by = tor_text.utf8_conv(response.headers.get("Powered-By"))
             domain = page.domain
             
-                
+            # don't check subdomains that often
+
+            subdomain_penalty = 0
+            if domain.is_subdomain:
+                subdomain_penalty = 180
+
             if domain.is_up:
                 domain.dead_in_a_row = 0
-                domain.next_scheduled_check = datetime.now() + timedelta(minutes = random.randint(60, 180)) 
+
+                domain.next_scheduled_check = datetime.now() + timedelta(minutes = subdomain_penalty + random.randint(60, 180)) 
             else:
                 yield_later = None
                 # check newly dead domains immediately
@@ -344,7 +350,7 @@ class TorSpider(scrapy.Spider):
                     if domain.dead_in_a_row > 16:
                         domain.dead_in_a_row = 16
                     domain.next_scheduled_check = (datetime.now() + 
-                        timedelta(minutes = random.randint(60, 180) * (1.5 ** domain.dead_in_a_row)))
+                        timedelta(minutes = subdomain_penalty + random.randint(60, 180) * (1.5 ** domain.dead_in_a_row)))
 
                 commit()
                 if yield_later:
