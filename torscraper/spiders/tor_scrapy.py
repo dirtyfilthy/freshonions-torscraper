@@ -144,7 +144,7 @@ class TorSpider(scrapy.Spider):
     
 
     def __init__(self, *args, **kwargs):
-        super(TorSpider, self).__init__(*args, **kwargs)
+        
         if hasattr(self, "passed_url"):
             self.start_urls = [self.passed_url]
         elif hasattr(self, "load_links") and self.load_links == "downonly":
@@ -158,9 +158,10 @@ class TorSpider(scrapy.Spider):
                 self.start_urls = domain_urls_next_scheduled_old()
             else:
                 self.start_urls = domain_urls_next_scheduled()
-            self.custom_settings['CONCURRENT_REQUESTS'] = 36
+            self.custom_settings['CONCURRENT_REQUESTS'] = 32
         else:
             self.start_urls = domain_urls_recent_no_crap()
+        super(TorSpider, self).__init__(*args, **kwargs)
 
 
 
