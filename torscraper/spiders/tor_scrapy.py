@@ -116,8 +116,8 @@ class TorSpider(scrapy.Spider):
         ],
         'INJECT_RANGE_HEADER': True,
         'ROBOTSTXT_OBEY': False,
-	    'CONCURRENT_REQUESTS' : 24,
-        'CONCURRENT_REQUESTS_PER_DOMAIN' : 6,
+	    'CONCURRENT_REQUESTS' : 8,
+        'CONCURRENT_REQUESTS_PER_DOMAIN' : 4,
         'DEPTH_PRIORITY' : 8,
         'DOWNLOAD_TIMEOUT': 90,
         'RETRY_TIMES': 1,
@@ -158,7 +158,7 @@ class TorSpider(scrapy.Spider):
                 self.start_urls = domain_urls_next_scheduled_old()
             else:
                 self.start_urls = domain_urls_next_scheduled()
-            self.custom_settings['CONCURRENT_REQUESTS'] = 40
+            self.custom_settings['CONCURRENT_REQUESTS'] = 36
         else:
             self.start_urls = domain_urls_recent_no_crap()
 
