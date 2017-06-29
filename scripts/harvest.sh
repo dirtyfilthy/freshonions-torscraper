@@ -19,6 +19,7 @@ $SCRIPTDIR/tor_extract_from_url.sh 'http://tt3j2x4k5ycaa5zt.onion/onions.php?for
 $SCRIPTDIR/tor_extract_from_url.sh 'http://skunksworkedp2cg.onion/sites.html' >> $LIST
 $SCRIPTDIR/tor_extract_from_url.sh 'http://visitorfi5kl7q7i.onion/onions/' >> $LIST
 $SCRIPTDIR/tor_extract_from_url.sh 'http://underdj5ziov3ic7.onion/crawler/index.php?online=1' >> $LIST
+$SCRIPTDIR/tor_extract_from_url.sh 'http://7cbqhjnlkivmigxf.onion/' >> $LIST
 $SCRIPTDIR/extract_from_url.sh 'https://www.reddit.com/r/HiddenService/' >> $LIST
 $SCRIPTDIR/purify.sh $LIST > $LIST2
 NUMBER=`wc -l $LIST2 | tr -s ' ' | cut -f 1 -d ' '`

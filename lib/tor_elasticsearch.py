@@ -200,3 +200,4 @@ def migrate():
 
 tracer = logging.getLogger('elasticsearch')
 tracer.setLevel(logging.CRITICAL)
+url_log = logging.getLogger('urllib3').setLevel(logging.CRITICAL)
