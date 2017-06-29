@@ -11,12 +11,17 @@ cat $RECENT_PASTES | xargs -n 1 -P 10 -I {} /bin/sh -c "$SCRIPTDIR/extract_from_
 $SCRIPTDIR/purify.sh $ONION_URLS > $PURIFIED
 echo "Raw onions:"
 cat $ONION_URLS
-echo "Found onions:"
+FOUND=`wc -l $PURIFIED | cut -f 1 -d ' '`
+echo "Found '$FOUND' onions:"
 cat $PURIFIED
-(
-cd $BASEDIR
-scrapy crawl tor -a load_links=$PURIFIED -a test=yes
+
+
+if [ $FOUND -gt 0 ]; then
+	(
+	cd $BASEDIR
+	scrapy crawl tor -a load_links=$PURIFIED -a test=yes
 )
+fi;
 rm $RECENT_PASTES
 rm $ONION_URLS
 rm $PURIFIED

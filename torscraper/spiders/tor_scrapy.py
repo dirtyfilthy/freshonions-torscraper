@@ -158,7 +158,7 @@ class TorSpider(scrapy.Spider):
                 self.start_urls = domain_urls_next_scheduled_old()
             else:
                 self.start_urls = domain_urls_next_scheduled()
-            self.custom_settings['CONCURRENT_REQUESTS'] = 32
+            self.custom_settings['CONCURRENT_REQUESTS'] = 24
         else:
             self.start_urls = domain_urls_recent_no_crap()
         super(TorSpider, self).__init__(*args, **kwargs)
