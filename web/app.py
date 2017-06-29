@@ -43,8 +43,6 @@ app.jinja_env.globals.update(break_long_words=tor_text.break_long_words)
 app.jinja_env.globals.update(is_elasticsearch_enabled=is_elasticsearch_enabled)
 app.jinja_env.globals.update(is_cached=is_cached)
 
-
-
 app.secret_key = os.environ['FLASK_SECRET'].decode("string-escape")
 BLACKLIST_AGENT = []
 #BLACKLIST_AGENT = [ 'Mozilla/5.0 (Windows NT x.y; rv:10.0) Gecko/20100101 Firefox/10.0']

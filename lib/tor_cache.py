@@ -2,9 +2,16 @@ from flask import Flask
 from flask import request
 from flask import g
 from flask import render_template
+from flask import make_response
+import flask
+import werkzeug.wrappers
+from flask import current_app as app
+import inspect
+import sys
 from werkzeug.contrib.cache import MemcachedCache
 import os
 import functools 
+import logging
 
 CACHE_TIMEOUT = 60 * 60 * 24 * 365
 
@@ -13,6 +20,16 @@ if os.environ['MEMCACHED_ENABLED'] == "true":
 	_cache = MemcachedCache(['%s:%s' % (os.environ['MEMCACHED_HOST'], os.environ['MEMCACHED_PORT'])])
 
 _is_cached = False
+
+def is_redirect(response):
+	if not isinstance(response, Response):
+		return False
+	if response.status_code in (301, 302):
+		return True
+	return False
+
+def is_response(response):
+	return isinstance(response, (flask.Response, werkzeug.wrappers.Response))
 
 
 def cache_memoize(key, func, timeout=300):
@@ -43,8 +60,15 @@ class cached(object):
         		response = f(*args, **kwargs)
         		_cache.set(request.path, response, self.timeout)
         	_is_cached = False
+        	
         	if self.render_layout:
-        		return "%s%s%s" % (render_template("layout_header.html"), response, render_template("layout_footer.html"))
+        		wrapped_response = make_response("%s%s%s" % (render_template("layout_header.html"), response, render_template("layout_footer.html")))
+        		if is_response(response):
+        			wrapped_response.status_code = response.status_code
+        			wrapped_response.headers     = response.headers
+        			wrapped_response.status      = response.status
+        			wrapped_response.mimetype    = response.mimetype
+        		return wrapped_response
         	else:
         		return response
 
