@@ -112,7 +112,7 @@ class TorSpider(scrapy.Spider):
         'DOWNLOAD_MAXSIZE': (1024 * 1024)*2,
         'BIG_DOWNLOAD_MAXSIZE': (1024 * 1024)*4,
         'ALLOW_BIG_DOWNLOAD': [
-            'cratedvnn5z57xhl.onion'
+            '7cbqhjnlkivmigxf.onion'
         ],
         'INJECT_RANGE_HEADER': True,
         'ROBOTSTXT_OBEY': False,
