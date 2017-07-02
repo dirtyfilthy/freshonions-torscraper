@@ -21,6 +21,7 @@ SUBDOMAIN_PENALTY    = 6 * 60
 NORMAL_RAND_RANGE    = 2 * 60
 SUBDOMAIN_RAND_RANGE = 6 * 60
 MAX_DEAD_IN_A_ROW    = 17
+PENALTY_BASE         = 1.5
 
 from scrapy.exceptions import IgnoreRequest
 
@@ -116,7 +117,8 @@ class TorSpider(scrapy.Spider):
         ],
         'INJECT_RANGE_HEADER': True,
         'ROBOTSTXT_OBEY': False,
-	    'CONCURRENT_REQUESTS' : 8,
+	    'CONCURRENT_REQUESTS' : 32,
+        'REACTOR_THREADPOOL_MAXSIZE' : 32,
         'CONCURRENT_REQUESTS_PER_DOMAIN' : 4,
         'DEPTH_PRIORITY' : 8,
         'DOWNLOAD_TIMEOUT': 90,
@@ -144,7 +146,7 @@ class TorSpider(scrapy.Spider):
     
 
     def __init__(self, *args, **kwargs):
-        
+        super(TorSpider, self).__init__(*args, **kwargs)
         if hasattr(self, "passed_url"):
             self.start_urls = [self.passed_url]
         elif hasattr(self, "load_links") and self.load_links == "downonly":
@@ -154,14 +156,14 @@ class TorSpider(scrapy.Spider):
         elif hasattr(self, "load_links"):
             self.start_urls = [maybe_add_scheme(line) for line in open(self.load_links)]
         elif hasattr(self, "test") and self.test == "yes":
-            if hasattr(self, "alive") and self.alive == "yes":
-                self.start_urls = domain_urls_next_scheduled_old()
-            else:
-                self.start_urls = domain_urls_next_scheduled()
-            self.custom_settings['CONCURRENT_REQUESTS'] = 24
+            if not hasattr(self, "load_links"):
+                if hasattr(self, "alive") and self.alive == "yes":
+                    self.start_urls = domain_urls_next_scheduled_old()
+                else:
+                    self.start_urls = domain_urls_next_scheduled()
         else:
             self.start_urls = domain_urls_recent_no_crap()
-        super(TorSpider, self).__init__(*args, **kwargs)
+        
 
 
 
@@ -358,7 +360,7 @@ class TorSpider(scrapy.Spider):
                     if domain.dead_in_a_row > MAX_DEAD_IN_A_ROW:
                         domain.dead_in_a_row = MAX_DEAD_IN_A_ROW
                     domain.next_scheduled_check = (datetime.now() + 
-                        timedelta(minutes = penalty + random.randint(60, 60 + rng) * (1.6 ** domain.dead_in_a_row)))
+                        timedelta(minutes = penalty + random.randint(60, 60 + rng) * (PENALTY_BASE ** domain.dead_in_a_row)))
 
                 commit()
                 if yield_later:
