@@ -69,11 +69,11 @@ class Domain(db.Entity):
     def domains_for_path(klass, path):
         d = None
         if interesting_paths.is_php(path):
-            d = leftjoin(d for d in klass for p in d.pages if d.useful_404_php == True and p.code in [200, 206] and p.path == path)
+            d = left_join(d for d in klass for p in d.pages if d.useful_404_php == True and p.code in [200, 206] and p.path == path)
         elif interesting_paths.is_dir(path):
-            d = leftjoin(d for d in klass for p in d.pages if d.useful_404_dir == True and p.code in [200, 206] and p.path == path)
+            d = left_join(d for d in klass for p in d.pages if d.useful_404_dir == True and p.code in [200, 206] and p.path == path)
         else:
-            d = leftjoin(d for d in klass for p in d.pages if d.useful_404     == True and p.code in [200, 206] and p.path == path)
+            d = left_join(d for d in klass for p in d.pages if d.useful_404     == True and p.code in [200, 206] and p.path == path)
         return d
 
     @db_session

@@ -16,3 +16,4 @@ langdetect
 pycountry
 networkx
 python-memcached
+pillow
