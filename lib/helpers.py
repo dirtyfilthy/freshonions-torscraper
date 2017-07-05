@@ -11,6 +11,7 @@ from pony.orm import *
 from datetime import *
 from tor_db import *
 from tor_elasticsearch import *
+from tor_cache import *
 import re
 import os
 import bitcoin
@@ -101,6 +102,26 @@ def build_search_context():
 
 	context["sort"] = request.args.get("sort")
 	return context
+
+@db_session 
+def count_ports(port):
+	return cache_memoize("count.ports:%d" % port, timeout=3600, func=lambda: OpenPort.count_open(port))
+
+@db_session 
+def count_emails(email):
+	return cache_memoize("count.emails:%s" % email.address, timeout=3600, func=lambda: len(email.domains()))
+
+@db_session 
+def count_bitcoins(addr):
+	return cache_memoize("count.bitcoin:%s" % addr.address, timeout=3600, func=lambda: len(addr.domains()))
+
+@db_session 
+def count_paths(path):
+	return cache_memoize("count.paths:%s" % path, timeout=3600, func=lambda: len(Domain.domains_for_path(path)))
+
+@db_session
+def count_webcomponent(name, version=None, account=None, string=None):
+	return cache_memoize(("count.webcomponent:%s;%s;%s;%s" % (str(name).replace(' ', '_'), str(version).replace(' ', '_'), str(account).replace(' ', '_'), str(string).replace(' ', '_'))), timeout=3600, func=lambda: len(WebComponent.find_domains(name, version=version, string=string, account=account)))
 
 def build_domain_query(context):
 	query = select(d for d in Domain)

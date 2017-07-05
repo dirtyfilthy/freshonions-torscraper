@@ -42,6 +42,11 @@ app.jinja_env.globals.update(unicode=unicode)
 app.jinja_env.globals.update(break_long_words=tor_text.break_long_words)
 app.jinja_env.globals.update(is_elasticsearch_enabled=is_elasticsearch_enabled)
 app.jinja_env.globals.update(is_cached=is_cached)
+app.jinja_env.globals.update(count_paths=helpers.count_paths)
+app.jinja_env.globals.update(count_ports=helpers.count_ports)
+app.jinja_env.globals.update(count_bitcoins=helpers.count_bitcoins)
+app.jinja_env.globals.update(count_emails=helpers.count_emails)
+app.jinja_env.globals.update(count_webcomponent=helpers.count_webcomponent)
 
 app.secret_key = os.environ['FLASK_SECRET'].decode("string-escape")
 BLACKLIST_AGENT = []

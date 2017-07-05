@@ -138,7 +138,7 @@ No open ports found.
 {% for port in open_ports %}
 <li>{{port}}:{{scanner.get_service_name(port)}}
 {% if port!=80 %}
-{% set port_count = OpenPort.count_open(port) %}
+{% set port_count =  count_ports(port) %}
 {% if port_count>1 %}
 (found {{port_count}} other places <a href="{{url_for('port_list',ports=port)}}">[VIEW]</a>)
 {% endif %}
@@ -158,7 +158,7 @@ No interesting paths in database.
 {% for path in paths %}
 <li>
 <a href="{{domain.construct_url(path)}}">{{path}}</a>
-{% set other_paths = len(Domain.domains_for_path(path)) %}
+{% set other_paths = count_paths(path) %}
 {% if other_paths>1 %}
 (found {{other_paths-1}} other places <a href="{{url_for('path_list',path=path[1:])}}">[VIEW]</a>)
 {% endif %}
@@ -177,8 +177,9 @@ No emails in database.
 <ul>
 {% for email in emails %}
 <li><a href="mailto://{{email.address}}">{{email.address}}</a>
-{% if len(email.domains())>1 %}
-(found {{len(email.domains())-1}} other places <a href="{{url_for('email_list',addr=email.address)}}">[VIEW]</a>)
+{% set other_emails = count_emails(email) %}
+{% if other_emails>1 %}
+(found {{other_emails-1}} other places <a href="{{url_for('email_list',addr=email.address)}}">[VIEW]</a>)
 {% endif %}
 </li>
 {% endfor %}
@@ -194,8 +195,9 @@ No bitcoin addresses in database.
 <ul>
 {% for addr in bitcoin_addresses %}
 <li><a href="https://blockchainbdgpzk.onion/address/{{addr.address}}">{{addr.address}}</a>
-{% if len(addr.domains())>1 %}
-(found {{len(addr.domains())-1}} other places <a href="{{url_for('bitcoin_list',addr=addr.address)}}">[VIEW]</a>)
+{% set other_bitcoin = count_bitcoins(addr) %}
+{% if other_bitcoin > 1 %}
+(found {{other_bitcoin - 1}} other places <a href="{{url_for('bitcoin_list',addr=addr.address)}}">[VIEW]</a>)
 {% endif %}
 </li>
 {% endfor %}
@@ -274,10 +276,10 @@ Value
 <h3>WhatWeb Plugins</h3>
 <ul>
 {% for plugin in domain.web_components %}
-{% set plugin_count  = count(WebComponent.find_domains(plugin.name)) - 1 %}
-{% set version_count = count(WebComponent.find_domains(plugin.name, version=plugin.version)) - 1 %}
-{% set account_count = count(WebComponent.find_domains(plugin.name, account=plugin.account)) - 1 %}
-{% set string_count  = count(WebComponent.find_domains(plugin.name, string=plugin.string))   - 1 %}
+{% set plugin_count  = count_webcomponent(plugin.name) - 1 %}
+{% set version_count = count_webcomponent(plugin.name, version=plugin.version) - 1 %}
+{% set account_count = count_webcomponent(plugin.name, account=plugin.account) - 1 %}
+{% set string_count  = count_webcomponent(plugin.name, string=plugin.string)   - 1 %}
 
 <li><b>{{plugin.name}}</b>
 {% if plugin_count > 0 %}
