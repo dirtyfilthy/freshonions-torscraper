@@ -139,7 +139,7 @@ class Domain(db.Entity):
             self.is_crap = False
 
 
-        if not self.is_genuine and len(self.title) > 8 and not self.title in ["Entry Point", "Login", "404 Not Found"]:
+        if not self.is_genuine and len(self.title) > 8 and not self.title in ["Entry Point", "Login", "404 Not Found", "403 Forbidden"]:
             genuine_exists = select(d.is_genuine for d in Domain if d.is_genuine == True and self.title == d.title).first()
             if genuine_exists:
                 self.is_fake = True
@@ -167,7 +167,7 @@ class Domain(db.Entity):
         else:
             self.is_crap = False
 
-        if not self.is_genuine and len(self.title) > 8 and not self.title in ["Entry Point", "Login"]: 
+        if not self.is_genuine and len(self.title) > 8 and not self.title in ["Entry Point", "Login", "404 Not Found", "403 Forbidden"]: 
             genuine_exists = select(d.is_genuine for d in Domain if d.is_genuine == True and self.title == d.title).first()
             if genuine_exists:
                 self.is_fake = True
