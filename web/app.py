@@ -435,6 +435,10 @@ def bitcoin_list_json(addr):
 def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static'), 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+@app.route('/robots.txt')
+def favicon():
+    return send_from_directory(os.path.join(app.root_path, 'static'), 'robots.txt')
+
 @app.route('/faq')
 def faq():
 	return render_template('faq.html')
