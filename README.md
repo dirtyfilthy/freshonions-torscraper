@@ -17,7 +17,6 @@ This is a copy of the source for the http://zlal32teyptf4tvi.onion hidden servic
 * Search for "interesting" URL paths, useful 404 detection
 * Automatic language detection
 * Fuzzy clone detection (requires elasticsearch, more advanced than superlist clone detection)
-* Doesn't fuck around in general.
 
 ## Licence
 
